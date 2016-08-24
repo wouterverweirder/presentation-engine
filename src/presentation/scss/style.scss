@@ -1,0 +1,125 @@
+@import 'reset';
+
+$enable-flex: true;
+
+@import '../../../node_modules/bootstrap/scss/variables';
+@import '../../../node_modules/bootstrap/scss/mixins';
+@import '../../../node_modules/bootstrap/scss/reboot';
+@import '../../../node_modules/bootstrap/scss/buttons';
+@import '../../../node_modules/bootstrap/scss/dropdown';
+@import '../../../node_modules/bootstrap/scss/nav';
+
+@import '../../../node_modules/font-awesome/scss/font-awesome';
+
+@import '../../../node_modules/codemirror/lib/codemirror';
+@import '../../../node_modules/codemirror/addon/hint/show-hint';
+
+@import '../../../node_modules/@shagstrom/split-pane/split_pane.css';
+@import '../../../node_modules/@shagstrom/split-pane/pretty-split-pane.css';
+
+@import 'devine';
+
+html, body {
+  height: 100%;
+}
+
+html {
+  font-size: 0.782vw; //10px on 1280x720
+}
+
+body {
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#presentation-wrapper-outer {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+#presentation-wrapper {
+  width: 100%;
+  height: 0;
+  padding-top: percentage(9/16);
+  overflow: hidden;
+  position: relative;
+}
+
+#presentation {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+}
+
+.slide-frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-size: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.slide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.live-code-element {
+  text-align: left;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.live-code-console-element {
+  .console-error {
+    color: red;
+  }
+  pre, code {
+    background: 0;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    border-bottom: solid 1px lightgrey;
+  }
+}
+
+.nav-tabs {
+  font-size: 0.6em;
+}
+
+.substate {
+  display: none;
+  &.active {
+    display: block;
+  }
+}
+
+.vertical-center {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.scrollable-menu {
+  height: auto;
+  max-height: 200px;
+  overflow-x: hidden;
+}

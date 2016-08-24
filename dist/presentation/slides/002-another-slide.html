@@ -1,0 +1,69 @@
+<template>
+  <article class="slide">
+    <header class="slide-title-header">
+      <h1 class="slide-title">git demo</h1>
+    </header>
+    <div class="slide-content">
+      <div class="live-code" data-entry-path="demos/ex01-git" data-output-path="tmp/ex01-git">
+        <ul class="nav nav-tabs" role="tablist">
+          <li class="nav-item"><a class="nav-link" href="#" aria-controls="hello.txt" role="tab">hello.txt</a></li>
+          <li class="nav-item"><a class="nav-link" href="#" aria-controls="terminal" role="tab">terminal</a></li>
+        </ul>
+        <div class="tab-content">
+          <div role="tabpanel" class="tab-pane" data-tab-id="hello.txt" style="height: 35rem; position: relative;">
+            <textarea data-type="code" data-file="hello.txt"></textarea>
+            <div class="btn-group" role="group" style="position: absolute; top: 1em; right: 1em; z-index: 10;">
+              <button type="button" data-target="hello.txt" data-type="reload-button" class="btn btn-secondary"><i class="fa fa-4x fa-refresh"></i></button>
+              <button type="button" data-target="hello.txt" data-type="save-button" class="btn btn-secondary"><i class="fa fa-4x fa-save"></i></button>
+            </div>
+          </div>
+          <div role="tabpanel" class="tab-pane" data-tab-id="terminal" style="height: 35rem; position: relative;">
+            <div data-type="terminal" data-dir="tmp/ex01-git"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <footer>
+      <div class="slide-footer-title">2015_2016 / 2_Devine / Creative Programming 3</div>
+      <div class="slide-footer-logo"></div>
+    </footer>
+<script type="text/template">
+(function($slideHolder){
+
+  var LiveCodeSlide = require('LiveCodeSlide').default;
+
+  function init() {
+    var liveCode = new LiveCodeSlide($slideHolder);
+
+    //manual manage tabs, as we don't want to work with element ids
+    $slideHolder.find('a[role=tab]').click(function (e) {
+      e.preventDefault();
+      var tabId = $(e.target).attr('aria-controls');
+      var $tab = $slideHolder.find('[data-tab-id="' + tabId + '"]');
+      $slideHolder.find(".nav-tabs .active, .tab-content .active").removeClass("active");
+      $(e.target).addClass('active');
+      $tab.addClass("active");
+      liveCode.layout();
+    });
+
+    $slideHolder.find('div.split-pane').splitPane();
+    $slideHolder.find('div.split-pane').on('resize', function(){
+      liveCode.layout();
+    });
+
+    //focus webpreview tab on run click
+    $slideHolder.find('[data-tab-id="html-code"] [data-type="run-button"]').on('click', function(){
+      $slideHolder.find('a[role=tab][aria-controls="html-output"]').click();
+    });
+
+    requestAnimationFrame(function(){
+      $slideHolder.find('a[role=tab]').first().click();
+    });
+  }
+
+  init();
+
+})(document.$slideHolder);
+</script><img onLoad="var s = document.createElement('script'); s.innerHTML = this.previousSibling.innerHTML; document.$slideHolder = $(this).closest('.slide-frame'); this.parentNode.appendChild(s);" style="display: none;" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="/>
+  </article>
+</template>

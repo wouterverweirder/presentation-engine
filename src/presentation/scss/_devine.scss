@@ -1,0 +1,174 @@
+@font-face {
+  font-family: 'Conv_DINCond-Bold';
+  src: url('../fonts/DINCond-Bold/fonts/DINCond-Bold.eot');
+  src: local('☺'), url('../fonts/DINCond-Bold/fonts/DINCond-Bold.woff') format('woff'), url('../fonts/DINCond-Bold/fonts/DINCond-Bold.ttf') format('truetype'), url('../fonts/DINCond-Bold/fonts/DINCond-Bold.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Conv_DINCond-Medium';
+  src: url('../fonts/DINCond-Medium/fonts/DINCond-Medium.eot');
+  src: local('☺'), url('../fonts/DINCond-Medium/fonts/DINCond-Medium.woff') format('woff'), url('../fonts/DINCond-Medium/fonts/DINCond-Medium.ttf') format('truetype'), url('../fonts/DINCond-Medium/fonts/DINCond-Medium.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Conv_DINPro';
+  src: url('../fonts/DINPro/fonts/DINPro.eot');
+  src: local('☺'), url('../fonts/DINPro/fonts/DINPro.woff') format('woff'), url('../fonts/DINPro/fonts/DINPro.ttf') format('truetype'), url('../fonts/DINPro/fonts/DINPro.svg') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+.slide {
+  font-family: 'Conv_DINPro';
+  // font-size: 34px;
+  //background: url(../slides/images/keynote/keynote.009.png);
+}
+
+.slide-title-header {
+  .slide-title {
+    margin: 8.3rem 0 0 5.3rem;
+    text-transform: uppercase;
+    font-family: 'Conv_DINCond-Bold';
+    font-size: 7rem;
+    position: relative;
+    z-index: 0;
+    &:before {
+      content: "";
+      display: block;
+      position: absolute;
+      left: -.8rem;
+      top: -3.5rem;
+      width: 3.8rem;
+      height: 10rem;
+      background: cyan;
+      z-index: -1;
+    }
+  }
+  &.slide-title-header-vertical-center {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    .slide-title {
+      margin: 0;
+      text-align: center;
+      font-size: 7.6rem;
+      line-height: 1.2em;
+      &:before {
+        left: 50%;
+        top: 50%;
+        width: 11rem;
+        height: 34rem;
+        margin-left: -5.5rem;
+        margin-top: -17rem;
+        transform: rotate(45deg);
+      }
+    }
+  }
+}
+
+.slide-content {
+  padding: 4.5rem;
+  color: black;
+}
+
+.slide-content-link {
+  color: black;
+  text-decoration: underline;
+}
+
+.slide-footer-title {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  z-index: 0;
+  padding-right: 18rem;
+  padding-left: 3.5rem;
+  padding-top: 0.4rem;
+  padding-bottom: 1px;
+  font-family: 'Conv_DINCond-Medium';
+  text-transform: uppercase;
+  font-size: 1.8rem;
+  &:before {
+    background: #D0FA01;
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 1.5rem;
+    height: 100%;
+    width: 100%;
+    z-index: -1;
+    transform: skewX(-45deg);
+  }
+}
+
+.slide-footer-logo {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 0;
+  &:before {
+    content: "";
+    display: block;
+    width: 12rem;
+    height: 6rem;
+    bottom: 0;
+    right: -9rem;
+    position: absolute;
+    z-index: -1;
+    background: cyan;
+    transform: skewX(-45deg);
+  }
+  &:after {
+    content: "";
+    background: url(../assets/embleem-devine.svg);
+    background-repeat: no-repeat;
+    display: block;
+    position: absolute;
+    width: 2.5rem;
+    height: 5.3rem;
+    bottom: .8rem;
+    right: 1rem;
+  }
+}
+
+.slide-content-list {
+  ul {
+    padding-left: 3.5rem;
+    ul {
+      margin-top: .9rem;
+      padding-left: 2.1rem;
+    }
+  }
+  li {
+    font-family: 'Conv_DINCond-Bold';
+    letter-spacing: -0.033rem;
+    margin-bottom: .8rem;
+    &:before {
+      content: '';
+      display: inline-block;
+      background-repeat: no-repeat;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='20'><path d='M0 1 L 7 8.5 L 0 16'/></svg>");
+      background-size: 100%;
+      width: .7rem;
+      height: 2rem;
+      margin-right: 0.2em;
+    }
+    li {
+      font-family: 'Conv_DINPro';
+      font-size: 2.4rem;
+      letter-spacing: 0;
+      &:before {
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='14'><path d='M0 1 L 5 5 L 0 10'/></svg>");
+        height: 1.4rem;
+        transform: translateY(0.1em);
+      }
+    }
+  }
+}

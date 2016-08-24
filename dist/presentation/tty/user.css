@@ -1,0 +1,11 @@
+.bar {
+  display: none;
+}
+
+.window {
+  padding-top: 0;
+}
+
+.terminal {
+  font-size: 2.346vw; //0.782 = 10px on 1280x720 4x0.782 = 3.128
+}
