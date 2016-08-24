@@ -22,6 +22,9 @@ Server (optional):
 npm start
 ```
 
+People can surf to http://REPLACE_WITH_YOUR_IP:5000 and follow the slides on their screen.
+
+
 ## slides
 
 The content of the dist/presentation/slides folder will be used for the slides, configuration happens via the file names.
