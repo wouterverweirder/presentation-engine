@@ -14,8 +14,8 @@ $enable-flex: true;
 @import '../../../node_modules/codemirror/lib/codemirror';
 @import '../../../node_modules/codemirror/addon/hint/show-hint';
 
-@import '../../../node_modules/@shagstrom/split-pane/split_pane.css';
-@import '../../../node_modules/@shagstrom/split-pane/pretty-split-pane.css';
+@import '../../../node_modules/@shagstrom/split-pane/split-pane';
+@import '../../../node_modules/@shagstrom/split-pane/pretty-split-pane';
 
 @import 'devine';
 
