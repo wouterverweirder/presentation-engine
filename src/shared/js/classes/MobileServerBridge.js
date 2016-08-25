@@ -1,3 +1,5 @@
+import fetch from 'isomorphic-fetch';
+
 export default class MobileServerBridge {
 
   constructor(presentation, settings) {
@@ -8,13 +10,17 @@ export default class MobileServerBridge {
 
   connect() {
     console.log('MobileServerBridge.connect');
-    $.post(this.settings.mobileServerUrl + '/login', this.getLoginCredentials()).done(this.loginHandler.bind(this))
-    .fail((function() {
+    //post to the api
+    fetch(`${this.settings.mobileServerUrl}/login`, {
+      method: 'POST',
+      body: JSON.stringify(this.getLoginCredentials()),
+      headers: new Headers({'Content-Type': 'application/json'})
+    })
+    .then(result => this.loginHandler(result))
+    .catch(e => {
       //retry after one second
-      setTimeout((function(){
-        this.connect();
-      }).bind(this), 1000);
-    }).bind(this));
+      setTimeout(() => this.connect(), 1000);
+    });
   }
 
   getLoginCredentials() {

@@ -1,3 +1,5 @@
+require('es6-promise').polyfill();
+
 import Presentation from './classes/Presentation';
 import SlidesFolderParser from '../../server/classes/SlidesFolderParser';
 

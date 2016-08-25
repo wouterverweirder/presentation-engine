@@ -628,6 +628,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _isomorphicFetch = require('isomorphic-fetch');
+
+var _isomorphicFetch2 = _interopRequireDefault(_isomorphicFetch);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var MobileServerBridge = function () {
@@ -642,13 +648,22 @@ var MobileServerBridge = function () {
   _createClass(MobileServerBridge, [{
     key: 'connect',
     value: function connect() {
+      var _this = this;
+
       console.log('MobileServerBridge.connect');
-      $.post(this.settings.mobileServerUrl + '/login', this.getLoginCredentials()).done(this.loginHandler.bind(this)).fail(function () {
+      //post to the api
+      (0, _isomorphicFetch2.default)(this.settings.mobileServerUrl + '/login', {
+        method: 'POST',
+        body: JSON.stringify(this.getLoginCredentials()),
+        headers: new Headers({ 'Content-Type': 'application/json' })
+      }).then(function (result) {
+        return _this.loginHandler(result);
+      }).catch(function (e) {
         //retry after one second
         setTimeout(function () {
-          this.connect();
-        }.bind(this), 1000);
-      }.bind(this));
+          return _this.connect();
+        }, 1000);
+      });
     }
   }, {
     key: 'getLoginCredentials',
@@ -701,7 +716,7 @@ var MobileServerBridge = function () {
 
 exports.default = MobileServerBridge;
 
-},{}],7:[function(require,module,exports){
+},{"isomorphic-fetch":1}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
