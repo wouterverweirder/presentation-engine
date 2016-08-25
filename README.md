@@ -33,6 +33,24 @@ The content of the dist/presentation/slides folder will be used for the slides, 
 - Use .desktop or .mobile in the filename, to host a different version of a slide for desktop or mobile:
   - slide.jpg and slide.mobile.jpg (slide.jpg will be shown on desktop, mobile version is the .mobile.jpg)
   - slide.jpg and slide.desktop.jpg (slide.jpg will be shown on mobile, slide.desktop.jpg on desktop)
+- Wrap html slides in a template tag:
+```html
+<template>
+  <article class="slide">
+<script type="text/template">
+(function($slideHolder){
+
+  function init() {
+    //$slideHolder contains the wrapping div for this slide
+  }
+
+  init();
+
+})(document.$slideHolder);
+</script><img onLoad="var s = document.createElement('script'); s.innerHTML = this.previousSibling.innerHTML; document.$slideHolder = $(this).closest('.slide-frame'); this.parentNode.appendChild(s);" style="display: none;" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="/>
+  </article>
+</template>
+```
 - Image slides can have the following options in the filename:
   - image.jpg (show entire image, letterboxed by default)
   - image.cover.jpg (fill the entire slide)
