@@ -248,7 +248,9 @@ export default class LiveCode {
 
   createRunButton(runButtonEl) {
     this.runButtonEls.push(runButtonEl);
+    console.log('createRunButton', $(runButtonEl));
     $(runButtonEl).on('click', (event => {
+      console.log('run button clicky');
       if(this.webPreviewElements[$(runButtonEl).data('target')]) {
         //save the files first
         this.saveCodeElementsToFiles()

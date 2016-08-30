@@ -5,16 +5,14 @@ import LiveCode from '../live-code';
 
 export default class LiveCodeSlide extends ContentBase {
 
-  constructor($slideHolder) {
+  constructor($slideHolder, config, readyCallback) {
     super($slideHolder);
 
-    var remote = requireNode('electron').remote;
-    var config = {
-      presentationPath: remote.getGlobal('__dirname')
-    };
+    let remote = requireNode('electron').remote;
+    let config2 = {...config, presentationPath: remote.getGlobal('__dirname')};
 
     //find live code element
-    this.liveCode = new LiveCode(this.$slideHolder.find('.live-code'), config);
+    this.liveCode = new LiveCode(this.$slideHolder.find('.live-code'), config2, readyCallback);
   }
 
   layout() {
