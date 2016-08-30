@@ -30,7 +30,7 @@
 
 .slide-title-header {
   .slide-title {
-    margin: 8.3rem 0 0 5.3rem;
+    margin: 0.94em 0 0 5.3rem; //use em for vertical - as we align to decoration bottom, depending on font size
     text-transform: uppercase;
     font-family: 'Conv_DINCond-Bold';
     font-size: 7rem;
@@ -40,10 +40,10 @@
       content: "";
       display: block;
       position: absolute;
-      left: -.8rem;
-      top: -3.5rem;
-      width: 3.8rem;
-      height: 10rem;
+      left: -.11em;
+      top: -.25em;
+      width: 0.54em;
+      height: 1.43em;
       background: cyan;
       z-index: -1;
     }

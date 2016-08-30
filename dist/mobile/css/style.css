@@ -4368,7 +4368,7 @@ font-family: 'Conv_DINPro';
 }
 
 .slide-title-header .slide-title {
-margin: 8.3rem 0 0 5.3rem;
+margin: 0.94em 0 0 0.76em;
 text-transform: uppercase;
 font-family: 'Conv_DINCond-Bold';
 font-size: 7rem;
@@ -4380,10 +4380,10 @@ z-index: 0;
 content: "";
 display: block;
 position: absolute;
-left: -.8rem;
-top: -3.5rem;
-width: 3.8rem;
-height: 10rem;
+left: -.11em;
+top: -.5em;
+width: 0.54em;
+height: 1.43em;
 background: cyan;
 z-index: -1;
 }
@@ -4539,6 +4539,18 @@ display: flex;
 align-items: center;
 -ms-flex-pack: center;
 justify-content: center;
+}
+
+#presentation-controls {
+position: absolute;
+top: 0;
+left: 0;
+display: -ms-flexbox;
+display: flex;
+color: white;
+background: black;
+-ms-flex-align: center;
+align-items: center;
 }
 
 #presentation-wrapper-outer {
