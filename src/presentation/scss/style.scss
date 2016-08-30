@@ -34,6 +34,16 @@ body {
   justify-content: center;
 }
 
+#presentation-controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  color: white;
+  background: black;
+  align-items: center;
+}
+
 #presentation-wrapper-outer {
   width: 100%;
   flex-shrink: 0;

@@ -2883,7 +2883,9 @@ var LiveCode = function () {
       var _this3 = this;
 
       this.runButtonEls.push(runButtonEl);
+      console.log('createRunButton', $(runButtonEl));
       $(runButtonEl).on('click', function (event) {
+        console.log('run button clicky');
         if (_this3.webPreviewElements[$(runButtonEl).data('target')]) {
           //save the files first
           _this3.saveCodeElementsToFiles().catch(function (err) {
@@ -3865,6 +3867,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
@@ -3890,18 +3894,16 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var LiveCodeSlide = function (_ContentBase) {
   _inherits(LiveCodeSlide, _ContentBase);
 
-  function LiveCodeSlide($slideHolder) {
+  function LiveCodeSlide($slideHolder, config, readyCallback) {
     _classCallCheck(this, LiveCodeSlide);
 
     var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(LiveCodeSlide).call(this, $slideHolder));
 
     var remote = requireNode('electron').remote;
-    var config = {
-      presentationPath: remote.getGlobal('__dirname')
-    };
+    var config2 = _extends({}, config, { presentationPath: remote.getGlobal('__dirname') });
 
     //find live code element
-    _this.liveCode = new _liveCode2.default(_this.$slideHolder.find('.live-code'), config);
+    _this.liveCode = new _liveCode2.default(_this.$slideHolder.find('.live-code'), config2, readyCallback);
     return _this;
   }
 
