@@ -49,7 +49,7 @@ export default class SlidesFolderParser {
           }
           slidesByName[slide.name] = slide;
         });
-        console.log(data.slides);
+        // console.log(data.slides);
         return data;
       })
       .catch(e => {

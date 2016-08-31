@@ -656,6 +656,8 @@ var MobileServerBridge = function () {
         method: 'POST',
         body: JSON.stringify(this.getLoginCredentials()),
         headers: new Headers({ 'Content-Type': 'application/json' })
+      }).then(function (response) {
+        return response.json();
       }).then(function (result) {
         return _this.loginHandler(result);
       }).catch(function (e) {

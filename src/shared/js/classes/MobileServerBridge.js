@@ -16,6 +16,7 @@ export default class MobileServerBridge {
       body: JSON.stringify(this.getLoginCredentials()),
       headers: new Headers({'Content-Type': 'application/json'})
     })
+    .then(response => response.json())
     .then(result => this.loginHandler(result))
     .catch(e => {
       //retry after one second

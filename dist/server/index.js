@@ -98,6 +98,7 @@ io.use(socketioJwt.authorize({
 var rooms = {};
 
 function ClientHandler(socket) {
+  console.log('created clientHandler');
   this.socket = socket;
   this.id = this.socket.id;
   this.role = socket.decoded_token && socket.decoded_token.role === 'presentation' ? 'presentation' : 'mobile';

@@ -74,7 +74,7 @@ var SlidesFolderParser = function () {
           }
           slidesByName[slide.name] = slide;
         });
-        console.log(data.slides);
+        // console.log(data.slides);
         return data;
       }).catch(function (e) {
         console.error(e);
