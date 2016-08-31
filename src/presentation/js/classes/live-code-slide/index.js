@@ -26,9 +26,10 @@ export default class LiveCodeSlide extends ContentBase {
 
   onStateChanged() {
     if(this.state === Constants.STATE_ACTIVE) {
+      this.liveCode.resume();
     } else {
       //stop
-      this.liveCode.stop();
+      this.liveCode.pause();
     }
   }
 

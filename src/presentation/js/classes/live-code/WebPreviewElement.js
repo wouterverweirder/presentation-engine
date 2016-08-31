@@ -24,18 +24,36 @@ export default class WebPreviewElement {
 		this.console = this.$el.data('console');
 
 		this.$el.css('width', '100%').css('height', '100%');
+
+		this.url = false;
+		this.blocks = false;
+		this.isRunning = false;
+		//webview gets created by calling updateUrl or updateCode
 	}
 
 	destroy() {
-    this.stop();
+    this.pause();
 	}
 
-  stop() {
+  pause() {
+		this.isRunning = false;
     if(this.webview) {
+			//TODO: remove all listeners?
       this.webview.parentNode.removeChild(this.webview);
       this.webview = false;
     }
   }
+
+	resume() {
+		if(this.isRunning) {
+			return;
+		}
+		if(this.url === false && this.blocks === false) {
+			return;
+		}
+		this.isRunning = true;
+		this._createWebview();
+	}
 
   _createWebview() {
     //create a webview tag
@@ -48,49 +66,25 @@ export default class WebPreviewElement {
     this.webview.style.height = '100%';
     this.webview.preload = 'js/webpreview.js';
     this.el.appendChild(this.webview);
-  }
 
-  updateUrl(url) {
-    this._createWebview();
-    this.webview.addEventListener("dom-ready", (function(){
-      //inject console logging code
-      console.log('dom-ready');
-    }).bind(this));
-
-    this.webview.addEventListener('ipc-message', (function(event) {
-      if(event.channel === 'console.log')
-      {
-        //notify live code editor
-        this.$wrapperEl.trigger('console.log', event.args[0]);
-      }
-      else if(event.channel === 'console.error')
-      {
-        //notify live code editor
-        this.$wrapperEl.trigger('console.error', event.args[0]);
-      }
-    }).bind(this));
-
-    this.webview.setAttribute('nodeintegration', '');
-    this.webview.setAttribute('src', url);
-  }
-
-	updateCode(blocks) {
-		this._createWebview();
-
-		var htmlSrc = '';
-		for(var i = 0; i < blocks.length; i++)
-		{
-			htmlSrc += blocks[i].code;
+		let url = (this.url !== false) ? this.url : 'webpreview.html';
+		let htmlSrc = '';
+		if(this.blocks !== false) {
+			for(let i = 0; i < blocks.length; i++)
+			{
+				htmlSrc += blocks[i].code;
+			}
 		}
 
-		this.webview.addEventListener("dom-ready", (function(){
-      if(this.$el.attr('data-open-devtools')) {
+		//add listeners
+		this.webview.addEventListener("dom-ready", () => {
+			if(this.$el.attr('data-open-devtools')) {
         this.webview.openDevTools();
       }
-		}).bind(this));
+    });
 
-		this.webview.addEventListener('ipc-message', (function(event) {
-      if(event.channel === 'request-html')
+    this.webview.addEventListener('ipc-message', event => {
+			if(event.channel === 'request-html')
       {
         this.webview.send('receive-html', htmlSrc);
       }
@@ -104,9 +98,23 @@ export default class WebPreviewElement {
         //notify live code editor
         this.$wrapperEl.trigger('console.error', event.args[0]);
       }
-    }).bind(this));
+    });
 
-		this.webview.setAttribute('nodeintegration', '');
-		this.webview.setAttribute('src', 'webpreview.html');
+    this.webview.setAttribute('nodeintegration', '');
+    this.webview.setAttribute('src', url);
+  }
+
+  updateUrl(url) {
+		this.pause();
+		this.url = url;
+		this.blocks = false;
+    this.resume();
+  }
+
+	updateCode(blocks) {
+		this.pause();
+		this.url = false;
+		this.blocks = blocks;
+		this.resume();
 	}
 }

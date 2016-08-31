@@ -4,8 +4,9 @@
   "description": "",
   "main": "dist/server/index.js",
   "scripts": {
-    "start": "node dist/server/index.js",
+    "start": "./dist/presentation/node_modules/.bin/electron ./dist/presentation/index.js",
     "develop": "gulp",
+    "server": "node dist/server/index.js",
     "postinstall": "node scripts/postinstall.js",
     "presentation": "./dist/presentation/node_modules/.bin/electron ./dist/presentation/index.js",
     "presentation:dev": "./dist/presentation/node_modules/.bin/electron ./dist/presentation/index.js --env=dev"

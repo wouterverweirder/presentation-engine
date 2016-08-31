@@ -67,11 +67,16 @@ export default class CodeElement {
     this.layout();
   }
 
-  stop() {
+  pause() {
+    //no real reason to do pause / resume
+  }
+
+  resume() {
+    //no real reason to do pause / resume
   }
 
   destroy() {
-    this.stop();
+    this.pause();
   }
 
   getValue() {

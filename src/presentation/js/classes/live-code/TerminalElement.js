@@ -24,6 +24,23 @@ export default class TerminalElement {
 
     this.$el.css('width', '100%').css('height', '100%');
 
+    this.isRunning = false;
+    this.resume();
+  }
+
+  pause() {
+    this.isRunning = false;
+    if(this.webview) {
+      this.webview.parentNode.removeChild(this.webview);
+      this.webview = false;
+    }
+  }
+
+  resume() {
+    if(this.isRunning) {
+      return;
+    }
+    this.isRunning = true;
     //create a webview tag
     if(this.webview) {
       this.webview.parentNode.removeChild(this.webview);
@@ -36,14 +53,7 @@ export default class TerminalElement {
     this.webview.setAttribute('src', 'http://localhost:3000?dir=' + this.dir);
   }
 
-  stop() {
-    if(this.webview) {
-      this.webview.parentNode.removeChild(this.webview);
-      this.webview = false;
-    }
-  }
-
   destroy() {
-    this.stop();
+    this.pause();
   }
 }

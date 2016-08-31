@@ -50,18 +50,37 @@ export default class ConsoleElement {
     this.$el.css('width', '100%').css('height', '100%');
 
     this.logs = [];
+
+    this.isRunning = false;
   }
 
-  stop() {
+  pause() {
+    if(!this.isRunning) {
+      return;
+    }
+    this.isRunning = false;
     this.nodeAppRunner.stop();
   }
 
+  resume() {
+    if(this.isRunning) {
+      return;
+    }
+    if(!this.applicationPath) {
+      return;
+    }
+    this.nodeAppRunner.run(this.applicationPath);
+    this.isRunning = true;
+  }
+
   destroy() {
-    this.stop();
+    this.pause();
   }
 
   runNodeApp(applicationPath) {
-    this.nodeAppRunner.run(applicationPath);
+    this.pause();
+    this.applicationPath = applicationPath;
+    this.resume();
   }
 
   info(args) {

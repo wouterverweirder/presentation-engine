@@ -2198,12 +2198,19 @@ var CodeElement = function () {
   }
 
   _createClass(CodeElement, [{
-    key: 'stop',
-    value: function stop() {}
+    key: 'pause',
+    value: function pause() {
+      //no real reason to do pause / resume
+    }
+  }, {
+    key: 'resume',
+    value: function resume() {
+      //no real reason to do pause / resume
+    }
   }, {
     key: 'destroy',
     value: function destroy() {
-      this.stop();
+      this.pause();
     }
   }, {
     key: 'getValue',
@@ -2308,22 +2315,42 @@ var ConsoleElement = function () {
     this.$el.css('width', '100%').css('height', '100%');
 
     this.logs = [];
+
+    this.isRunning = false;
   }
 
   _createClass(ConsoleElement, [{
-    key: 'stop',
-    value: function stop() {
+    key: 'pause',
+    value: function pause() {
+      if (!this.isRunning) {
+        return;
+      }
+      this.isRunning = false;
       this.nodeAppRunner.stop();
+    }
+  }, {
+    key: 'resume',
+    value: function resume() {
+      if (this.isRunning) {
+        return;
+      }
+      if (!this.applicationPath) {
+        return;
+      }
+      this.nodeAppRunner.run(this.applicationPath);
+      this.isRunning = true;
     }
   }, {
     key: 'destroy',
     value: function destroy() {
-      this.stop();
+      this.pause();
     }
   }, {
     key: 'runNodeApp',
     value: function runNodeApp(applicationPath) {
-      this.nodeAppRunner.run(applicationPath);
+      this.pause();
+      this.applicationPath = applicationPath;
+      this.resume();
     }
   }, {
     key: 'info',
@@ -2413,30 +2440,41 @@ var TerminalElement = function () {
 
     this.$el.css('width', '100%').css('height', '100%');
 
-    //create a webview tag
-    if (this.webview) {
-      this.webview.parentNode.removeChild(this.webview);
-      this.webview = false;
-    }
-    this.webview = document.createElement('webview');
-    this.webview.style.width = '100%';
-    this.webview.style.height = '100%';
-    this.el.appendChild(this.webview);
-    this.webview.setAttribute('src', 'http://localhost:3000?dir=' + this.dir);
+    this.isRunning = false;
+    this.resume();
   }
 
   _createClass(TerminalElement, [{
-    key: 'stop',
-    value: function stop() {
+    key: 'pause',
+    value: function pause() {
+      this.isRunning = false;
       if (this.webview) {
         this.webview.parentNode.removeChild(this.webview);
         this.webview = false;
       }
     }
   }, {
+    key: 'resume',
+    value: function resume() {
+      if (this.isRunning) {
+        return;
+      }
+      this.isRunning = true;
+      //create a webview tag
+      if (this.webview) {
+        this.webview.parentNode.removeChild(this.webview);
+        this.webview = false;
+      }
+      this.webview = document.createElement('webview');
+      this.webview.style.width = '100%';
+      this.webview.style.height = '100%';
+      this.el.appendChild(this.webview);
+      this.webview.setAttribute('src', 'http://localhost:3000?dir=' + this.dir);
+    }
+  }, {
     key: 'destroy',
     value: function destroy() {
-      this.stop();
+      this.pause();
     }
   }]);
 
@@ -2449,7 +2487,7 @@ exports.default = TerminalElement;
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+	value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2457,116 +2495,130 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var WebPreviewElement = function () {
-  function WebPreviewElement(el, options) {
-    _classCallCheck(this, WebPreviewElement);
+	function WebPreviewElement(el, options) {
+		_classCallCheck(this, WebPreviewElement);
 
-    this.el = el;
-    this.$el = $(el);
-    //options
-    if (!options) {
-      options = {};
-    }
-    //wrap element in a container
-    this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-web-preview-element"></div>').parent();
-    this.wrapperEl = this.$wrapperEl[0];
+		this.el = el;
+		this.$el = $(el);
+		//options
+		if (!options) {
+			options = {};
+		}
+		//wrap element in a container
+		this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-web-preview-element"></div>').parent();
+		this.wrapperEl = this.$wrapperEl[0];
 
-    this.id = this.$el.attr('data-id');
-    if (!this.id) {
-      //generate id
-      this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
-      this.$el.attr('data-id', this.id);
-    }
+		this.id = this.$el.attr('data-id');
+		if (!this.id) {
+			//generate id
+			this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
+			this.$el.attr('data-id', this.id);
+		}
 
-    this.file = this.$el.data('file');
+		this.file = this.$el.data('file');
 
-    this.console = this.$el.data('console');
+		this.console = this.$el.data('console');
 
-    this.$el.css('width', '100%').css('height', '100%');
-  }
+		this.$el.css('width', '100%').css('height', '100%');
 
-  _createClass(WebPreviewElement, [{
-    key: 'destroy',
-    value: function destroy() {
-      this.stop();
-    }
-  }, {
-    key: 'stop',
-    value: function stop() {
-      if (this.webview) {
-        this.webview.parentNode.removeChild(this.webview);
-        this.webview = false;
-      }
-    }
-  }, {
-    key: '_createWebview',
-    value: function _createWebview() {
-      //create a webview tag
-      if (this.webview) {
-        this.webview.parentNode.removeChild(this.webview);
-        this.webview = false;
-      }
-      this.webview = document.createElement('webview');
-      this.webview.style.width = '100%';
-      this.webview.style.height = '100%';
-      this.webview.preload = 'js/webpreview.js';
-      this.el.appendChild(this.webview);
-    }
-  }, {
-    key: 'updateUrl',
-    value: function updateUrl(url) {
-      this._createWebview();
-      this.webview.addEventListener("dom-ready", function () {
-        //inject console logging code
-        console.log('dom-ready');
-      }.bind(this));
+		this.url = false;
+		this.blocks = false;
+		this.isRunning = false;
+		//webview gets created by calling updateUrl or updateCode
+	}
 
-      this.webview.addEventListener('ipc-message', function (event) {
-        if (event.channel === 'console.log') {
-          //notify live code editor
-          this.$wrapperEl.trigger('console.log', event.args[0]);
-        } else if (event.channel === 'console.error') {
-          //notify live code editor
-          this.$wrapperEl.trigger('console.error', event.args[0]);
-        }
-      }.bind(this));
+	_createClass(WebPreviewElement, [{
+		key: 'destroy',
+		value: function destroy() {
+			this.pause();
+		}
+	}, {
+		key: 'pause',
+		value: function pause() {
+			this.isRunning = false;
+			if (this.webview) {
+				//TODO: remove all listeners?
+				this.webview.parentNode.removeChild(this.webview);
+				this.webview = false;
+			}
+		}
+	}, {
+		key: 'resume',
+		value: function resume() {
+			if (this.isRunning) {
+				return;
+			}
+			if (this.url === false && this.blocks === false) {
+				return;
+			}
+			this.isRunning = true;
+			this._createWebview();
+		}
+	}, {
+		key: '_createWebview',
+		value: function _createWebview() {
+			var _this = this;
 
-      this.webview.setAttribute('nodeintegration', '');
-      this.webview.setAttribute('src', url);
-    }
-  }, {
-    key: 'updateCode',
-    value: function updateCode(blocks) {
-      this._createWebview();
+			//create a webview tag
+			if (this.webview) {
+				this.webview.parentNode.removeChild(this.webview);
+				this.webview = false;
+			}
+			this.webview = document.createElement('webview');
+			this.webview.style.width = '100%';
+			this.webview.style.height = '100%';
+			this.webview.preload = 'js/webpreview.js';
+			this.el.appendChild(this.webview);
 
-      var htmlSrc = '';
-      for (var i = 0; i < blocks.length; i++) {
-        htmlSrc += blocks[i].code;
-      }
+			var url = this.url !== false ? this.url : 'webpreview.html';
+			var htmlSrc = '';
+			if (this.blocks !== false) {
+				for (var i = 0; i < blocks.length; i++) {
+					htmlSrc += blocks[i].code;
+				}
+			}
 
-      this.webview.addEventListener("dom-ready", function () {
-        if (this.$el.attr('data-open-devtools')) {
-          this.webview.openDevTools();
-        }
-      }.bind(this));
+			//add listeners
+			this.webview.addEventListener("dom-ready", function () {
+				if (_this.$el.attr('data-open-devtools')) {
+					_this.webview.openDevTools();
+				}
+			});
 
-      this.webview.addEventListener('ipc-message', function (event) {
-        if (event.channel === 'request-html') {
-          this.webview.send('receive-html', htmlSrc);
-        } else if (event.channel === 'console.log') {
-          //notify live code editor
-          this.$wrapperEl.trigger('console.log', event.args[0]);
-        } else if (event.channel === 'console.error') {
-          //notify live code editor
-          this.$wrapperEl.trigger('console.error', event.args[0]);
-        }
-      }.bind(this));
+			this.webview.addEventListener('ipc-message', function (event) {
+				if (event.channel === 'request-html') {
+					_this.webview.send('receive-html', htmlSrc);
+				} else if (event.channel === 'console.log') {
+					//notify live code editor
+					_this.$wrapperEl.trigger('console.log', event.args[0]);
+				} else if (event.channel === 'console.error') {
+					//notify live code editor
+					_this.$wrapperEl.trigger('console.error', event.args[0]);
+				}
+			});
 
-      this.webview.setAttribute('nodeintegration', '');
-      this.webview.setAttribute('src', 'webpreview.html');
-    }
-  }]);
+			this.webview.setAttribute('nodeintegration', '');
+			this.webview.setAttribute('src', url);
+		}
+	}, {
+		key: 'updateUrl',
+		value: function updateUrl(url) {
+			this.pause();
+			this.url = url;
+			this.blocks = false;
+			this.resume();
+		}
+	}, {
+		key: 'updateCode',
+		value: function updateCode(blocks) {
+			this.pause();
+			this.url = false;
+			this.blocks = blocks;
+			this.resume();
+		}
+	}]);
 
-  return WebPreviewElement;
+	return WebPreviewElement;
 }();
 
 exports.default = WebPreviewElement;
@@ -2804,20 +2856,37 @@ var LiveCode = function () {
       //TODO: destroy the tmp directory for this instance
     }
   }, {
-    key: 'stop',
-    value: function stop() {
+    key: 'pause',
+    value: function pause() {
       var key = void 0;
       for (key in this.consoleElements) {
-        this.consoleElements[key].stop();
+        this.consoleElements[key].pause();
       }
       for (key in this.terminalElements) {
-        this.terminalElements[key].stop();
+        this.terminalElements[key].pause();
       }
       for (key in this.webPreviewElements) {
-        this.webPreviewElements[key].stop();
+        this.webPreviewElements[key].pause();
       }
       for (key in this.codeElements) {
-        this.codeElements[key].stop();
+        this.codeElements[key].pause();
+      }
+    }
+  }, {
+    key: 'resume',
+    value: function resume() {
+      var key = void 0;
+      for (key in this.consoleElements) {
+        this.consoleElements[key].resume();
+      }
+      for (key in this.terminalElements) {
+        this.terminalElements[key].resume();
+      }
+      for (key in this.webPreviewElements) {
+        this.webPreviewElements[key].resume();
+      }
+      for (key in this.codeElements) {
+        this.codeElements[key].resume();
       }
     }
   }, {
@@ -3921,9 +3990,11 @@ var LiveCodeSlide = function (_ContentBase) {
   }, {
     key: 'onStateChanged',
     value: function onStateChanged() {
-      if (this.state === _Constants.Constants.STATE_ACTIVE) {} else {
+      if (this.state === _Constants.Constants.STATE_ACTIVE) {
+        this.liveCode.resume();
+      } else {
         //stop
-        this.liveCode.stop();
+        this.liveCode.pause();
       }
     }
   }]);

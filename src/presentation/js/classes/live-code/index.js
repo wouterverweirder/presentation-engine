@@ -177,23 +177,43 @@ export default class LiveCode {
     //TODO: destroy the tmp directory for this instance
   }
 
-  stop() {
+  pause() {
     let key;
     for(key in this.consoleElements)
     {
-      this.consoleElements[key].stop();
+      this.consoleElements[key].pause();
     }
     for(key in this.terminalElements)
     {
-      this.terminalElements[key].stop();
+      this.terminalElements[key].pause();
     }
     for(key in this.webPreviewElements)
     {
-      this.webPreviewElements[key].stop();
+      this.webPreviewElements[key].pause();
     }
     for(key in this.codeElements)
     {
-      this.codeElements[key].stop();
+      this.codeElements[key].pause();
+    }
+  }
+
+  resume() {
+    let key;
+    for(key in this.consoleElements)
+    {
+      this.consoleElements[key].resume();
+    }
+    for(key in this.terminalElements)
+    {
+      this.terminalElements[key].resume();
+    }
+    for(key in this.webPreviewElements)
+    {
+      this.webPreviewElements[key].resume();
+    }
+    for(key in this.codeElements)
+    {
+      this.codeElements[key].resume();
     }
   }
 
