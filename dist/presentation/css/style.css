@@ -4621,6 +4621,8 @@ background: 0;
 border: 0;
 margin: 0;
 padding: 0;
+padding-left: 0.5em;
+padding-right: 0.5em;
 border-bottom: solid 1px lightgrey;
 }
 
