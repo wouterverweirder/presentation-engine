@@ -3711,6 +3711,8 @@ var MobileServerBridge = function () {
       var _this = this;
 
       console.log('MobileServerBridge.connect');
+      console.warn('MobileServerBridge disabled');
+      return;
       //post to the api
       (0, _isomorphicFetch2.default)(this.settings.mobileServerUrl + '/login', {
         method: 'POST',
