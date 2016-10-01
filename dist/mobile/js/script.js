@@ -476,7 +476,7 @@ var Presentation = function (_PresentationBase) {
   function Presentation(data, role, settings) {
     _classCallCheck(this, Presentation);
 
-    var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(Presentation).call(this, data, role, settings));
+    var _this = _possibleConstructorReturn(this, (Presentation.__proto__ || Object.getPrototypeOf(Presentation)).call(this, data, role, settings));
 
     _this.$overlay = $('#overlay');
     return _this;
@@ -502,7 +502,7 @@ var Presentation = function (_PresentationBase) {
   }, {
     key: 'setCurrentSlideIndex',
     value: function setCurrentSlideIndex(index) {
-      _get(Object.getPrototypeOf(Presentation.prototype), 'setCurrentSlideIndex', this).call(this, index);
+      _get(Presentation.prototype.__proto__ || Object.getPrototypeOf(Presentation.prototype), 'setCurrentSlideIndex', this).call(this, index);
       if (this.$overlay) {
         this.$overlay.removeClass('active');
       }
