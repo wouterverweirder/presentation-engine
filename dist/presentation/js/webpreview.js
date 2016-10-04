@@ -13,5 +13,5 @@ console.error = function(){
   require('electron').ipcRenderer.sendToHost('console.error', JSON.stringify({args: args}));
 }
 window.onerror = function(msg, url, line, col, error) {
-  console.error(msg);
+  console.error(`${msg} (line: ${line})`);
 }
