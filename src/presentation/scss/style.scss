@@ -117,6 +117,24 @@ body {
   font-size: 0.6em;
 }
 
+//if we use webviews in tabs, they dont re-load when setting display none on them
+//solution: give tabs no dimensions instead of setting display to none
+.tab-content > .tab-pane {
+  display: block;
+  width: 0;
+  height: 0;
+}
+
+.tab-content > .active {
+  display: block;
+  width: auto;
+  height: auto;
+}
+
+.tab-content > .tab-pane-full-height.active {
+  height: 100%;
+}
+
 .substate {
   display: none;
   &.active {

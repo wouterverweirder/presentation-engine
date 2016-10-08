@@ -4630,6 +4630,22 @@ border-bottom: solid 1px lightgrey;
 font-size: 0.6em;
 }
 
+.tab-content > .tab-pane {
+display: block;
+width: 0;
+height: 0;
+}
+
+.tab-content > .active {
+display: block;
+width: auto;
+height: auto;
+}
+
+.tab-content > .tab-pane-full-height.active {
+height: 100%;
+}
+
 .substate {
 display: none;
 }
