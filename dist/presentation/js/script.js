@@ -2632,10 +2632,16 @@ var TERMINAL_URL = 'http://localhost:3000';
 
 var TerminalElement = function () {
   function TerminalElement(el, options) {
+    var _this = this;
+
     _classCallCheck(this, TerminalElement);
 
     this.el = el;
     this.$el = $(el);
+
+    this._ipcMessageHandler = function (e) {
+      return _this.ipcMessageHandler(e);
+    };
 
     //options
     if (!options) {
@@ -2653,6 +2659,7 @@ var TerminalElement = function () {
     }
 
     this.dir = this.$el.data('dir');
+    this.autorun = this.$el.data('autorun');
 
     this.$el.css('width', '100%').css('height', '100%');
 
@@ -2678,14 +2685,57 @@ var TerminalElement = function () {
       this.isRunning = true;
       //create a webview tag
       if (this.webview) {
+        this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
         this.webview.parentNode.removeChild(this.webview);
         this.webview = false;
       }
       this.webview = document.createElement('webview');
+      // this.webview.addEventListener('dom-ready', () => {
+      //   this.webview.openDevTools();
+      // });
+      this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
       this.webview.style.width = '100%';
       this.webview.style.height = '100%';
+      this.webview.setAttribute('nodeintegration', '');
+      this.webview.setAttribute('src', TERMINAL_URL);
       this.el.appendChild(this.webview);
-      this.webview.setAttribute('src', TERMINAL_URL + '?dir=' + this.dir);
+    }
+  }, {
+    key: 'ipcMessageHandler',
+    value: function ipcMessageHandler(e) {
+      if (e.channel !== 'message-from-terminal') {
+        return;
+      }
+      if (e.args.length < 1) {
+        return;
+      }
+      var o = e.args[0];
+      if (!o.command) {
+        return;
+      }
+      switch (o.command) {
+        case 'init':
+          if (this.dir) {
+            this.executeCommand('cd ' + this.dir);
+            this.executeCommand('clear');
+          }
+          if (this.autorun) {
+            this.executeCommand(this.autorun);
+          }
+          break;
+        default:
+          console.warn('unknow command object from terminal');
+          console.warn(o);
+          break;
+      }
+    }
+  }, {
+    key: 'executeCommand',
+    value: function executeCommand(commandString) {
+      this.webview.send('message-to-terminal', {
+        command: 'execute',
+        value: commandString
+      });
     }
   }, {
     key: 'destroy',
@@ -2732,6 +2782,7 @@ var WebPreviewElement = function () {
 		}
 
 		this.file = this.$el.data('file') || this.$el.data('url');
+		this.autoload = this.$el.data('autoload');
 
 		this.console = this.$el.data('console');
 
@@ -2753,9 +2804,12 @@ var WebPreviewElement = function () {
 		value: function pause() {
 			this.isRunning = false;
 			if (this.webview) {
-				//TODO: remove all listeners?
+				this.webview.removeEventListener('dom-ready', this._domReadyHandler);
+				this.webview.removeEventListener('did-fail-load', this._didFailLoadHandler);
+				this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
 				this.webview.parentNode.removeChild(this.webview);
 				this.webview = false;
+				clearTimeout(this.retryTimeout);
 			}
 		}
 	}, {
@@ -2795,13 +2849,22 @@ var WebPreviewElement = function () {
 			}
 
 			//add listeners
-			this.webview.addEventListener("dom-ready", function () {
+			this._domReadyHandler = function () {
 				if (_this.$el.attr('data-open-devtools')) {
 					_this.webview.openDevTools();
 				}
-			});
+			};
+			this.webview.addEventListener('dom-ready', this._domReadyHandler);
 
-			this.webview.addEventListener('ipc-message', function (event) {
+			this._didFailLoadHandler = function (e) {
+				_this.retryTimeout = setTimeout(function () {
+					_this.pause();
+					_this.resume();
+				}, 1000);
+			};
+			this.webview.addEventListener('did-fail-load', this._didFailLoadHandler);
+
+			this._ipcMessageHandler = function (event) {
 				if (event.channel === 'request-html') {
 					_this.webview.send('receive-html', htmlSrc);
 				} else if (event.channel === 'console.log') {
@@ -2811,7 +2874,8 @@ var WebPreviewElement = function () {
 					//notify live code editor
 					_this.$wrapperEl.trigger('console.error', event.args[0]);
 				}
-			});
+			};
+			this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
 
 			this.webview.setAttribute('nodeintegration', '');
 			this.webview.setAttribute('src', url);
@@ -2945,6 +3009,8 @@ var LiveCode = function () {
       });
     }).then(function () {
       return _this.setCodeElementValuesFromFiles();
+    }).then(function () {
+      return _this.autoStartWebpreviewElementsWhenNeeded();
     }).then(readyCallback).catch(function (err) {
       return console.log(err);
     });
@@ -2975,13 +3041,33 @@ var LiveCode = function () {
   }, {
     key: 'getCodeElement',
     value: function getCodeElement(input) {
+      return this.getElement(this.codeElements, input);
+    }
+
+    /**
+     * return a previously created web preview element, based on the input
+     * input can be:
+     *  - html dom element
+     *  - id of code element
+     *
+     * returns the web preview element if found, otherwise returns false
+     */
+
+  }, {
+    key: 'getWebPreviewElement',
+    value: function getWebPreviewElement(input) {
+      return this.getElement(this.webPreviewElements, input);
+    }
+  }, {
+    key: 'getElement',
+    value: function getElement(elementsCollection, input) {
       var propertyToCheck = 'id';
       if (input.nodeName) {
         propertyToCheck = 'el';
       }
-      for (var key in this.codeElements) {
-        if (this.codeElements[key][propertyToCheck] === input) {
-          return this.codeElements[key];
+      for (var key in elementsCollection) {
+        if (elementsCollection[key][propertyToCheck] === input) {
+          return elementsCollection[key];
         }
       }
       return false;
@@ -3030,6 +3116,16 @@ var LiveCode = function () {
         }
       }
       return Promise.all(tasks);
+    }
+  }, {
+    key: 'autoStartWebpreviewElementsWhenNeeded',
+    value: function autoStartWebpreviewElementsWhenNeeded() {
+      for (var key in this.webPreviewElements) {
+        var webPreviewElement = this.webPreviewElements[key];
+        if (webPreviewElement.autoload) {
+          this.reloadWebPreviewElement(webPreviewElement);
+        }
+      }
     }
   }, {
     key: 'saveCodeElementsToFiles',
@@ -3196,22 +3292,27 @@ var LiveCode = function () {
   }, {
     key: 'createSaveButton',
     value: function createSaveButton(saveButtonEl) {
-      var self = this;
+      var _this4 = this;
+
       this.saveButtonEls.push(saveButtonEl);
       $(saveButtonEl).on('click', function () {
-        //get the code element for this reload button
-        var codeElement = self.getCodeElement($(saveButtonEl).data('target'));
+        //get the target element for this button
+        var targetString = $(saveButtonEl).data('target');
+        if (targetString === 'all') {
+          return _this4.saveCodeElementsToFiles();
+        }
+        var codeElement = _this4.getCodeElement(targetString);
         if (!codeElement) {
           return;
         }
-        var filePath = self.getFilePathForCodeElement(codeElement);
+        var filePath = _this4.getFilePathForCodeElement(codeElement);
         if (!filePath) {
           return;
         }
         codeElement.saveToFile(filePath).catch(function (err) {
           console.log(err);
         });
-      }.bind(this));
+      });
     }
   }, {
     key: 'destroySaveButton',
@@ -3221,22 +3322,38 @@ var LiveCode = function () {
   }, {
     key: 'createReloadButton',
     value: function createReloadButton(reloadButtonEl) {
-      var self = this;
+      var _this5 = this;
+
       this.reloadButtonEls.push(reloadButtonEl);
-      $(reloadButtonEl).on('click', function () {
-        //get the code element for this reload button
-        var codeElement = self.getCodeElement($(reloadButtonEl).data('target'));
-        if (!codeElement) {
+      $(reloadButtonEl).on('click', function (e) {
+        //get the reload button target
+        var reloadTargetElement = _this5.getCodeElement($(reloadButtonEl).data('target'));
+        if (reloadTargetElement) {
+          _this5.reloadCodeElement(reloadTargetElement);
           return;
         }
-        var filePath = self.getFilePathForCodeElement(codeElement);
-        if (!filePath) {
+        reloadTargetElement = _this5.getWebPreviewElement($(reloadButtonEl).data('target'));
+        if (reloadTargetElement) {
+          _this5.reloadWebPreviewElement(reloadTargetElement);
           return;
         }
-        codeElement.readFromFile(filePath).catch(function (err) {
-          console.log(err);
-        });
-      }.bind(this));
+      });
+    }
+  }, {
+    key: 'reloadCodeElement',
+    value: function reloadCodeElement(codeElement) {
+      var filePath = self.getFilePathForCodeElement(codeElement);
+      if (!filePath) {
+        return;
+      }
+      codeElement.readFromFile(filePath).catch(function (err) {
+        return console.log(err);
+      });
+    }
+  }, {
+    key: 'reloadWebPreviewElement',
+    value: function reloadWebPreviewElement(webPreviewElement) {
+      this.updateWebPreviewElement(webPreviewElement);
     }
   }, {
     key: 'destroyReloadButton',

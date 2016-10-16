@@ -14,23 +14,35 @@
     w.maximize();
   }
 
-  function openTab() {
+  function linkToPresentation() {
     var tab =  w.tabs[0];
-    //open the directory provided in the querystring
-    var dir = getParameterByName(window.location, 'dir');
-    if(dir && dir.length > 0) {
-      tab.socket.emit("data", tab.id, "cd " + dir + "\n");
-      tab.socket.emit("data", tab.id, "clear\n");
-    }
-  }
-
-  function getParameterByName(url, name) {
-    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-    results = regex.exec(url);
-    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    const {ipcRenderer} = require('electron');
+    ipcRenderer.on('message-to-terminal', (sender, ...args) => {
+      if(args.length < 1) {
+        return;
+      }
+      const o = args[0];
+      if(!o.command) {
+        return;
+      }
+      switch(o.command) {
+        case 'execute':
+          if(!o.value) {
+            return;
+          }
+          tab.socket.emit("data", tab.id, o.value + "\n");
+          break;
+        default:
+          console.warn('received unknown command object');
+          console.warn(o);
+          break;
+      }
+    });
+    ipcRenderer.sendToHost('message-from-terminal', {
+      command: 'init'
+    });
   }
 
   tty.on('open', init);
-  tty.on('open tab', openTab);
+  tty.on('open tab', linkToPresentation);
 })();

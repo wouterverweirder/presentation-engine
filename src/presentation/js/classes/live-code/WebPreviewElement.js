@@ -20,6 +20,7 @@ export default class WebPreviewElement {
 		}
 
     this.file = this.$el.data('file') || this.$el.data('url');
+		this.autoload = this.$el.data('autoload');
 
 		this.console = this.$el.data('console');
 
@@ -42,9 +43,12 @@ export default class WebPreviewElement {
   pause() {
 		this.isRunning = false;
     if(this.webview) {
-			//TODO: remove all listeners?
+			this.webview.removeEventListener('dom-ready', this._domReadyHandler);
+			this.webview.removeEventListener('did-fail-load', this._didFailLoadHandler);
+			this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
       this.webview.parentNode.removeChild(this.webview);
       this.webview = false;
+			clearTimeout(this.retryTimeout);
     }
   }
 
@@ -81,13 +85,22 @@ export default class WebPreviewElement {
 		}
 
 		//add listeners
-		this.webview.addEventListener("dom-ready", () => {
+		this._domReadyHandler = () => {
 			if(this.$el.attr('data-open-devtools')) {
         this.webview.openDevTools();
       }
-    });
+		};
+		this.webview.addEventListener('dom-ready', this._domReadyHandler);
 
-    this.webview.addEventListener('ipc-message', event => {
+		this._didFailLoadHandler = e => {
+			this.retryTimeout = setTimeout(() => {
+				this.pause();
+				this.resume();
+			}, 1000);
+		};
+		this.webview.addEventListener('did-fail-load', this._didFailLoadHandler);
+
+		this._ipcMessageHandler = event => {
 			if(event.channel === 'request-html')
       {
         this.webview.send('receive-html', htmlSrc);
@@ -102,7 +115,8 @@ export default class WebPreviewElement {
         //notify live code editor
         this.$wrapperEl.trigger('console.error', event.args[0]);
       }
-    });
+		}
+    this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
 
     this.webview.setAttribute('nodeintegration', '');
     this.webview.setAttribute('src', url);

@@ -60,6 +60,7 @@ export default class LiveCode {
 
     })
     .then(() => this.setCodeElementValuesFromFiles())
+    .then(() => this.autoStartWebpreviewElementsWhenNeeded())
     .then(readyCallback).catch(err => console.log(err));
 
     //disable keyboard bubbling up
@@ -81,14 +82,30 @@ export default class LiveCode {
    * returns the code element if found, otherwise returns false
    */
   getCodeElement(input) {
+    return this.getElement(this.codeElements, input);
+  }
+
+  /**
+   * return a previously created web preview element, based on the input
+   * input can be:
+   *  - html dom element
+   *  - id of code element
+   *
+   * returns the web preview element if found, otherwise returns false
+   */
+  getWebPreviewElement(input) {
+    return this.getElement(this.webPreviewElements, input);
+  }
+
+  getElement(elementsCollection, input) {
     let propertyToCheck = 'id';
     if(input.nodeName) {
       propertyToCheck = 'el';
     }
-    for(let key in this.codeElements)
+    for(let key in elementsCollection)
     {
-      if(this.codeElements[key][propertyToCheck] === input) {
-        return this.codeElements[key];
+      if(elementsCollection[key][propertyToCheck] === input) {
+        return elementsCollection[key];
       }
     }
     return false;
@@ -134,6 +151,16 @@ export default class LiveCode {
       }
     }
     return Promise.all(tasks);
+  }
+
+  autoStartWebpreviewElementsWhenNeeded() {
+    for(let key in this.webPreviewElements)
+    {
+      const webPreviewElement = this.webPreviewElements[key];
+      if(webPreviewElement.autoload) {
+        this.reloadWebPreviewElement(webPreviewElement);
+      }
+    }
   }
 
   saveCodeElementsToFiles() {
@@ -289,20 +316,23 @@ export default class LiveCode {
   }
 
   createSaveButton(saveButtonEl) {
-    var self = this;
     this.saveButtonEls.push(saveButtonEl);
-    $(saveButtonEl).on('click', (function(){
-      //get the code element for this reload button
-      var codeElement = self.getCodeElement($(saveButtonEl).data('target'));
+    $(saveButtonEl).on('click', () => {
+      //get the target element for this button
+      const targetString = $(saveButtonEl).data('target');
+      if(targetString === 'all') {
+        return this.saveCodeElementsToFiles();
+      }
+      var codeElement = this.getCodeElement(targetString);
       if(!codeElement) {
         return;
       }
-      var filePath = self.getFilePathForCodeElement(codeElement);
+      var filePath = this.getFilePathForCodeElement(codeElement);
       if(!filePath) {
         return;
       }
       codeElement.saveToFile(filePath).catch(function(err) { console.log(err); });
-    }).bind(this));
+    });
   }
 
   destroySaveButton(saveButtonEl) {
@@ -310,20 +340,32 @@ export default class LiveCode {
   }
 
   createReloadButton(reloadButtonEl) {
-    var self = this;
     this.reloadButtonEls.push(reloadButtonEl);
-    $(reloadButtonEl).on('click', (function(){
-      //get the code element for this reload button
-      var codeElement = self.getCodeElement($(reloadButtonEl).data('target'));
-      if(!codeElement) {
+    $(reloadButtonEl).on('click', e => {
+      //get the reload button target
+      let reloadTargetElement = this.getCodeElement($(reloadButtonEl).data('target'));
+      if(reloadTargetElement) {
+        this.reloadCodeElement(reloadTargetElement);
         return;
       }
-      var filePath = self.getFilePathForCodeElement(codeElement);
-      if(!filePath) {
+      reloadTargetElement = this.getWebPreviewElement($(reloadButtonEl).data('target'));
+      if(reloadTargetElement) {
+        this.reloadWebPreviewElement(reloadTargetElement);
         return;
       }
-      codeElement.readFromFile(filePath).catch(function(err) { console.log(err); });
-    }).bind(this));
+    });
+  }
+
+  reloadCodeElement(codeElement) {
+    let filePath = self.getFilePathForCodeElement(codeElement);
+    if(!filePath) {
+      return;
+    }
+    codeElement.readFromFile(filePath).catch(err =>console.log(err));
+  }
+
+  reloadWebPreviewElement(webPreviewElement) {
+    this.updateWebPreviewElement(webPreviewElement);
   }
 
   destroyReloadButton(reloadButtonEl) {
