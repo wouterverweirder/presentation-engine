@@ -2628,6 +2628,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var TERMINAL_URL = 'http://localhost:3000';
+
 var TerminalElement = function () {
   function TerminalElement(el, options) {
     _classCallCheck(this, TerminalElement);
@@ -2683,7 +2685,7 @@ var TerminalElement = function () {
       this.webview.style.width = '100%';
       this.webview.style.height = '100%';
       this.el.appendChild(this.webview);
-      this.webview.setAttribute('src', 'http://localhost:3000?dir=' + this.dir);
+      this.webview.setAttribute('src', TERMINAL_URL + '?dir=' + this.dir);
     }
   }, {
     key: 'destroy',
@@ -2729,7 +2731,7 @@ var WebPreviewElement = function () {
 			this.$el.attr('data-id', this.id);
 		}
 
-		this.file = this.$el.data('file');
+		this.file = this.$el.data('file') || this.$el.data('url');
 
 		this.console = this.$el.data('console');
 
@@ -2829,6 +2831,11 @@ var WebPreviewElement = function () {
 			this.url = false;
 			this.blocks = blocks;
 			this.resume();
+		}
+	}, {
+		key: 'needsOutputPathPrefix',
+		get: function get() {
+			return !this.$el.data('url');
 		}
 	}]);
 
@@ -3166,9 +3173,7 @@ var LiveCode = function () {
       var _this3 = this;
 
       this.runButtonEls.push(runButtonEl);
-      console.log('createRunButton', $(runButtonEl));
       $(runButtonEl).on('click', function (event) {
-        console.log('run button clicky');
         if (_this3.webPreviewElements[$(runButtonEl).data('target')]) {
           //save the files first
           _this3.saveCodeElementsToFiles().catch(function (err) {
@@ -3271,12 +3276,10 @@ var LiveCode = function () {
     value: function updateWebPreviewElement(webPreviewElement) {
       //load a file or code blocks?
       if (webPreviewElement.file) {
-        if (this.outputPath) {
-          webPreviewElement.updateUrl(path.join(this.outputPath, webPreviewElement.file));
-        } else {
-          webPreviewElement.updateUrl(webPreviewElement.file);
+        if (this.outputPath && webPreviewElement.needsOutputPathPrefix) {
+          return webPreviewElement.updateUrl(path.join(this.outputPath, webPreviewElement.file));
         }
-        return;
+        return webPreviewElement.updateUrl(webPreviewElement.file);
       }
 
       //gather all the code for this element

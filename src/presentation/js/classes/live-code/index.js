@@ -359,12 +359,10 @@ export default class LiveCode {
   updateWebPreviewElement(webPreviewElement) {
     //load a file or code blocks?
     if(webPreviewElement.file) {
-      if(this.outputPath) {
-        webPreviewElement.updateUrl(path.join(this.outputPath, webPreviewElement.file));
-      } else {
-        webPreviewElement.updateUrl(webPreviewElement.file);
+      if(this.outputPath && webPreviewElement.needsOutputPathPrefix) {
+        return webPreviewElement.updateUrl(path.join(this.outputPath, webPreviewElement.file));
       }
-      return;
+      return webPreviewElement.updateUrl(webPreviewElement.file);
     }
 
     //gather all the code for this element

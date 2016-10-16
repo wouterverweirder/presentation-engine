@@ -19,7 +19,7 @@ export default class WebPreviewElement {
 			this.$el.attr('data-id', this.id);
 		}
 
-    this.file = this.$el.data('file');
+    this.file = this.$el.data('file') || this.$el.data('url');
 
 		this.console = this.$el.data('console');
 
@@ -29,6 +29,10 @@ export default class WebPreviewElement {
 		this.blocks = false;
 		this.isRunning = false;
 		//webview gets created by calling updateUrl or updateCode
+	}
+
+	get needsOutputPathPrefix() {
+		return !(this.$el.data('url'));
 	}
 
 	destroy() {

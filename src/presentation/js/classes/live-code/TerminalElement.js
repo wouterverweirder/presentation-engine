@@ -1,3 +1,5 @@
+const TERMINAL_URL = 'http://localhost:3000';
+
 export default class TerminalElement {
 
   constructor(el, options) {
@@ -50,7 +52,7 @@ export default class TerminalElement {
     this.webview.style.width = '100%';
     this.webview.style.height = '100%';
     this.el.appendChild(this.webview);
-    this.webview.setAttribute('src', 'http://localhost:3000?dir=' + this.dir);
+    this.webview.setAttribute('src', `${TERMINAL_URL}?dir=${this.dir}`);
   }
 
   destroy() {
