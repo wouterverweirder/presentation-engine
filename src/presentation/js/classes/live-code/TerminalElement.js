@@ -30,7 +30,6 @@ export default class TerminalElement {
     this.$el.css('width', '100%').css('height', '100%');
 
     this.isRunning = false;
-    this.resume();
   }
 
   pause() {

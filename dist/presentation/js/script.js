@@ -2293,6 +2293,8 @@ var SlideBridge = function (_SlideBridgeBase) {
     value: function attachToSlideHolder(slideHolder, src, cb) {
       var _this2 = this;
 
+      // console.log('attachToSlideHolder', src);
+      // console.log(slideHolder);
       this.slideHolder = slideHolder;
       //notify the content it is being cleared
       this.tryToPostMessage({ action: 'destroy' });
@@ -2301,6 +2303,7 @@ var SlideBridge = function (_SlideBridgeBase) {
       $(slideHolder).attr('data-name', this.name);
       $(slideHolder).addClass('loading');
 
+      $(slideHolder).off('load');
       $(slideHolder).on('load', function () {
         _this2.tryToPostMessage({
           action: 'setState',
@@ -2310,22 +2313,24 @@ var SlideBridge = function (_SlideBridgeBase) {
       });
 
       if (src !== $(slideHolder).attr('data-src')) {
-        //create html import
-        var $importEl = $('<link rel="import">');
-        var importEl = $importEl[0];
-        $importEl.on('load', function () {
-          var template = importEl.import.querySelector('template');
-          if (template) {
-            var clone = document.importNode(template.content, true);
-            this.slideHolder.appendChild(clone);
-          }
-          $importEl.remove();
-          $(slideHolder).removeClass('loading');
-          cb();
-        }.bind(this));
-        $importEl.attr('href', src);
-        $(slideHolder).attr('data-src', src);
-        $(slideHolder).html($importEl);
+        (function () {
+          //create html import
+          var $importEl = $('<link rel="import">');
+          var importEl = $importEl[0];
+          $importEl.on('load', function () {
+            var template = importEl.import.querySelector('template');
+            if (template) {
+              var clone = document.importNode(template.content, true);
+              _this2.slideHolder.appendChild(clone);
+            }
+            $importEl.remove();
+            $(slideHolder).removeClass('loading');
+            cb();
+          });
+          $importEl.attr('href', src);
+          $(slideHolder).attr('data-src', src);
+          $(slideHolder).html($importEl);
+        })();
       }
     }
   }]);
@@ -2334,6 +2339,7 @@ var SlideBridge = function (_SlideBridgeBase) {
 }(_SlideBridge2.default);
 
 exports.default = SlideBridge;
+;
 
 },{"../../../shared/js/classes/SlideBridge":20}],9:[function(require,module,exports){
 'use strict';
@@ -2664,7 +2670,6 @@ var TerminalElement = function () {
     this.$el.css('width', '100%').css('height', '100%');
 
     this.isRunning = false;
-    this.resume();
   }
 
   _createClass(TerminalElement, [{
@@ -3010,7 +3015,11 @@ var LiveCode = function () {
     }).then(function () {
       return _this.setCodeElementValuesFromFiles();
     }).then(function () {
-      return _this.autoStartWebpreviewElementsWhenNeeded();
+      _this.loaded = true;
+      if (_this.isRunning) {
+        _this.isRunning = false;
+        _this.resume();
+      }
     }).then(readyCallback).catch(function (err) {
       return console.log(err);
     });
@@ -3175,6 +3184,10 @@ var LiveCode = function () {
   }, {
     key: 'pause',
     value: function pause() {
+      this.isRunning = false;
+      if (!this.loaded) {
+        return;
+      }
       var key = void 0;
       for (key in this.consoleElements) {
         this.consoleElements[key].pause();
@@ -3192,6 +3205,10 @@ var LiveCode = function () {
   }, {
     key: 'resume',
     value: function resume() {
+      this.isRunning = true;
+      if (!this.loaded) {
+        return;
+      }
       var key = void 0;
       for (key in this.consoleElements) {
         this.consoleElements[key].resume();
@@ -3205,6 +3222,7 @@ var LiveCode = function () {
       for (key in this.codeElements) {
         this.codeElements[key].resume();
       }
+      this.autoStartWebpreviewElementsWhenNeeded();
     }
   }, {
     key: 'layout',
@@ -4135,11 +4153,13 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
+      var _this = this;
+
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        this.slideMessageHandler({ data: message });
-      }.bind(this));
+        _this.slideMessageHandler({ data: message });
+      });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
         this.mobileServerBridge.tryToSend(_Constants.Constants.LEAVE_SLIDE_ROOM, $(slideHolder).attr('data-name'));
@@ -4215,6 +4235,7 @@ var SlideBridge = function () {
       $(slideHolder).attr('data-name', this.name);
       $(slideHolder).addClass('loading');
 
+      $(slideHolder).off('load');
       $(slideHolder).on('load', function () {
         _this.tryToPostMessage({
           action: 'setState',
@@ -4266,6 +4287,7 @@ var SlideBridge = function () {
 }();
 
 exports.default = SlideBridge;
+;
 
 },{"isomorphic-fetch":2}],"LiveCodeSlide":[function(require,module,exports){
 'use strict';

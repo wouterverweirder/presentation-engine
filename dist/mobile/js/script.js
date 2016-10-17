@@ -955,11 +955,13 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
+      var _this = this;
+
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        this.slideMessageHandler({ data: message });
-      }.bind(this));
+        _this.slideMessageHandler({ data: message });
+      });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
         this.mobileServerBridge.tryToSend(_Constants.Constants.LEAVE_SLIDE_ROOM, $(slideHolder).attr('data-name'));
@@ -1035,6 +1037,7 @@ var SlideBridge = function () {
       $(slideHolder).attr('data-name', this.name);
       $(slideHolder).addClass('loading');
 
+      $(slideHolder).off('load');
       $(slideHolder).on('load', function () {
         _this.tryToPostMessage({
           action: 'setState',
@@ -1086,6 +1089,7 @@ var SlideBridge = function () {
 }();
 
 exports.default = SlideBridge;
+;
 
 },{"isomorphic-fetch":1}]},{},[4])
 

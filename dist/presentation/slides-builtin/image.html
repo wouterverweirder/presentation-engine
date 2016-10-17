@@ -20,6 +20,9 @@
       backgroundPosition: 'center center',
       backgroundImage: 'url(' + imageUrl + ')'
     });
+
+    //trigger load
+    $slideHolder.trigger('load');
   }
 
   function getParameterByName(url, name) {

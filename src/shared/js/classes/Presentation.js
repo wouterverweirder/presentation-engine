@@ -200,9 +200,9 @@ export default class Presentation {
   attachToSlideHolder(slideHolder, slideBridge, src) {
     //listen for events on this slideHolder
     $(slideHolder).off('message-from-slide');
-    $(slideHolder).on('message-from-slide', (function(event, message) {
+    $(slideHolder).on('message-from-slide', (event, message) =>  {
       this.slideMessageHandler({data: message});
-    }).bind(this));
+    });
     //leave previous channel of this slideHolder
     if(this.mobileServerBridge) {
       this.mobileServerBridge.tryToSend(Constants.LEAVE_SLIDE_ROOM, $(slideHolder).attr('data-name'));

@@ -8,7 +8,7 @@ export default class SlideBridge {
 
   isAlreadyCorrectlyAttached(slideHolder, src) {
     return (this.slideHolder === slideHolder && $(slideHolder).attr('data-name') === this.name && $(slideHolder).attr('data-src') === src);
-  };
+  }
 
   attachToSlideHolder(slideHolder, src, cb) {
     this.slideHolder = slideHolder;
@@ -19,6 +19,7 @@ export default class SlideBridge {
     $(slideHolder).attr('data-name', this.name);
     $(slideHolder).addClass('loading');
 
+    $(slideHolder).off('load');
     $(slideHolder).on('load', () => {
       this.tryToPostMessage({
         action: 'setState',
@@ -44,7 +45,7 @@ export default class SlideBridge {
         });
       $(slideHolder).attr('data-src', src);
     }
-  };
+  }
 
   tryToPostMessage(message) {
     if(!this.slideHolder)
@@ -54,7 +55,7 @@ export default class SlideBridge {
     }
     //trigger with jquery
     $(this.slideHolder).trigger('message-to-slide', message);
-  };
+  }
 
   setState(state) {
     this.state = state;
@@ -62,5 +63,5 @@ export default class SlideBridge {
       action: 'setState',
       state: this.state
     });
-  };
-}
+  }
+};

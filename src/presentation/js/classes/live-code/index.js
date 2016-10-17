@@ -60,7 +60,13 @@ export default class LiveCode {
 
     })
     .then(() => this.setCodeElementValuesFromFiles())
-    .then(() => this.autoStartWebpreviewElementsWhenNeeded())
+    .then(() => {
+      this.loaded = true;
+      if(this.isRunning) {
+        this.isRunning = false;
+        this.resume();
+      }
+    })
     .then(readyCallback).catch(err => console.log(err));
 
     //disable keyboard bubbling up
@@ -205,6 +211,10 @@ export default class LiveCode {
   }
 
   pause() {
+    this.isRunning = false;
+    if(!this.loaded) {
+      return;
+    }
     let key;
     for(key in this.consoleElements)
     {
@@ -225,6 +235,10 @@ export default class LiveCode {
   }
 
   resume() {
+    this.isRunning = true;
+    if(!this.loaded) {
+      return;
+    }
     let key;
     for(key in this.consoleElements)
     {
@@ -242,6 +256,7 @@ export default class LiveCode {
     {
       this.codeElements[key].resume();
     }
+    this.autoStartWebpreviewElementsWhenNeeded();
   }
 
   layout() {

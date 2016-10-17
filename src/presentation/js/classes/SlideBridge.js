@@ -3,6 +3,8 @@ import SlideBridgeBase from '../../../shared/js/classes/SlideBridge';
 export default class SlideBridge extends SlideBridgeBase {
 
   attachToSlideHolder(slideHolder, src, cb) {
+    // console.log('attachToSlideHolder', src);
+    // console.log(slideHolder);
     this.slideHolder = slideHolder;
     //notify the content it is being cleared
     this.tryToPostMessage({action: 'destroy'});
@@ -11,6 +13,7 @@ export default class SlideBridge extends SlideBridgeBase {
     $(slideHolder).attr('data-name', this.name);
     $(slideHolder).addClass('loading');
 
+    $(slideHolder).off('load');
     $(slideHolder).on('load', () => {
       this.tryToPostMessage({
         action: 'setState',
@@ -19,23 +22,23 @@ export default class SlideBridge extends SlideBridgeBase {
       $(slideHolder).off('load');
     });
 
-    if(src !== $(slideHolder).attr('data-src')) {
+    if (src !== $(slideHolder).attr('data-src')) {
       //create html import
-      var $importEl = $('<link rel="import">');
-      var importEl = $importEl[0];
-      $importEl.on('load', (function(){
-        var template = importEl.import.querySelector('template');
+      const $importEl = $('<link rel="import">');
+      const importEl = $importEl[0];
+      $importEl.on('load', () => {
+        const template = importEl.import.querySelector('template');
         if(template) {
-          var clone = document.importNode(template.content, true);
+          const clone = document.importNode(template.content, true);
           this.slideHolder.appendChild(clone);
         }
         $importEl.remove();
         $(slideHolder).removeClass('loading');
         cb();
-      }).bind(this));
+      });
       $importEl.attr('href', src);
       $(slideHolder).attr('data-src', src);
       $(slideHolder).html($importEl);
     }
-  };
-}
+  }
+};
