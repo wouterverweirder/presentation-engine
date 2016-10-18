@@ -121,6 +121,7 @@ body {
 //solution: give tabs no dimensions instead of setting display to none
 .tab-content > .tab-pane {
   display: block;
+  overflow: hidden;
   width: 0;
   height: 0;
 }
