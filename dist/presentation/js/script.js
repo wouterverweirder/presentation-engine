@@ -2882,7 +2882,9 @@ var WebPreviewElement = function () {
 			};
 			this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
 
-			this.webview.setAttribute('nodeintegration', '');
+			if (!this.$el.attr('data-disable-nodeintegration')) {
+				this.webview.setAttribute('nodeintegration', '');
+			}
 			this.webview.setAttribute('src', url);
 		}
 	}, {
