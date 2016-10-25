@@ -43,7 +43,7 @@ export default class WebPreviewElement {
   pause() {
 		this.isRunning = false;
     if(this.webview) {
-			this.webview.removeEventListener('dom-ready', this._domReadyHandler);
+			this.webview.removeEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
 			this.webview.removeEventListener('did-fail-load', this._didFailLoadHandler);
 			this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
       this.webview.parentNode.removeChild(this.webview);
@@ -85,12 +85,15 @@ export default class WebPreviewElement {
 		}
 
 		//add listeners
-		this._domReadyHandler = () => {
+		this._didGetResponseDetailsHandler = e => {
+			if(e.originalURL !== this.webview.src) {
+				return;
+			}
 			if(this.$el.attr('data-open-devtools')) {
         this.webview.openDevTools();
       }
 		};
-		this.webview.addEventListener('dom-ready', this._domReadyHandler);
+		this.webview.addEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
 
 		this._didFailLoadHandler = e => {
 			this.retryTimeout = setTimeout(() => {

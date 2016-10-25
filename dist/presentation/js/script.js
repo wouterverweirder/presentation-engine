@@ -2809,7 +2809,7 @@ var WebPreviewElement = function () {
 		value: function pause() {
 			this.isRunning = false;
 			if (this.webview) {
-				this.webview.removeEventListener('dom-ready', this._domReadyHandler);
+				this.webview.removeEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
 				this.webview.removeEventListener('did-fail-load', this._didFailLoadHandler);
 				this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
 				this.webview.parentNode.removeChild(this.webview);
@@ -2854,12 +2854,15 @@ var WebPreviewElement = function () {
 			}
 
 			//add listeners
-			this._domReadyHandler = function () {
+			this._didGetResponseDetailsHandler = function (e) {
+				if (e.originalURL !== _this.webview.src) {
+					return;
+				}
 				if (_this.$el.attr('data-open-devtools')) {
 					_this.webview.openDevTools();
 				}
 			};
-			this.webview.addEventListener('dom-ready', this._domReadyHandler);
+			this.webview.addEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
 
 			this._didFailLoadHandler = function (e) {
 				_this.retryTimeout = setTimeout(function () {
