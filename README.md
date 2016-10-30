@@ -13,13 +13,13 @@ npm run develop
 Presentation:
 
 ```bash
-npm run presentation
+npm start
 ```
 
 Server (optional):
 
 ```bash
-npm start
+npm run server
 ```
 
 People can surf to http://REPLACE_WITH_YOUR_IP:5000 and follow the slides on their screen.
@@ -42,6 +42,7 @@ The content of the dist/presentation/slides folder will be used for the slides, 
 
   function init() {
     //$slideHolder contains the wrapping div for this slide
+    $slideHolder.trigger('load'); //this lets the presentation know the slide has loaded
   }
 
   init();
@@ -75,8 +76,8 @@ Example:
           <li class="nav-item"><a class="nav-link" href="#" aria-controls="html-code" role="tab">html code</a></li>
           <li class="nav-item"><a class="nav-link" href="#" aria-controls="html-output" role="tab">html output</a></li>
         </ul>
-        <div class="tab-content">
-          <div role="tabpanel" class="tab-pane" data-tab-id="nodejs" style="height: 66rem; position: relative;">
+        <div class="tab-content" style="height: 66rem; overflow: auto;">
+          <div role="tabpanel" class="tab-pane" data-tab-id="nodejs" style="position: relative;">
             <div class="split-pane fixed-bottom">
               <div class="split-pane-component top-pane" style="bottom: 3em; margin-bottom: 5px; min-height: 5em;">
                 <textarea data-type="code" data-mode="javascript" data-language="javascript" data-file="server.js"></textarea>
@@ -92,7 +93,7 @@ Example:
               </div>
             </div>
           </div>
-          <div role="tabpanel" class="tab-pane" data-tab-id="html-code" style="height: 66rem; position: relative;">
+          <div role="tabpanel" class="tab-pane" data-tab-id="html-code" style="position: relative;">
             <textarea data-type="code" data-mode="htmlmixed" data-language="html" data-file="index.html"></textarea>
             <div class="btn-group" role="group" style="position: absolute; top: 1em; right: 1em; z-index: 10;">
               <button type="button" data-target="index.html" data-type="reload-button" class="btn btn-secondary"><i class="fa fa-4x fa-refresh"></i></button>
@@ -100,7 +101,7 @@ Example:
               <button type="button" data-target="web-preview" data-type="run-button" class="btn btn-secondary"><i class="fa fa-4x fa-play"></i></button>
             </div>
           </div>
-          <div role="tabpanel" class="tab-pane" data-tab-id="html-output" style="height: 66rem; position: relative;">
+          <div role="tabpanel" class="tab-pane" data-tab-id="html-output" style="position: relative;">
             <div class="split-pane fixed-bottom">
               <div class="split-pane-component top-pane" style="bottom: 3em; margin-bottom: 5px; min-height: 5em;">
                 <div data-id="web-preview" data-type="web-preview" data-console="web-preview-console" data-file="index.html"></div>
