@@ -49,7 +49,7 @@ export default class Presentation extends PresentationBase{
     if(this.$overlay.hasClass('blink-on')) {
       this.$overlay.css('background-color', backgroundColor);
     } else {
-      this.$overlay.css('background-color', false);
+      this.$overlay.css('background-color', '');
     }
   }
 

@@ -202,9 +202,7 @@ button:focus {
 }
 
 input,button,select,textarea {
-  margin: 0;
   line-height: inherit;
-  border-radius: 0;
 }
 
 input[type="radio"]:disabled,input[type="checkbox"]:disabled {
@@ -858,9 +856,9 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
   z-index: 1000;
   display: none;
   float: left;
-  min-width: 160px;
-  padding: 5px 0;
-  margin: 2px 0 0;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
   font-size: 1rem;
   color: #373a3c;
   text-align: left;
@@ -881,7 +879,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 .dropdown-item {
   display: block;
   width: 100%;
-  padding: 3px 20px;
+  padding: 3px 1.5rem;
   clear: both;
   font-weight: normal;
   color: #373a3c;
@@ -936,7 +934,8 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 
 .dropdown-header {
   display: block;
-  padding: 5px 20px;
+  padding: 0.5rem 1.5rem;
+  margin-bottom: 0;
   font-size: 0.875rem;
   color: #818a91;
   white-space: nowrap;
@@ -960,7 +959,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 .dropup .dropdown-menu,.navbar-fixed-bottom .dropdown .dropdown-menu {
   top: auto;
   bottom: 100%;
-  margin-bottom: 2px;
+  margin-bottom: 0.125rem;
 }
 
 .nav {
@@ -1087,7 +1086,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 .tab-content > .active {
   display: block;
 }/*!
- *  Font Awesome 4.6.3 by @davegandy - http://fontawesome.io - @fontawesome
+ *  Font Awesome 4.7.0 by @davegandy - http://fontawesome.io - @fontawesome
  *  License - http://fontawesome.io/license (Font: SIL OFL 1.1, CSS: MIT License)
  *//* FONT PATH
  * -------------------------- */.fa {
@@ -1216,7 +1215,6 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 }
 
 :root .fa-rotate-90,:root .fa-rotate-180,:root .fa-rotate-270,:root .fa-flip-horizontal,:root .fa-flip-vertical {
-  -webkit-filter: none;
   filter: none;
 }
 
@@ -3343,7 +3341,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
   content: "";
 }
 
-.fa-battery-4:before,.fa-battery-full:before {
+.fa-battery-4:before,.fa-battery:before,.fa-battery-full:before {
   content: "";
 }
 
@@ -3783,6 +3781,170 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
   content: "";
 }
 
+.fa-handshake-o:before {
+  content: "";
+}
+
+.fa-envelope-open:before {
+  content: "";
+}
+
+.fa-envelope-open-o:before {
+  content: "";
+}
+
+.fa-linode:before {
+  content: "";
+}
+
+.fa-address-book:before {
+  content: "";
+}
+
+.fa-address-book-o:before {
+  content: "";
+}
+
+.fa-vcard:before,.fa-address-card:before {
+  content: "";
+}
+
+.fa-vcard-o:before,.fa-address-card-o:before {
+  content: "";
+}
+
+.fa-user-circle:before {
+  content: "";
+}
+
+.fa-user-circle-o:before {
+  content: "";
+}
+
+.fa-user-o:before {
+  content: "";
+}
+
+.fa-id-badge:before {
+  content: "";
+}
+
+.fa-drivers-license:before,.fa-id-card:before {
+  content: "";
+}
+
+.fa-drivers-license-o:before,.fa-id-card-o:before {
+  content: "";
+}
+
+.fa-quora:before {
+  content: "";
+}
+
+.fa-free-code-camp:before {
+  content: "";
+}
+
+.fa-telegram:before {
+  content: "";
+}
+
+.fa-thermometer-4:before,.fa-thermometer:before,.fa-thermometer-full:before {
+  content: "";
+}
+
+.fa-thermometer-3:before,.fa-thermometer-three-quarters:before {
+  content: "";
+}
+
+.fa-thermometer-2:before,.fa-thermometer-half:before {
+  content: "";
+}
+
+.fa-thermometer-1:before,.fa-thermometer-quarter:before {
+  content: "";
+}
+
+.fa-thermometer-0:before,.fa-thermometer-empty:before {
+  content: "";
+}
+
+.fa-shower:before {
+  content: "";
+}
+
+.fa-bathtub:before,.fa-s15:before,.fa-bath:before {
+  content: "";
+}
+
+.fa-podcast:before {
+  content: "";
+}
+
+.fa-window-maximize:before {
+  content: "";
+}
+
+.fa-window-minimize:before {
+  content: "";
+}
+
+.fa-window-restore:before {
+  content: "";
+}
+
+.fa-times-rectangle:before,.fa-window-close:before {
+  content: "";
+}
+
+.fa-times-rectangle-o:before,.fa-window-close-o:before {
+  content: "";
+}
+
+.fa-bandcamp:before {
+  content: "";
+}
+
+.fa-grav:before {
+  content: "";
+}
+
+.fa-etsy:before {
+  content: "";
+}
+
+.fa-imdb:before {
+  content: "";
+}
+
+.fa-ravelry:before {
+  content: "";
+}
+
+.fa-eercast:before {
+  content: "";
+}
+
+.fa-microchip:before {
+  content: "";
+}
+
+.fa-snowflake-o:before {
+  content: "";
+}
+
+.fa-superpowers:before {
+  content: "";
+}
+
+.fa-wpexplorer:before {
+  content: "";
+}
+
+.fa-meetup:before {
+  content: "";
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -4058,9 +4220,6 @@ height: 100%;
 display: inline-block;
 vertical-align: top;
 margin-bottom: -30px;
- /* Hack to make IE7 behave */
-*zoom: 1;
-*display: inline;
 }
 
 .CodeMirror-gutter-wrapper {
@@ -4200,8 +4359,6 @@ background: #d7d4f0;
 .cm-searching {
 background: #ffa;
 background: rgba(255, 255, 0, 0.4);
-}/* IE7 hack to prevent it from returning funny offsetTops on the spans */.CodeMirror span {
-*vertical-align: text-bottom;
 }/* Used to force a border model for a node */.cm-force-border {
 padding-right: .1px;
 }/* See issue #2901 */.cm-tab-wrap-hack:after {
@@ -4361,6 +4518,154 @@ width: 100%;
 height: 100%;
 padding: 0 1em;
 overflow: auto;
+}
+
+html,body {
+height: 100%;
+}
+
+html {
+font-size: 0.782vw;
+}
+
+body {
+background: black;
+display: -ms-flexbox;
+display: flex;
+-ms-flex-align: center;
+align-items: center;
+-ms-flex-pack: center;
+justify-content: center;
+}
+
+#presentation-controls {
+position: absolute;
+top: 0;
+left: 0;
+display: -ms-flexbox;
+display: flex;
+color: white;
+background: black;
+-ms-flex-align: center;
+align-items: center;
+}
+
+#presentation-wrapper-outer {
+width: 100%;
+-ms-flex-negative: 0;
+flex-shrink: 0;
+}
+
+#presentation-wrapper {
+width: 100%;
+height: 0;
+padding-top: 56.25%;
+overflow: hidden;
+position: relative;
+}
+
+#presentation {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: white;
+}
+
+.slide-frame {
+position: absolute;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+overflow: hidden;
+font-size: 3rem;
+display: -ms-flexbox;
+display: flex;
+-ms-flex-direction: column;
+flex-direction: column;
+-ms-flex-pack: center;
+justify-content: center;
+-ms-flex-align: center;
+align-items: center;
+}
+
+.slide {
+position: absolute;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: hidden;
+}
+
+.live-code-element {
+text-align: left;
+box-sizing: border-box;
+width: 100%;
+height: 100%;
+overflow-x: auto;
+overflow-y: auto;
+}
+
+.live-code-console-element .console-error {
+color: red;
+}
+
+.live-code-console-element pre,.live-code-console-element code {
+background: 0;
+border: 0;
+margin: 0;
+padding: 0;
+padding-left: 0.5em;
+padding-right: 0.5em;
+border-bottom: solid 1px lightgrey;
+}
+
+.nav-tabs {
+font-size: 0.6em;
+}
+
+.tab-content > .tab-pane {
+display: block;
+overflow: hidden;
+width: 0;
+height: 0;
+}
+
+.tab-content > .active {
+display: block;
+width: auto;
+height: auto;
+}
+
+.tab-content > .tab-pane-full-height.active {
+height: 100%;
+}
+
+.substate {
+display: none;
+}
+
+.substate.active {
+display: block;
+}
+
+.vertical-center {
+display: -ms-flexbox;
+display: flex;
+-ms-flex-direction: column;
+flex-direction: column;
+-ms-flex-pack: center;
+justify-content: center;
+vertical-align: middle;
+}
+
+.scrollable-menu {
+height: auto;
+max-height: 200px;
+overflow-x: hidden;
 }
 
 .slide {
@@ -4523,155 +4828,32 @@ height: 1.4rem;
 transform: translateY(0.1em);
 }
 
-html,body {
-height: 100%;
-}
-
-html {
-font-size: 0.782vw;
-}
-
-body {
-background: black;
-display: -ms-flexbox;
-display: flex;
--ms-flex-align: center;
-align-items: center;
--ms-flex-pack: center;
-justify-content: center;
-}
-
-#presentation-controls {
+.overlay {
 position: absolute;
+width: 100%;
+height: 100%;
 top: 0;
 left: 0;
-display: -ms-flexbox;
-display: flex;
-color: white;
-background: black;
--ms-flex-align: center;
-align-items: center;
-}
-
-#presentation-wrapper-outer {
-width: 100%;
--ms-flex-negative: 0;
-flex-shrink: 0;
-}
-
-#presentation-wrapper {
-width: 100%;
-height: 0;
-padding-top: 56.25%;
-overflow: hidden;
-position: relative;
-}
-
-#presentation {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: white;
-}
-
-.slide-frame {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-overflow: hidden;
-font-size: 3rem;
-display: -ms-flexbox;
-display: flex;
--ms-flex-direction: column;
-flex-direction: column;
--ms-flex-pack: center;
-justify-content: center;
--ms-flex-align: center;
-align-items: center;
-}
-
-.slide {
-position: absolute;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-overflow: hidden;
-}
-
-.live-code-element {
-text-align: left;
-box-sizing: border-box;
-width: 100%;
-height: 100%;
-overflow-x: auto;
-overflow-y: auto;
-}
-
-.live-code-console-element .console-error {
-color: red;
-}
-
-.live-code-console-element pre,.live-code-console-element code {
-background: 0;
-border: 0;
-margin: 0;
-padding: 0;
-padding-left: 0.5em;
-padding-right: 0.5em;
-border-bottom: solid 1px lightgrey;
-}
-
-.nav-tabs {
-font-size: 0.6em;
-}
-
-.tab-content > .tab-pane {
-display: block;
-overflow: hidden;
-width: 0;
-height: 0;
-}
-
-.tab-content > .active {
-display: block;
-width: auto;
-height: auto;
-}
-
-.tab-content > .tab-pane-full-height.active {
-height: 100%;
-}
-
-.substate {
 display: none;
+z-index: 9999;
+background-color: black;
+color: white;
 }
 
-.substate.active {
-display: block;
+.overlay.active {
+display: table;
 }
 
-.vertical-center {
-display: -ms-flexbox;
-display: flex;
--ms-flex-direction: column;
-flex-direction: column;
--ms-flex-pack: center;
-justify-content: center;
-}
-
-.scrollable-menu {
-height: auto;
-max-height: 200px;
-overflow-x: hidden;
+.overlay .content {
+display: table-cell;
+width: 100%;
+height: 100%;
+text-align: center;
+vertical-align: middle;
 }
 
 @font-face {
-font-family:'FontAwesome';src:url("../fonts/fontawesome-webfont.eot?v=4.6.3");src:url("../fonts/fontawesome-webfont.eot?#iefix&v=4.6.3") format("embedded-opentype"), url("../fonts/fontawesome-webfont.woff2?v=4.6.3") format("woff2"), url("../fonts/fontawesome-webfont.woff?v=4.6.3") format("woff"), url("../fonts/fontawesome-webfont.ttf?v=4.6.3") format("truetype"), url("../fonts/fontawesome-webfont.svg?v=4.6.3#fontawesomeregular") format("svg");font-weight:normal;font-style:normal;
+font-family:'FontAwesome';src:url("../fonts/fontawesome-webfont.eot?v=4.7.0");src:url("../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0") format("embedded-opentype"), url("../fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"), url("../fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"), url("../fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"), url("../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular") format("svg");font-weight:normal;font-style:normal;
 }
 
 @font-face {

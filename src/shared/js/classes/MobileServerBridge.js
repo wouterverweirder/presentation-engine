@@ -10,8 +10,8 @@ export default class MobileServerBridge {
 
   connect() {
     console.log('MobileServerBridge.connect');
-    console.warn('MobileServerBridge disabled');
-    return;
+    //console.warn('MobileServerBridge disabled');
+    //return;
     //post to the api
     fetch(`${this.settings.mobileServerUrl}/login`, {
       method: 'POST',

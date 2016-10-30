@@ -94,6 +94,7 @@ var presentationScriptsTask = function(watch) {
   var b = browserify(config.presentation.js.src + '/script.js', { debug: gutil.env.type !== 'production' })
     .require(__dirname + '/' + config.presentation.js.src + '/classes/live-code-slide/index.js', { expose: 'LiveCodeSlide'})
     .require(__dirname + '/' + config.presentation.js.src + '/classes/video-slide/index.js', { expose: 'VideoSlide'})
+    .require(__dirname + '/' + config.presentation.js.src + '/classes/shake-your-phones-slide/index.js', { expose: 'ShakeYourPhonesSlide'})
     .transform(babelify);
 
   return scriptsTask(b, watch, 'script.js', config.presentation.js.dst);
@@ -112,6 +113,7 @@ var mobileStylesTask = function() {
 
 var mobileScriptsTask = function(watch) {
   var b = browserify(config.mobile.js.src + '/script.js', { debug: gutil.env.type !== 'production' })
+    .require(__dirname + '/' + config.mobile.js.src + '/classes/shake-your-phones-slide/index.js', { expose: 'ShakeYourPhonesSlide'})
     .transform(babelify);
 
   return scriptsTask(b, watch, 'script.js', config.mobile.js.dst);

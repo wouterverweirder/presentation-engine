@@ -26,6 +26,10 @@ export const Constants = {
   OPEN_COMMAND_LINE: 'openCommandLine',
   OPEN_CAMERA: 'openCamera',
 
+  BLINK : 'blink',
+
+  HEART_RATE_POLAR : 'heartRatePolar',
+
   SET_TEAM : 'setTeam',
   UPDATE_MOTION : 'updateMotion',
 

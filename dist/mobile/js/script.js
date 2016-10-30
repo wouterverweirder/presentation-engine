@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // the whatwg-fetch polyfill installs the fetch() function
 // on the global object (window or self)
 //
@@ -528,7 +528,7 @@ var Presentation = function (_PresentationBase) {
       if (this.$overlay.hasClass('blink-on')) {
         this.$overlay.css('background-color', backgroundColor);
       } else {
-        this.$overlay.css('background-color', false);
+        this.$overlay.css('background-color', '');
       }
     }
   }]);
@@ -538,7 +538,7 @@ var Presentation = function (_PresentationBase) {
 
 exports.default = Presentation;
 
-},{"../../../shared/js/Constants":5,"../../../shared/js/classes/MobileServerBridge":6,"../../../shared/js/classes/Presentation":7}],4:[function(require,module,exports){
+},{"../../../shared/js/Constants":5,"../../../shared/js/classes/MobileServerBridge":7,"../../../shared/js/classes/Presentation":8}],4:[function(require,module,exports){
 'use strict';
 
 var _Presentation = require('./classes/Presentation');
@@ -603,6 +603,10 @@ var Constants = exports.Constants = {
   OPEN_COMMAND_LINE: 'openCommandLine',
   OPEN_CAMERA: 'openCamera',
 
+  BLINK: 'blink',
+
+  HEART_RATE_POLAR: 'heartRatePolar',
+
   SET_TEAM: 'setTeam',
   UPDATE_MOTION: 'updateMotion',
 
@@ -620,6 +624,151 @@ var Constants = exports.Constants = {
 };
 
 },{}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Constants = require('../Constants');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var ContentBase = function () {
+  function ContentBase($slideHolder) {
+    _classCallCheck(this, ContentBase);
+
+    this.$slideHolder = $slideHolder;
+    this.src = $slideHolder.attr('data-src');
+    this.name = $slideHolder.attr('data-name');
+    this.settings = {};
+    try {
+      this.settings = JSON.parse($('#presentation').attr('data-presentation-settings'));
+    } catch (e) {}
+    this.fps = 60;
+    this._animationFrameId = false;
+    this._currentTime = 0;
+    this._delta = 0;
+    this._interval = false;
+    this._lastTime = new Date().getTime();
+    this.currentFrame = 0;
+
+    this.startListeningForMessages();
+
+    this.__drawLoop = this._drawLoop.bind(this);
+    this._interval = 1000 / this.fps;
+
+    window.requestAnimationFrame(function () {
+      $slideHolder.trigger('load');
+    });
+  }
+
+  _createClass(ContentBase, [{
+    key: 'startListeningForMessages',
+    value: function startListeningForMessages() {
+      this._slideHolderMessageToSlideHandler = this.slideHolderMessageToSlideHandler.bind(this);
+      this.$slideHolder.on('message-to-slide', this._slideHolderMessageToSlideHandler);
+    }
+  }, {
+    key: 'stopListeningForMessages',
+    value: function stopListeningForMessages() {
+      this.$slideHolder.off('message-to-slide', this._slideHolderMessageToSlideHandler);
+    }
+  }, {
+    key: 'slideHolderMessageToSlideHandler',
+    value: function slideHolderMessageToSlideHandler(event, message) {
+      this.receiveMessage({ data: message });
+    }
+  }, {
+    key: 'receiveMessage',
+    value: function receiveMessage(event) {
+      if (!event.data) {
+        return;
+      }
+      switch (event.data.action) {
+        case 'setState':
+          this.setState(event.data.state);
+          break;
+        case 'destroy':
+          this.destroy();
+          break;
+        case _Constants.Constants.SOCKET_RECEIVE:
+          this.receiveSocketMessage(event.data.message);
+          break;
+        default:
+          this.handleMessage(event.data);
+          break;
+      }
+    }
+  }, {
+    key: 'destroy',
+    value: function destroy() {
+      this.stopListeningForMessages();
+      window.cancelAnimationFrame(this._animationFrameId);
+    }
+  }, {
+    key: 'postMessage',
+    value: function postMessage(data) {
+      this.$slideHolder.trigger('message-from-slide', data);
+    }
+  }, {
+    key: 'handleMessage',
+    value: function handleMessage(data) {}
+  }, {
+    key: 'postSocketMessage',
+    value: function postSocketMessage(message) {
+      this.postMessage({
+        action: _Constants.Constants.SOCKET_SEND,
+        message: message
+      });
+    }
+  }, {
+    key: 'receiveSocketMessage',
+    value: function receiveSocketMessage(message) {
+      //console.log('receiveSocketMessageame, message);
+    }
+  }, {
+    key: 'setState',
+    value: function setState(state) {
+      if (state !== this.state) {
+        this.state = state;
+        this.onStateChanged();
+        if (this.state === _Constants.Constants.STATE_ACTIVE) {
+          this.currentFrame = 0;
+          this._drawLoop();
+        } else {
+          window.cancelAnimationFrame(this._animationFrameId);
+        }
+      }
+    }
+  }, {
+    key: 'onStateChanged',
+    value: function onStateChanged() {}
+  }, {
+    key: '_drawLoop',
+    value: function _drawLoop() {
+      this._animationFrameId = window.requestAnimationFrame(this.__drawLoop);
+      this._currentTime = new Date().getTime();
+      this._delta = this._currentTime - this._lastTime;
+      if (this._delta > this._interval) {
+        this.currentFrame++;
+        this.drawLoop(this._delta);
+        this._lastTime = this._currentTime - this._delta % this._interval;
+      }
+    }
+  }, {
+    key: 'drawLoop',
+    value: function drawLoop(delta) {}
+  }]);
+
+  return ContentBase;
+}();
+
+exports.default = ContentBase;
+
+},{"../Constants":5}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -651,8 +800,8 @@ var MobileServerBridge = function () {
       var _this = this;
 
       console.log('MobileServerBridge.connect');
-      console.warn('MobileServerBridge disabled');
-      return;
+      //console.warn('MobileServerBridge disabled');
+      //return;
       //post to the api
       (0, _isomorphicFetch2.default)(this.settings.mobileServerUrl + '/login', {
         method: 'POST',
@@ -720,7 +869,7 @@ var MobileServerBridge = function () {
 
 exports.default = MobileServerBridge;
 
-},{"isomorphic-fetch":1}],7:[function(require,module,exports){
+},{"isomorphic-fetch":1}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -750,6 +899,7 @@ var Presentation = function () {
     this.data = data;
     this.role = role;
     this.settings = settings;
+    $('#presentation').attr('data-presentation-settings', JSON.stringify(settings));
     this.currentSlideIndex = -1;
     this.slideHolders = [];
     this.numSlideHolders = 3;
@@ -994,7 +1144,7 @@ var Presentation = function () {
 
 exports.default = Presentation;
 
-},{"../Constants":5,"./SlideBridge":8}],8:[function(require,module,exports){
+},{"../Constants":5,"./SlideBridge":9}],9:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -1091,7 +1241,131 @@ var SlideBridge = function () {
 exports.default = SlideBridge;
 ;
 
-},{"isomorphic-fetch":1}]},{},[4])
+},{"isomorphic-fetch":1}],"ShakeYourPhonesSlide":[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Constants = require('../../../../shared/js/Constants');
+
+var _ContentBase2 = require('../../../../shared/js/classes/ContentBase');
+
+var _ContentBase3 = _interopRequireDefault(_ContentBase2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ShakeYourPhonesSlide = function (_ContentBase) {
+  _inherits(ShakeYourPhonesSlide, _ContentBase);
+
+  function ShakeYourPhonesSlide($slideHolder) {
+    _classCallCheck(this, ShakeYourPhonesSlide);
+
+    var _this = _possibleConstructorReturn(this, (ShakeYourPhonesSlide.__proto__ || Object.getPrototypeOf(ShakeYourPhonesSlide)).call(this, $slideHolder));
+
+    _this.currentMotion = 0;
+    _this.motion = 0;
+
+    _this.$slideHolder.find('.slide').css('background-color', '#c6363d');
+
+    _this.$background = _this.$slideHolder.find('.background');
+    _this.$background.css('top', '100%');
+    _this.$background.css('background-color', 'rgba(255, 255, 255, 0.5)');
+
+    _this._motionUpdateHandler = _this.motionUpdateHandler.bind(_this);
+    return _this;
+  }
+
+  _createClass(ShakeYourPhonesSlide, [{
+    key: 'onStateChanged',
+    value: function onStateChanged() {
+      if (this.state === _Constants.Constants.STATE_ACTIVE) {
+        if (window.DeviceMotionEvent) {
+          window.addEventListener('devicemotion', this._motionUpdateHandler, false);
+        } else {
+          this.$slideHolder.find('.acceleration').text('Not supported on your device :-(');
+        }
+      } else {
+        window.removeEventListener('devicemotion', this._motionUpdateHandler);
+      }
+    }
+  }, {
+    key: 'receiveSocketMessage',
+    value: function receiveSocketMessage(message) {
+      if (!message.content) {
+        return;
+      }
+      if (message.content.action === _Constants.Constants.SET_SUBSTATE) {
+        this.setSubstate(message.content.substate);
+      }
+      // if(message.content.action === Constants.YOU_WIN) {
+      //   this.$slideHolder.find('.substate-finished h1').text('Your Team Won!');
+      // }
+      // if(message.content.action === Constants.YOU_LOSE) {
+      //   this.$slideHolder.find('.substate-finished h1').text('Your Team Lost...');
+      // }
+    }
+  }, {
+    key: 'setSubstate',
+    value: function setSubstate(substate) {
+      if (this.substate !== substate) {
+        this.substate = substate;
+        this.showCurrentState();
+      }
+    }
+  }, {
+    key: 'motionUpdateHandler',
+    value: function motionUpdateHandler(event) {
+      this.currentMotion = event.interval * (Math.abs(event.acceleration.x) + Math.abs(event.acceleration.y) + Math.abs(event.acceleration.z));
+    }
+  }, {
+    key: 'drawLoop',
+    value: function drawLoop() {
+      this.motion += this.currentMotion;
+      this.motion *= 0.97;
+      this.$background.css('top', 100 - this.motion + '%');
+      if (this.currentFrame % 10 === 0) {
+        this.postSocketMessage({
+          target: {
+            client: 'presentation',
+            slide: this.name
+          },
+          content: {
+            action: _Constants.Constants.UPDATE_MOTION,
+            motion: this.motion
+          }
+        });
+      }
+    }
+  }, {
+    key: 'showCurrentState',
+    value: function showCurrentState() {
+      this.$slideHolder.find('.substate').removeClass('active');
+      if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_GAME) {
+        this.$slideHolder.find('.substate-game').addClass('active');
+      } else if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_FINISHED) {
+        this.$slideHolder.find('.substate-finished').addClass('active');
+      } else {
+        this.$slideHolder.find('.substate-intro').addClass('active');
+      }
+    }
+  }]);
+
+  return ShakeYourPhonesSlide;
+}(_ContentBase3.default);
+
+exports.default = ShakeYourPhonesSlide;
+
+},{"../../../../shared/js/Constants":5,"../../../../shared/js/classes/ContentBase":6}]},{},[4])
 
 
 //# sourceMappingURL=script.js.map

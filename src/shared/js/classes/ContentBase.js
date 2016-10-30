@@ -6,6 +6,11 @@ export default class ContentBase{
     this.$slideHolder = $slideHolder;
     this.src = $slideHolder.attr('data-src');
     this.name = $slideHolder.attr('data-name');
+    this.settings = {};
+    try {
+      this.settings = JSON.parse($('#presentation').attr('data-presentation-settings'));
+    } catch (e) {
+    }
     this.fps = 60;
     this._animationFrameId = false;
     this._currentTime = 0;

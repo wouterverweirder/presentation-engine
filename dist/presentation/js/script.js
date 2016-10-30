@@ -5,7 +5,7 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   3.3.1
+ * @version   4.0.5
  */
 
 (function (global, factory) {
@@ -80,9 +80,13 @@ function useNextTick() {
 
 // vertx
 function useVertxTimer() {
-  return function () {
-    vertxNext(flush);
-  };
+  if (typeof vertxNext !== 'undefined') {
+    return function () {
+      vertxNext(flush);
+    };
+  }
+
+  return useSetTimeout();
 }
 
 function useMutationObserver() {
@@ -1145,7 +1149,6 @@ function polyfill() {
     local.Promise = Promise;
 }
 
-polyfill();
 // Strange compat..
 Promise.polyfill = polyfill;
 Promise.Promise = Promise;
@@ -3665,6 +3668,10 @@ var Constants = exports.Constants = {
   OPEN_COMMAND_LINE: 'openCommandLine',
   OPEN_CAMERA: 'openCamera',
 
+  BLINK: 'blink',
+
+  HEART_RATE_POLAR: 'heartRatePolar',
+
   SET_TEAM: 'setTeam',
   UPDATE_MOTION: 'updateMotion',
 
@@ -3701,6 +3708,10 @@ var ContentBase = function () {
     this.$slideHolder = $slideHolder;
     this.src = $slideHolder.attr('data-src');
     this.name = $slideHolder.attr('data-name');
+    this.settings = {};
+    try {
+      this.settings = JSON.parse($('#presentation').attr('data-presentation-settings'));
+    } catch (e) {}
     this.fps = 60;
     this._animationFrameId = false;
     this._currentTime = 0;
@@ -3854,8 +3865,8 @@ var MobileServerBridge = function () {
       var _this = this;
 
       console.log('MobileServerBridge.connect');
-      console.warn('MobileServerBridge disabled');
-      return;
+      //console.warn('MobileServerBridge disabled');
+      //return;
       //post to the api
       (0, _isomorphicFetch2.default)(this.settings.mobileServerUrl + '/login', {
         method: 'POST',
@@ -3953,6 +3964,7 @@ var Presentation = function () {
     this.data = data;
     this.role = role;
     this.settings = settings;
+    $('#presentation').attr('data-presentation-settings', JSON.stringify(settings));
     this.currentSlideIndex = -1;
     this.slideHolders = [];
     this.numSlideHolders = 3;
@@ -4369,7 +4381,240 @@ var LiveCodeSlide = function (_ContentBase) {
 
 exports.default = LiveCodeSlide;
 
-},{"../../../../shared/js/Constants":16,"../../../../shared/js/classes/ContentBase":17,"../live-code":13}],"VideoSlide":[function(require,module,exports){
+},{"../../../../shared/js/Constants":16,"../../../../shared/js/classes/ContentBase":17,"../live-code":13}],"ShakeYourPhonesSlide":[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Constants = require('../../../../shared/js/Constants');
+
+var _ContentBase2 = require('../../../../shared/js/classes/ContentBase');
+
+var _ContentBase3 = _interopRequireDefault(_ContentBase2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ShakeYourPhonesSlide = function (_ContentBase) {
+  _inherits(ShakeYourPhonesSlide, _ContentBase);
+
+  function ShakeYourPhonesSlide($slideHolder) {
+    _classCallCheck(this, ShakeYourPhonesSlide);
+
+    var _this = _possibleConstructorReturn(this, (ShakeYourPhonesSlide.__proto__ || Object.getPrototypeOf(ShakeYourPhonesSlide)).call(this, $slideHolder));
+
+    _this.gameDuration = 13; //game lasts 13 seconds
+    _this.clientsMap = {};
+    _this.clientsByTeam = [[], []];
+    _this.motions = [0, 0];
+    _this.music = _this.$slideHolder.find('#music')[0];
+
+    _this.$slideHolder.find('#ip').text(_this.settings.mobileServerUrl);
+
+    _this.$slideHolder.find('.substate-intro .btn').on('click', _this.startClickHandler.bind(_this));
+    _this.$slideHolder.find('.substate-finished .btn').on('click', _this.winnerClickHandler.bind(_this));
+
+    _this.setSubstate(_Constants.Constants.SHAKE_YOUR_PHONES_INTRO);
+    return _this;
+  }
+
+  _createClass(ShakeYourPhonesSlide, [{
+    key: 'setSubstate',
+    value: function setSubstate(substate) {
+      if (this.substate !== substate) {
+        this.substate = substate;
+        //send substate to mobile clients
+        this.postSocketMessage({
+          target: {
+            client: 'mobile',
+            slide: this.name
+          },
+          content: {
+            action: _Constants.Constants.SET_SUBSTATE,
+            substate: this.substate
+          }
+        });
+        if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_GAME) {
+          this.resetMotion();
+        }
+        this.showCurrentState();
+      }
+    }
+  }, {
+    key: 'receiveSocketMessage',
+    value: function receiveSocketMessage(message) {
+      if (!message.content) {
+        return;
+      }
+      if (message.content.action === 'updateRoomList') {
+        //message.content.ids is an array with ids in this room
+        var clientMapIds = _.keys(this.clientsMap);
+        //which ids are new? (in message.content.ids but not in clientsMap)
+        var newClientIds = _.difference(message.content.ids, clientMapIds);
+        //which ids need to be removed? (in clientsMap but not in message.content.ids)
+        var removeClientIds = _.difference(clientMapIds, message.content.ids);
+        //update our map
+        newClientIds.forEach(function (id) {
+          var left = Math.random();
+          var top = Math.random();
+          this.clientsMap[id] = {
+            id: id,
+            motion: 0,
+            size: 10,
+            shakeWinner: false,
+            $div: $('<div>').css({
+              position: 'absolute',
+              left: left * 100 + '%',
+              top: top * 100 + '%',
+              transformOrigin: 'center',
+              transform: 'scale(1)',
+              borderRadius: '50%',
+              backgroundColor: 'rgba(' + Math.round(left * 255) + ',' + Math.round(top * 255) + ', 0, 1)',
+              width: '10px',
+              height: '10px'
+            })
+          };
+          $('.background .substate-game').append(this.clientsMap[id].$div);
+          this.postSocketMessage({
+            target: {
+              client: 'mobile',
+              slide: this.name
+            },
+            content: {
+              action: _Constants.Constants.SET_SUBSTATE,
+              substate: this.substate
+            }
+          });
+        }, this);
+        removeClientIds.forEach(function (id) {
+          if (this.clientsMap[id]) {
+            this.clientsMap[id].$div.remove();
+          }
+          delete this.clientsMap[id];
+        }, this);
+
+        this.numClientsChanged();
+      } else if (message.content.action === _Constants.Constants.UPDATE_MOTION) {
+        if (!message.sender) {
+          return;
+        }
+        //message.sender.id contains the origin id
+        if (!this.clientsMap[message.sender.id]) {
+          return;
+        }
+        this.clientsMap[message.sender.id].motion = Math.min(130, message.content.motion); //limit max motion to 130
+      }
+    }
+  }, {
+    key: 'startClickHandler',
+    value: function startClickHandler() {
+      this.setSubstate(_Constants.Constants.SHAKE_YOUR_PHONES_GAME);
+    }
+  }, {
+    key: 'winnerClickHandler',
+    value: function winnerClickHandler() {
+      //get the clienthandler with the largest motion, and blink it's screen
+      var winningClient = false;
+      var maximumMotion = -1;
+      for (var id in this.clientsMap) {
+        if (!this.clientsMap[id].shakeWinner && this.clientsMap[id].motion > maximumMotion) {
+          winningClient = this.clientsMap[id];
+          maximumMotion = winningClient.motion;
+        }
+      }
+      if (winningClient) {
+        winningClient.shakeWinner = true;
+        //send message to this client
+        this.postSocketMessage({
+          target: {
+            client: winningClient.id
+          },
+          content: {
+            action: _Constants.Constants.BLINK,
+            text: '<span style="font-size: 5em;">Spectacular, You Win!</span>',
+            backgroundColor: 'red'
+          }
+        });
+      }
+    }
+  }, {
+    key: 'resetMotion',
+    value: function resetMotion() {
+      this.motions = [0, 0];
+      for (var id in this.clientsMap) {
+        this.clientsMap[id].motion = 0;
+        this.clientsMap[id].shakeWinner = false;
+      }
+    }
+  }, {
+    key: 'numClientsChanged',
+    value: function numClientsChanged() {
+      this.$slideHolder.find('#connections span').text(_.keys(this.clientsMap).length);
+    }
+  }, {
+    key: 'showCurrentState',
+    value: function showCurrentState() {
+      this.$slideHolder.find('.substate').removeClass('active');
+      this.$slideHolder.find('.slide').css({
+        backgroundImage: 'none'
+      });
+      if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_GAME) {
+        this.music.play();
+        this.$slideHolder.find('.substate-game .countdown').html(this.gameDuration);
+        this.$slideHolder.find('.substate-game').addClass('active');
+        this.countDownTimeout = setTimeout(this.countDownHandler.bind(this, this.gameDuration - 1), 1000);
+      } else if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_FINISHED) {
+        this.$slideHolder.find('.substate-finished').addClass('active');
+      } else {
+        this.$slideHolder.find('.slide').css({
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+          backgroundPosition: 'center center',
+          backgroundImage: 'url(assets/iphone-connections.png)'
+        });
+        this.$slideHolder.find('.substate-intro').addClass('active');
+      }
+    }
+  }, {
+    key: 'countDownHandler',
+    value: function countDownHandler(timeLeft) {
+      this.$slideHolder.find('.substate-game .countdown').html(timeLeft);
+      if (timeLeft > 0) {
+        this.countDownTimeout = setTimeout(this.countDownHandler.bind(this, timeLeft - 1), 1000);
+      } else {
+        this.setSubstate(_Constants.Constants.SHAKE_YOUR_PHONES_FINISHED);
+      }
+    }
+  }, {
+    key: 'drawLoop',
+    value: function drawLoop() {
+      if (this.substate === _Constants.Constants.SHAKE_YOUR_PHONES_GAME) {
+        $.each(this.clientsMap, function (key, value) {
+          var target = Math.max(10, value.motion);
+          value.size += (target - value.size) * 0.2;
+          value.$div.css({
+            transform: 'scale(' + value.size + ')'
+          });
+        });
+      }
+    }
+  }]);
+
+  return ShakeYourPhonesSlide;
+}(_ContentBase3.default);
+
+exports.default = ShakeYourPhonesSlide;
+
+},{"../../../../shared/js/Constants":16,"../../../../shared/js/classes/ContentBase":17}],"VideoSlide":[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {

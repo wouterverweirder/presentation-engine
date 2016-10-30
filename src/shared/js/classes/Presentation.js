@@ -10,6 +10,7 @@ export default class Presentation {
     this.data = data;
     this.role = role;
     this.settings = settings;
+    $('#presentation').attr('data-presentation-settings', JSON.stringify(settings));
     this.currentSlideIndex = -1;
     this.slideHolders = [];
     this.numSlideHolders = 3;
