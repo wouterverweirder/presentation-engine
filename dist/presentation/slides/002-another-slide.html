@@ -9,15 +9,15 @@
           <li class="nav-item"><a class="nav-link" href="#" aria-controls="hello.txt" role="tab">hello.txt</a></li>
           <li class="nav-item"><a class="nav-link" href="#" aria-controls="terminal" role="tab">terminal</a></li>
         </ul>
-        <div class="tab-content">
-          <div role="tabpanel" class="tab-pane" data-tab-id="hello.txt" style="height: 35rem; position: relative;">
+        <div class="tab-content" style="height: 35rem; overflow: auto;">
+          <div role="tabpanel" class="tab-pane" data-tab-id="hello.txt" style="position: relative;">
             <textarea data-type="code" data-file="hello.txt"></textarea>
             <div class="btn-group" role="group" style="position: absolute; top: 1em; right: 1em; z-index: 10;">
               <button type="button" data-target="hello.txt" data-type="reload-button" class="btn btn-secondary"><i class="fa fa-4x fa-refresh"></i></button>
               <button type="button" data-target="hello.txt" data-type="save-button" class="btn btn-secondary"><i class="fa fa-4x fa-save"></i></button>
             </div>
           </div>
-          <div role="tabpanel" class="tab-pane" data-tab-id="terminal" style="height: 35rem; position: relative;">
+          <div role="tabpanel" class="tab-pane tab-pane-full-height" data-tab-id="terminal" style="position: relative;">
             <div data-type="terminal" data-dir="tmp/ex01-git"></div>
           </div>
         </div>
