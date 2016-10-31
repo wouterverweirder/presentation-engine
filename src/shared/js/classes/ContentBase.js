@@ -4,6 +4,14 @@ export default class ContentBase{
 
   constructor($slideHolder) {
     this.$slideHolder = $slideHolder;
+    this.slideHolder = this.$slideHolder[0];
+    this.width = this.slideHolder.offsetWidth;
+    this.height = this.slideHolder.offsetHeight;
+    this.prevWidth = this.width;
+    this.prevHeight = this.height;
+    this.widthChanged = false;
+    this.heightChanged = false;
+    this.sizeChanged = false;
     this.src = $slideHolder.attr('data-src');
     this.name = $slideHolder.attr('data-name');
     this.settings = {};
@@ -107,6 +115,13 @@ export default class ContentBase{
       this._delta = (this._currentTime - this._lastTime);
       if(this._delta > this._interval) {
         this.currentFrame++;
+        this.prevWidth = this.width;
+        this.prevHeight = this.height;
+        this.width = this.slideHolder.offsetWidth;
+        this.height = this.slideHolder.offsetHeight;
+        this.widthChanged = (this.width !== this.prevWidth);
+        this.heightChanged = (this.height !== this.prevHeight);
+        this.sizeChanged = (this.widthChanged || this.heightChanged);
         this.drawLoop(this._delta);
         this._lastTime = this._currentTime - (this._delta % this._interval);
       }
