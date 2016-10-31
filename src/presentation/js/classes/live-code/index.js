@@ -2,6 +2,7 @@ import ConsoleElement from './ConsoleElement';
 import TerminalElement from './TerminalElement';
 import CodeElement from './CodeElement';
 import WebPreviewElement from './WebPreviewElement';
+import WebcamElement from './WebcamElement';
 
 const path = requireNode('path');
 const fs = requireNode('fs-promise');
@@ -45,6 +46,10 @@ export default class LiveCode {
       //create the code editors
       this.codeElements = {};
       this.$el.find('[data-type="code"]').each(((index, codeEl) => this.createCodeElement(codeEl)));
+
+      //create the webcam elements
+      this.webcamElements = {};
+      this.$el.find('[data-type="webcam"]').each(((index, webcamEl) => this.createWebcamElement(webcamEl)));
 
       //create run buttons
       this.runButtonEls = [];
@@ -204,6 +209,10 @@ export default class LiveCode {
     {
       this.destroyCodeElement(this.codeElements[key]);
     }
+    for(key in this.webcamElements)
+    {
+      this.destroyWebcamElement(this.webcamElements[key]);
+    }
     this.runButtonEls.forEach(el => this.destroyRunButton(el));
     this.saveButtonEls.forEach(el => this.destroySaveButton(el));
     this.reloadButtonEls.forEach(el => this.destroyReloadButton(el));
@@ -232,6 +241,10 @@ export default class LiveCode {
     {
       this.codeElements[key].pause();
     }
+    for(key in this.webcamElements)
+    {
+      this.webcamElements[key].pause();
+    }
   }
 
   resume() {
@@ -255,6 +268,10 @@ export default class LiveCode {
     for(key in this.codeElements)
     {
       this.codeElements[key].resume();
+    }
+    for(key in this.webcamElements)
+    {
+      this.webcamElements[key].resume();
     }
     this.autoStartWebpreviewElementsWhenNeeded();
   }
@@ -306,6 +323,15 @@ export default class LiveCode {
 
   destroyCodeElement(codeElement) {
     codeElement.destroy();
+  }
+
+  createWebcamElement(webcamEl) {
+    let webcamElement = new WebcamElement(webcamEl);
+    this.webcamElements[webcamElement.id] = webcamElement;
+  }
+
+  destroyWebcamElement(webcamElement) {
+    webcamElement.destroy();
   }
 
   createRunButton(runButtonEl) {
