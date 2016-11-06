@@ -1,11 +1,12 @@
 'use strict';
 
 const path = require(`path`),
+  resolvePackageManager = require(`./resolve-package-manager`),
   spawnPromised = require(`./spawn-promised`),
   isLocal = process.platform === `darwin`; //quick check, we don't need to install presentation dependencies on heroku
 
 const init = () => {
-  const packageManager = `npm`; //yarn does not work very well with native modules
+  const packageManager = resolvePackageManager();
   const packageManagerArgs = (packageManager === `npm`) ? [`install`] : [];
   console.log(`packageManager: ${packageManager}`);
   spawnPromised(`echo`, [`Installing Presentation Dependencies`])

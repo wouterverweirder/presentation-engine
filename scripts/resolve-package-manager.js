@@ -1,7 +1,7 @@
 const resolvePackageManager = () => {
   let packageManager = `npm`;
   try {
-    require(`child_process`).execSync(`npm list -g yarn`, { encoding: `utf8` });
+    require(`child_process`).execSync(`yarn --version`, { encoding: `utf8` });
     packageManager = `yarn`;
   } catch (ex) {
     console.log(`yarn not available, using npm instead`);

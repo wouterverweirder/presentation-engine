@@ -292,7 +292,7 @@ babel-core@^6.0.14, babel-core@^6.0.2, babel-core@^6.18.0:
     slash "^1.0.0"
     source-map "^0.5.0"
 
-babel-eslint:
+babel-eslint@^7.1.0:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/babel-eslint/-/babel-eslint-7.1.0.tgz#d506a5174ba224e25a2d17e128e2ba8987139ddc"
   dependencies:
@@ -1988,7 +1988,7 @@ escope@^3.6.0:
     esrecurse "^4.1.0"
     estraverse "^4.1.1"
 
-eslint:
+eslint@^3.9.1:
   version "3.9.1"
   resolved "https://registry.yarnpkg.com/eslint/-/eslint-3.9.1.tgz#5a8597706fc6048bc6061ac754d4a211d28f4f5b"
   dependencies:
@@ -2284,7 +2284,21 @@ for-own@^0.1.4:
   dependencies:
     for-in "^0.1.5"
 
-forever:
+forever-agent@~0.6.1:
+  version "0.6.1"
+  resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
+
+forever-monitor@~1.7.0:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/forever-monitor/-/forever-monitor-1.7.1.tgz#5d820f4a3a78db2d81ae2671f158b9e86a091bb8"
+  dependencies:
+    broadway "~0.3.6"
+    chokidar "^1.0.1"
+    minimatch "~3.0.2"
+    ps-tree "0.0.x"
+    utile "~0.2.1"
+
+forever@^0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/forever/-/forever-0.15.3.tgz#77d9d7e15fd2f511ad9d84a110c7dd8fc8ecebc2"
   dependencies:
@@ -2303,20 +2317,6 @@ forever:
     timespan "~2.3.0"
     utile "~0.2.1"
     winston "~0.8.1"
-
-forever-agent@~0.6.1:
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
-
-forever-monitor@~1.7.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/forever-monitor/-/forever-monitor-1.7.1.tgz#5d820f4a3a78db2d81ae2671f158b9e86a091bb8"
-  dependencies:
-    broadway "~0.3.6"
-    chokidar "^1.0.1"
-    minimatch "~3.0.2"
-    ps-tree "0.0.x"
-    utile "~0.2.1"
 
 form-data@~2.1.1:
   version "2.1.1"
