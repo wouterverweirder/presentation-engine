@@ -4,15 +4,15 @@ import fetch from 'isomorphic-fetch';
 (() => {
 
   const init = () => {
-    let settings = {
-      presentationPath: '/',
-      mobileServerUrl: ''
+    const settings = {
+      presentationPath: `/`,
+      mobileServerUrl: ``
     };
     //get slides by xmlhttprequest
-    fetch('/data.json?t=' + Date.now())
+    fetch(`/data.json?t=${  Date.now()}`)
       .then(data => data.json())
       .then(data => {
-        new Presentation(data, 'mobile', settings);
+        new Presentation(data, `mobile`, settings);
       });
   };
 

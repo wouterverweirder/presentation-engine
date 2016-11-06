@@ -6,7 +6,7 @@ export default class Presentation extends PresentationBase{
 
   constructor(data, role, settings) {
     super(data, role, settings);
-    this.$overlay = $('#overlay');
+    this.$overlay = $(`#overlay`);
   }
 
   createMobileServerBridge() {
@@ -17,9 +17,9 @@ export default class Presentation extends PresentationBase{
     if(!message.content) {
       return;
     }
-    if(message.content.action == 'setCurrentSlideIndex') {
+    if(message.content.action === `setCurrentSlideIndex`) {
       this.setCurrentSlideIndex(message.content.currentSlideIndex);
-    } else if(message.content.action == Constants.BLINK) {
+    } else if(message.content.action === Constants.BLINK) {
       this.blink(message.content.text, message.content.backgroundColor);
     }
   }
@@ -27,7 +27,7 @@ export default class Presentation extends PresentationBase{
   setCurrentSlideIndex(index) {
     super.setCurrentSlideIndex(index);
     if(this.$overlay) {
-      this.$overlay.removeClass('active');
+      this.$overlay.removeClass(`active`);
     }
     if(this.blinkInterval) {
       clearInterval(this.blinkInterval);
@@ -36,8 +36,8 @@ export default class Presentation extends PresentationBase{
 
   blink(text, backgroundColor) {
     //overlay important, blinking text
-    this.$overlay.find('.content').html(text);
-    this.$overlay.addClass('active');
+    this.$overlay.find(`.content`).html(text);
+    this.$overlay.addClass(`active`);
     if(this.blinkInterval) {
       clearInterval(this.blinkInterval);
     }
@@ -45,11 +45,11 @@ export default class Presentation extends PresentationBase{
   }
 
   blinkToggle(backgroundColor) {
-    this.$overlay.toggleClass('blink-on');
-    if(this.$overlay.hasClass('blink-on')) {
-      this.$overlay.css('background-color', backgroundColor);
+    this.$overlay.toggleClass(`blink-on`);
+    if(this.$overlay.hasClass(`blink-on`)) {
+      this.$overlay.css(`background-color`, backgroundColor);
     } else {
-      this.$overlay.css('background-color', '');
+      this.$overlay.css(`background-color`, ``);
     }
   }
 

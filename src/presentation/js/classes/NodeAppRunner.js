@@ -1,32 +1,32 @@
-let childProcess = requireNode('child_process');
-let EventEmitter = requireNode('events').EventEmitter;
-let path = requireNode('path');
+const childProcess = requireNode(`child_process`);
+const EventEmitter = requireNode(`events`).EventEmitter;
+const path = requireNode(`path`);
 
-let platform = requireNode('electron').remote.process.platform;
-let isWin = /^win/.test(platform);
+const platform = requireNode(`electron`).remote.process.platform;
+const isWin = /^win/.test(platform);
 
 //kill entire process tree
 //http://krasimirtsonev.com/blog/article/Nodejs-managing-child-processes-starting-stopping-exec-spawn
 const kill = (pid, signal) => {
-  signal = signal || 'SIGKILL';
-  return new Promise((resolve, reject) => {
+  signal = signal || `SIGKILL`;
+  return new Promise(resolve => {
     if(!isWin) {
-      let psTree = requireNode('ps-tree');
-      let killTree = true;
+      const psTree = requireNode(`ps-tree`);
+      const killTree = true;
       if(killTree) {
         psTree(pid, (err, children) => {
           [pid].concat(children.map(p => p.PID)).forEach(tpid => {
             try { process.kill(tpid, signal); }
-            catch (ex) { }
+            catch (ex) { console.error(ex); }
           });
         });
       } else {
         try { process.kill(pid, signal); }
-        catch (ex) { }
+        catch (ex) { console.error(ex); }
       }
       resolve();
     } else {
-      childProcess.exec('taskkill /PID ' + pid + ' /T /F', (error, stdout, stderr) => {
+      childProcess.exec(`taskkill /PID ${  pid  } /T /F`, () => {
         resolve();
       });
     }
@@ -45,19 +45,19 @@ export default class NodeAppRunner extends EventEmitter {
       this.ignoreFirstEventsAmount = 0;
       if(isWin) {
         this.ignoreFirstEventsAmount = 2;
-        this.runner = childProcess.spawn("cmd", ["nvmw", "use", "iojs-v2.3.1"], {cwd: this.cwd});
+        this.runner = childProcess.spawn(`cmd`, [`nvmw`, `use`, `iojs-v2.3.1`], {cwd: this.cwd});
         setTimeout(() => {
-          this.runner.stdin.write("node " + applicationPath + "\n");
+          this.runner.stdin.write(`node ${  applicationPath  }\n`);
         }, 500);
       } else {
-        console.log('node ' + applicationPath);
-        this.runner = childProcess.spawn("node", [applicationPath], {cwd: this.cwd});
+        console.log(`node ${  applicationPath}`);
+        this.runner = childProcess.spawn(`node`, [applicationPath], {cwd: this.cwd});
       }
-      this.runner.stdout.on('data', data => this.onRunnerData(data));
-      this.runner.stderr.on('data', error => this.onRunnerError(error));
-      this.runner.on('disconnect', () => this.onDisconnect());
-      this.runner.on('close', () => this.onClose());
-      this.runner.on('exit', () => this.onExit());
+      this.runner.stdout.on(`data`, data => this.onRunnerData(data));
+      this.runner.stderr.on(`data`, error => this.onRunnerError(error));
+      this.runner.on(`disconnect`, () => this.onDisconnect());
+      this.runner.on(`close`, () => this.onClose());
+      this.runner.on(`exit`, () => this.onExit());
     });
   }
   onRunnerData(data) {
@@ -73,30 +73,30 @@ export default class NodeAppRunner extends EventEmitter {
         return;
       }
     }
-    this.emit('stdout-data', data);
+    this.emit(`stdout-data`, data);
   }
 
   onRunnerError(error) {
-    this.emit('stderr-data', error.toString().trim());
+    this.emit(`stderr-data`, error.toString().trim());
   }
 
   onDisconnect() {
-    console.log('[ChildApp] runner disconnected');
+    console.log(`[ChildApp] runner disconnected`);
     this.runner = false;
   }
 
   onClose() {
-    console.log('[ChildApp] runner closed');
+    console.log(`[ChildApp] runner closed`);
     this.runner = false;
   }
 
   onExit() {
-    console.log('[ChildApp] runner exited');
+    console.log(`[ChildApp] runner exited`);
     this.runner = false;
   }
 
   stop() {
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       if(!this.runner) {
         resolve();
       }
@@ -104,7 +104,7 @@ export default class NodeAppRunner extends EventEmitter {
       this.runner.stderr.removeAllListeners();
       this.runner.stdin.end();
       //listen for runner events and resolve on the one that occurs
-      let cbCalled = false;
+      // const cbCalled = false;
       // this.runner.on('disconnect', () => {
       //   console.log('disconnect');
       //   if(!cbCalled) {

@@ -8,11 +8,11 @@ export default class LiveCodeSlide extends ContentBase {
   constructor($slideHolder, config, readyCallback) {
     super($slideHolder);
 
-    let remote = requireNode('electron').remote;
-    let config2 = {...config, presentationPath: remote.getGlobal('__dirname')};
+    const remote = requireNode(`electron`).remote;
+    const config2 = {...config, presentationPath: remote.getGlobal(`__dirname`)};
 
     //find live code element
-    this.liveCode = new LiveCode(this.$slideHolder.find('.live-code'), config2, readyCallback);
+    this.liveCode = new LiveCode(this.$slideHolder.find(`.live-code`), config2, readyCallback);
   }
 
   layout() {

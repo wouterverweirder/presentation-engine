@@ -1,15 +1,16 @@
-if(!(typeof window !== 'undefined' && window)) {
-  var requireNode = require;
+let requireNode;
+if(!(typeof window !== `undefined` && window)) {
+  requireNode = require;
 } else {
-  var requireNode = window.requireNode;
+  requireNode = window.requireNode;
 }
 
-const fs = requireNode('fs-promise');
-const path = requireNode('path');
+const fs = requireNode(`fs-promise`);
+const path = requireNode(`path`);
 
 const getFileProperties = filePath => {
   let _fd, _o;
-  return fs.open(filePath, 'r')
+  return fs.open(filePath, `r`)
     .then(fd => {
       _fd = fd;
       return fd;
@@ -19,7 +20,7 @@ const getFileProperties = filePath => {
       _o = o;
       return _o;
     })
-    .then(o => fs.close(_fd))
+    .then(() => fs.close(_fd))
     .then(() => {
       return {
         path: filePath,
@@ -34,16 +35,16 @@ export default class SlidesFolderParser {
   parse(presentationPath, slidesFolderPath) {
     //read the contents of the slides directory
     return fs.readdir(slidesFolderPath)
-      .then(result => result.filter(name => name.indexOf('.') > 0))
+      .then(result => result.filter(name => name.indexOf(`.`) > 0))
       .then(result => result.map(name => path.resolve(slidesFolderPath, name)))
       .then(result => Promise.all(result.map(filePath => getFileProperties(filePath))))
       .then(result => {
-        let data = {
+        const data = {
           slides: []
         };
-        let slidesByName = {};
+        const slidesByName = {};
         result.forEach(props => {
-          let slide = this.createSlideObjectBasedOnFileProperties(props, presentationPath, slidesByName);
+          const slide = this.createSlideObjectBasedOnFileProperties(props, presentationPath, slidesByName);
           if(!slidesByName[slide.name]) {
             data.slides.push(slide);
           }
@@ -58,31 +59,31 @@ export default class SlidesFolderParser {
   }
 
   parseSlideBaseName(slideBaseName) {
-    let parsed = {};
+    const parsed = {};
     parsed.ext = path.extname(slideBaseName);
     parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
-    let splitted = parsed.name.split('.');
-    let keywords = ['mobile', 'desktop', 'muted', 'loop', 'cover'];
+    const splitted = parsed.name.split(`.`);
+    const keywords = [`mobile`, `desktop`, `muted`, `loop`, `cover`];
     keywords.forEach(keyword => {
-      let index = splitted.indexOf(keyword);
+      const index = splitted.indexOf(keyword);
       if(index > -1) {
         parsed[keyword] = true;
         splitted.splice(index, 1);
       }
     });
-    parsed.name = splitted.join('.');
+    parsed.name = splitted.join(`.`);
     return parsed;
   }
 
   createSlideObjectBasedOnFileProperties(fileProperties, presentationPath, slidesByName) {
 
-    let parsed = this.parseSlideBaseName(path.basename(fileProperties.path));
-    let url = path.relative(presentationPath, fileProperties.path).replace('\\', '/');
-    if(parsed.ext === '.jpg' || parsed.ext === '.jpeg' || parsed.ext === '.gif' || parsed.ext === '.png') {
-      url = 'slides-builtin/image.html?image=' + url;
+    const parsed = this.parseSlideBaseName(path.basename(fileProperties.path));
+    let url = path.relative(presentationPath, fileProperties.path).replace(`\\`, `/`);
+    if(parsed.ext === `.jpg` || parsed.ext === `.jpeg` || parsed.ext === `.gif` || parsed.ext === `.png`) {
+      url = `slides-builtin/image.html?image=${  url}`;
     }
-    if(parsed.ext === '.mp4') {
-      url = 'slides-builtin/video.html?video=' + url;
+    if(parsed.ext === `.mp4`) {
+      url = `slides-builtin/video.html?video=${  url}`;
     }
     if(slidesByName[parsed.name]) {
       if(parsed.mobile) {

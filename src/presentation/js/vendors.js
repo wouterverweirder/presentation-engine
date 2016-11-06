@@ -8,14 +8,14 @@ window.bean = bean;
 window.io = io;
 window._ = _;
 
-window.Tether = require('tether');
-require('../../vendors/bootstrap-4.0.0-alpha.2/dist/js/bootstrap');
+window.Tether = require(`tether`);
+require(`../../vendors/bootstrap-4.0.0-alpha.2/dist/js/bootstrap`);
 
-window.CodeMirror = require('../../../node_modules/codemirror/lib/codemirror.js');
-require('../../../node_modules/codemirror/mode/javascript/javascript.js');
-require('../../../node_modules/codemirror/mode/htmlmixed/htmlmixed.js');
-require('../../../node_modules/codemirror/mode/clike/clike.js');
-require('../../../node_modules/codemirror/addon/hint/show-hint.js');
-require('../../../node_modules/codemirror/addon/hint/javascript-hint.js');
+window.CodeMirror = require(`../../../node_modules/codemirror/lib/codemirror.js`);
+require(`../../../node_modules/codemirror/mode/javascript/javascript.js`);
+require(`../../../node_modules/codemirror/mode/htmlmixed/htmlmixed.js`);
+require(`../../../node_modules/codemirror/mode/clike/clike.js`);
+require(`../../../node_modules/codemirror/addon/hint/show-hint.js`);
+require(`../../../node_modules/codemirror/addon/hint/javascript-hint.js`);
 
-require('../../../node_modules/@shagstrom/split-pane/split-pane.js');
+require(`../../../node_modules/@shagstrom/split-pane/split-pane.js`);

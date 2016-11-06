@@ -1,4 +1,4 @@
-const fs = requireNode('fs-promise');
+const fs = requireNode(`fs-promise`);
 
 export default class CodeElement {
   constructor(el, options) {
@@ -10,15 +10,15 @@ export default class CodeElement {
       options = {};
     }
 
-    let width = $(el).parent()[0].style.width || '100%';
-    let height = $(el).parent()[0].style.height || '100%';
+    const width = $(el).parent()[0].style.width || `100%`;
+    const height = $(el).parent()[0].style.height || `100%`;
 
     //wrap element in a container
-    this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-code-element"></div>').parent();
+    this.$wrapperEl = $(el).wrap(`<div class="live-code-element live-code-code-element"></div>`).parent();
     this.wrapperEl = this.$wrapperEl[0];
 
-    this.id = this.$el.attr('data-id');
-    this.file = this.$el.data('file');
+    this.id = this.$el.attr(`data-id`);
+    this.file = this.$el.data(`file`);
 
     if(!this.id && this.file)
     {
@@ -26,29 +26,29 @@ export default class CodeElement {
     }
     if(!this.id)
     {
-      this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
+      this.id = `code-${  Math.round(Math.random() * 1000 * new Date().getTime())}`;
     }
-    this.$el.attr('data-id', this.id);
+    this.$el.attr(`data-id`, this.id);
 
-    this.runtime = this.$el.data('runtime');
+    this.runtime = this.$el.data(`runtime`);
     if(!this.runtime)
     {
-      this.runtime = 'browser';
+      this.runtime = `browser`;
     }
 
-    this.console = this.$el.data('console');
-    this.processor = this.$el.data('processor');
+    this.console = this.$el.data(`console`);
+    this.processor = this.$el.data(`processor`);
 
     //language is programming language - used for injecting in html
-    this.language = this.$el.data('language');
+    this.language = this.$el.data(`language`);
     if(!this.language)
     {
       //default to javascript
-      this.language = "javascript";
+      this.language = `javascript`;
     }
 
     //mode is mode for codemirror
-    this.mode = this.$el.data('mode');
+    this.mode = this.$el.data(`mode`);
     if(!this.mode)
     {
       //default to the language
@@ -58,7 +58,7 @@ export default class CodeElement {
     this.codeMirror = CodeMirror.fromTextArea(this.el, {
       lineNumbers: true,
       mode: this.mode,
-      extraKeys: {"Ctrl-Space": "autocomplete"}
+      extraKeys: {"Ctrl-Space": `autocomplete`}
     });
 
     this.codeMirror.setSize(width, height);
@@ -92,7 +92,7 @@ export default class CodeElement {
   }
 
   readFromFile(filePath) {
-    return fs.readFile(filePath, 'utf8')
+    return fs.readFile(filePath, `utf8`)
       .then(data => {
         this.setValue(data);
         return data;

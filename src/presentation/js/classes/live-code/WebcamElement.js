@@ -9,20 +9,20 @@ export default class WebcamElement {
       options = {};
     }
 
-    this.id = this.$el.attr('data-id');
+    this.id = this.$el.attr(`data-id`);
     if(!this.id)
     {
       //generate id
-      this.id = 'webcam-' + Math.round(Math.random() * 1000 * new Date().getTime());
-      this.$el.attr('data-id', this.id);
+      this.id = `webcam-${  Math.round(Math.random() * 1000 * new Date().getTime())}`;
+      this.$el.attr(`data-id`, this.id);
     }
 
-    this.source = this.$el.attr('data-source');
+    this.source = this.$el.attr(`data-source`);
     if(this.source) {
       this.sourceEl = document.querySelector(this.source);
     }
 
-    this.ctx = this.el.getContext('2d');
+    this.ctx = this.el.getContext(`2d`);
 
     this.isRunning = false;
   }

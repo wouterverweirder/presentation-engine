@@ -4,8 +4,8 @@ import CodeElement from './CodeElement';
 import WebPreviewElement from './WebPreviewElement';
 import WebcamElement from './WebcamElement';
 
-const path = requireNode('path');
-const fs = requireNode('fs-promise');
+const path = requireNode(`path`);
+const fs = requireNode(`fs-promise`);
 
 export default class LiveCode {
 
@@ -13,19 +13,19 @@ export default class LiveCode {
     this.$el = $el;
     this.el = this.$el[0];
 
-    if(this.$el.attr('data-entry-path')) {
-      this.entryPath = path.join(config.presentationPath, this.$el.attr('data-entry-path'));
+    if(this.$el.attr(`data-entry-path`)) {
+      this.entryPath = path.join(config.presentationPath, this.$el.attr(`data-entry-path`));
     }
-    if(this.$el.attr('data-output-path')) {
-      this.outputPath = path.join(config.presentationPath, this.$el.attr('data-output-path'));
+    if(this.$el.attr(`data-output-path`)) {
+      this.outputPath = path.join(config.presentationPath, this.$el.attr(`data-output-path`));
     } else {
       if(this.entryPath) {
         this.outputPath = this.entryPath;
       }
     }
 
-    let p = Promise.resolve();
-    p.then(() => {
+    const p = Promise.resolve();
+    p.then(() => {
       if(this.entryPath && this.entryPath !== this.outputPath) {
         return fs.copy(this.entryPath, this.outputPath);
       }
@@ -33,35 +33,35 @@ export default class LiveCode {
     .then(() => {
       //create the consoles
       this.consoleElements = {};
-      this.$el.find('[data-type="console"]').each(((index, consoleEl) => this.createConsoleElement(consoleEl)));
+      this.$el.find(`[data-type="console"]`).each(((index, consoleEl) => this.createConsoleElement(consoleEl)));
 
       //create the terminals
       this.terminalElements = {};
-      this.$el.find('[data-type="terminal"]').each(((index, terminalEl) => this.createTerminalElement(terminalEl)));
+      this.$el.find(`[data-type="terminal"]`).each(((index, terminalEl) => this.createTerminalElement(terminalEl)));
 
       //create the previews
       this.webPreviewElements = {};
-      this.$el.find('[data-type="web-preview"]').each(((index, webPreviewEl) => this.createWebPreviewElement(webPreviewEl)));
+      this.$el.find(`[data-type="web-preview"]`).each(((index, webPreviewEl) => this.createWebPreviewElement(webPreviewEl)));
 
       //create the code editors
       this.codeElements = {};
-      this.$el.find('[data-type="code"]').each(((index, codeEl) => this.createCodeElement(codeEl)));
+      this.$el.find(`[data-type="code"]`).each(((index, codeEl) => this.createCodeElement(codeEl)));
 
       //create the webcam elements
       this.webcamElements = {};
-      this.$el.find('[data-type="webcam"]').each(((index, webcamEl) => this.createWebcamElement(webcamEl)));
+      this.$el.find(`[data-type="webcam"]`).each(((index, webcamEl) => this.createWebcamElement(webcamEl)));
 
       //create run buttons
       this.runButtonEls = [];
-      this.$el.find('[data-type="run-button"]').each(((index, runButtonEl) => this.createRunButton(runButtonEl)));
+      this.$el.find(`[data-type="run-button"]`).each(((index, runButtonEl) => this.createRunButton(runButtonEl)));
 
       //create save buttons
       this.saveButtonEls = [];
-      this.$el.find('[data-type="save-button"]').each(((index, saveButtonEl) => this.createSaveButton(saveButtonEl)));
+      this.$el.find(`[data-type="save-button"]`).each(((index, saveButtonEl) => this.createSaveButton(saveButtonEl)));
 
       //create reload buttons
       this.reloadButtonEls = [];
-      this.$el.find('[data-type="reload-button"]').each(((index, reloadButtonEl) => this.createReloadButton(reloadButtonEl)));
+      this.$el.find(`[data-type="reload-button"]`).each(((index, reloadButtonEl) => this.createReloadButton(reloadButtonEl)));
 
     })
     .then(() => this.setCodeElementValuesFromFiles())
@@ -75,7 +75,7 @@ export default class LiveCode {
     .then(readyCallback).catch(err => console.log(err));
 
     //disable keyboard bubbling up
-    $(window).on('keydown', event => this.keyDownHandler(event));
+    $(window).on(`keydown`, event => this.keyDownHandler(event));
   }
 
   keyDownHandler(e) {
@@ -109,11 +109,11 @@ export default class LiveCode {
   }
 
   getElement(elementsCollection, input) {
-    let propertyToCheck = 'id';
+    let propertyToCheck = `id`;
     if(input.nodeName) {
-      propertyToCheck = 'el';
+      propertyToCheck = `el`;
     }
-    for(let key in elementsCollection)
+    for(const key in elementsCollection)
     {
       if(elementsCollection[key][propertyToCheck] === input) {
         return elementsCollection[key];
@@ -148,7 +148,7 @@ export default class LiveCode {
   }
 
   setCodeElementValuesFromFiles() {
-    let tasks = [];
+    const tasks = [];
     let key;
     let codeElement;
     let filePath;
@@ -165,7 +165,7 @@ export default class LiveCode {
   }
 
   autoStartWebpreviewElementsWhenNeeded() {
-    for(let key in this.webPreviewElements)
+    for(const key in this.webPreviewElements)
     {
       const webPreviewElement = this.webPreviewElements[key];
       if(webPreviewElement.autoload) {
@@ -175,7 +175,7 @@ export default class LiveCode {
   }
 
   saveCodeElementsToFiles() {
-    let tasks = [];
+    const tasks = [];
     let key;
     let codeElement;
     let filePath;
@@ -279,14 +279,14 @@ export default class LiveCode {
   layout() {
     //might be triggered after split pane resize or tab switch
     //codemirror instances need to be updated
-    for(let key in this.codeElements)
+    for(const key in this.codeElements)
     {
       this.codeElements[key].layout();
     }
   }
 
   createConsoleElement(consoleEl) {
-    let consoleElement = new ConsoleElement(consoleEl);
+    const consoleElement = new ConsoleElement(consoleEl);
     this.consoleElements[consoleElement.id] = consoleElement;
   }
 
@@ -295,7 +295,7 @@ export default class LiveCode {
   }
 
   createTerminalElement(terminalEl) {
-    let terminalElement = new TerminalElement(terminalEl);
+    const terminalElement = new TerminalElement(terminalEl);
     this.terminalElements[terminalElement.id] = terminalElement;
   }
 
@@ -304,20 +304,20 @@ export default class LiveCode {
   }
 
   createWebPreviewElement(webPreviewEl) {
-    let webPreviewElement = new WebPreviewElement(webPreviewEl);
-    webPreviewElement.$wrapperEl.on('console.log', this.webPreviewConsoleLogHandler.bind(this, webPreviewElement));
-    webPreviewElement.$wrapperEl.on('console.error', this.webPreviewConsoleErrorHandler.bind(this, webPreviewElement));
+    const webPreviewElement = new WebPreviewElement(webPreviewEl);
+    webPreviewElement.$wrapperEl.on(`console.log`, this.webPreviewConsoleLogHandler.bind(this, webPreviewElement));
+    webPreviewElement.$wrapperEl.on(`console.error`, this.webPreviewConsoleErrorHandler.bind(this, webPreviewElement));
     this.webPreviewElements[webPreviewElement.id] = webPreviewElement;
   }
 
   destroyWebPreviewElement(webPreviewElement) {
-    webPreviewElement.$wrapperEl.off('console.log');
-    webPreviewElement.$wrapperEl.off('console.error');
+    webPreviewElement.$wrapperEl.off(`console.log`);
+    webPreviewElement.$wrapperEl.off(`console.error`);
     webPreviewElement.destroy();
   }
 
   createCodeElement(codeEl) {
-    let codeElement = new CodeElement(codeEl);
+    const codeElement = new CodeElement(codeEl);
     this.codeElements[codeElement.id] = codeElement;
   }
 
@@ -326,7 +326,7 @@ export default class LiveCode {
   }
 
   createWebcamElement(webcamEl) {
-    let webcamElement = new WebcamElement(webcamEl);
+    const webcamElement = new WebcamElement(webcamEl);
     this.webcamElements[webcamElement.id] = webcamElement;
   }
 
@@ -336,39 +336,39 @@ export default class LiveCode {
 
   createRunButton(runButtonEl) {
     this.runButtonEls.push(runButtonEl);
-    $(runButtonEl).on('click', (event => {
-      if(this.webPreviewElements[$(runButtonEl).data('target')]) {
+    $(runButtonEl).on(`click`, (() => {
+      if(this.webPreviewElements[$(runButtonEl).data(`target`)]) {
         //save the files first
         this.saveCodeElementsToFiles()
-          .catch(err =>console.log(err))
+          .catch(err => console.log(err))
           .then(() => {
             //update the web preview
-            this.updateWebPreviewElement(this.webPreviewElements[$(runButtonEl).data('target')]);
+            this.updateWebPreviewElement(this.webPreviewElements[$(runButtonEl).data(`target`)]);
           });
-      } else if(this.consoleElements[$(runButtonEl).data('target')]) {
-        let applicationPath = this.getFilePath(this.consoleElements[$(runButtonEl).data('target')].file);
-        this.consoleElements[$(runButtonEl).data('target')].runNodeApp(applicationPath);
+      } else if(this.consoleElements[$(runButtonEl).data(`target`)]) {
+        const applicationPath = this.getFilePath(this.consoleElements[$(runButtonEl).data(`target`)].file);
+        this.consoleElements[$(runButtonEl).data(`target`)].runNodeApp(applicationPath);
       }
     }));
   }
 
   destroyRunButton(runButtonEl) {
-    $(runButtonEl).off('click');
+    $(runButtonEl).off(`click`);
   }
 
   createSaveButton(saveButtonEl) {
     this.saveButtonEls.push(saveButtonEl);
-    $(saveButtonEl).on('click', () => {
+    $(saveButtonEl).on(`click`, () => {
       //get the target element for this button
-      const targetString = $(saveButtonEl).data('target');
-      if(targetString === 'all') {
+      const targetString = $(saveButtonEl).data(`target`);
+      if(targetString === `all`) {
         return this.saveCodeElementsToFiles();
       }
-      var codeElement = this.getCodeElement(targetString);
+      const codeElement = this.getCodeElement(targetString);
       if(!codeElement) {
         return;
       }
-      var filePath = this.getFilePathForCodeElement(codeElement);
+      const filePath = this.getFilePathForCodeElement(codeElement);
       if(!filePath) {
         return;
       }
@@ -377,19 +377,19 @@ export default class LiveCode {
   }
 
   destroySaveButton(saveButtonEl) {
-    $(saveButtonEl).off('click');
+    $(saveButtonEl).off(`click`);
   }
 
   createReloadButton(reloadButtonEl) {
     this.reloadButtonEls.push(reloadButtonEl);
-    $(reloadButtonEl).on('click', e => {
+    $(reloadButtonEl).on(`click`, () => {
       //get the reload button target
-      let reloadTargetElement = this.getCodeElement($(reloadButtonEl).data('target'));
+      let reloadTargetElement = this.getCodeElement($(reloadButtonEl).data(`target`));
       if(reloadTargetElement) {
         this.reloadCodeElement(reloadTargetElement);
         return;
       }
-      reloadTargetElement = this.getWebPreviewElement($(reloadButtonEl).data('target'));
+      reloadTargetElement = this.getWebPreviewElement($(reloadButtonEl).data(`target`));
       if(reloadTargetElement) {
         this.reloadWebPreviewElement(reloadTargetElement);
         return;
@@ -398,11 +398,11 @@ export default class LiveCode {
   }
 
   reloadCodeElement(codeElement) {
-    let filePath = self.getFilePathForCodeElement(codeElement);
+    const filePath = self.getFilePathForCodeElement(codeElement);
     if(!filePath) {
       return;
     }
-    codeElement.readFromFile(filePath).catch(err =>console.log(err));
+    codeElement.readFromFile(filePath).catch(err => console.log(err));
   }
 
   reloadWebPreviewElement(webPreviewElement) {
@@ -410,12 +410,12 @@ export default class LiveCode {
   }
 
   destroyReloadButton(reloadButtonEl) {
-    $(reloadButtonEl).off('click');
+    $(reloadButtonEl).off(`click`);
   }
 
   webPreviewConsoleLogHandler(webPreviewElement, event, message) {
     //get the console element for this web preview
-    var consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
+    const consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
     if(consoleElement)
     {
       consoleElement.info(JSON.parse(message).args);
@@ -424,7 +424,7 @@ export default class LiveCode {
 
   webPreviewConsoleErrorHandler(webPreviewElement, event, message) {
     //get the console element for this web preview
-    var consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
+    const consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
     if(consoleElement)
     {
       consoleElement.error(JSON.parse(message).args);
@@ -449,13 +449,13 @@ export default class LiveCode {
     }
 
     //gather all the code for this element
-    var blocks = [];
-    for(var key in this.codeElements)
+    const blocks = [];
+    for(const key in this.codeElements)
     {
-      var codeElement = this.codeElements[key];
+      const codeElement = this.codeElements[key];
       if(codeElement.processor === webPreviewElement.id)
       {
-        var block = {
+        const block = {
           language: codeElement.language,
           code: codeElement.getValue()
         };

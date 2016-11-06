@@ -12,7 +12,7 @@ export default class MobileServerBridge extends MobileServerBridgeBase{
     super.socketConnectHandler();
     this.tryToSend(Constants.MESSAGE, {
       target: {
-        client: 'mobile',
+        client: `mobile`,
       },
       content: {
         action: Constants.SET_CURRENT_SLIDE_INDEX,
@@ -24,7 +24,7 @@ export default class MobileServerBridge extends MobileServerBridgeBase{
   currentSlideIndexChanged(currentSlideIndex) {
     this.tryToSend(Constants.MESSAGE, {
       target: {
-        client: 'mobile',
+        client: `mobile`,
       },
       content: {
         action: Constants.SET_CURRENT_SLIDE_INDEX,

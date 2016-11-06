@@ -1,25 +1,25 @@
 import SlidesFolderParser from './classes/SlidesFolderParser';
 
-let path = require('path'),
-  express = require('express'),
-  bodyParser = require('body-parser'),
+const path = require(`path`),
+  express = require(`express`),
+  bodyParser = require(`body-parser`),
   app = express(),
-  server = require('http').createServer(app),
-  io = require('socket.io').listen(server),
-  jwt = require('jsonwebtoken'),
-  socketioJwt = require('socketio-jwt'),
-  _ = require('lodash');
+  server = require(`http`).createServer(app),
+  io = require(`socket.io`).listen(server),
+  jwt = require(`jsonwebtoken`),
+  socketioJwt = require(`socketio-jwt`),
+  _ = require(`lodash`);
 
 const port = process.env.PORT || 5000;
-const jwtSecret = process.env.PRESENTATION_JWTSECRET || "JdklmazeXHkdlsfdezaiHJK67hdf87";
-const username = process.env.PRESENTATION_USERNAME || "wouter.verweirder@gmail.com";
-const password = process.env.PRESENTATION_PASSWORD || "geheim";
-const presentationPath = path.resolve(__dirname, '..', 'presentation');
+const jwtSecret = process.env.PRESENTATION_JWTSECRET || `JdklmazeXHkdlsfdezaiHJK67hdf87`;
+const username = process.env.PRESENTATION_USERNAME || `wouter.verweirder@gmail.com`;
+const password = process.env.PRESENTATION_PASSWORD || `geheim`;
+const presentationPath = path.resolve(__dirname, `..`, `presentation`);
 
 let data = {};
 
-let slidesFolderParser = new SlidesFolderParser();
-slidesFolderParser.parse(presentationPath, path.resolve(presentationPath, 'slides'))
+const slidesFolderParser = new SlidesFolderParser();
+slidesFolderParser.parse(presentationPath, path.resolve(presentationPath, `slides`))
   .then(parsedData => {
     data = parsedData;
   });
@@ -32,55 +32,55 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-app.use(express.static(path.resolve(__dirname, '..', 'mobile')));
-app.use('/slides', express.static(path.resolve(__dirname, '..', 'presentation', 'slides')));
-app.use('/slides-builtin', express.static(path.resolve(__dirname, '..', 'presentation', 'slides-builtin')));
-app.use('/fonts', express.static(path.resolve(__dirname, '..', 'presentation', 'fonts')));
-app.use('/assets', express.static(path.resolve(__dirname, '..', 'presentation', 'assets')));
+app.use(express.static(path.resolve(__dirname, `..`, `mobile`)));
+app.use(`/slides`, express.static(path.resolve(__dirname, `..`, `presentation`, `slides`)));
+app.use(`/slides-builtin`, express.static(path.resolve(__dirname, `..`, `presentation`, `slides-builtin`)));
+app.use(`/fonts`, express.static(path.resolve(__dirname, `..`, `presentation`, `fonts`)));
+app.use(`/assets`, express.static(path.resolve(__dirname, `..`, `presentation`, `assets`)));
 
-app.get('/data.json', function(req, res){
+app.get(`/data.json`, function(req, res){
   res.json(data);
 });
 
-app.post('/remote/:action', function(req, res){
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+app.post(`/remote/:action`, function(req, res){
+  res.header(`Access-Control-Allow-Origin`, `*`);
+  res.header(`Access-Control-Allow-Headers`, `X-Requested-With`);
   //check credentials
   if(req.body.email === username && req.body.password === password) {
-    if(req.params.action === 'previous') {
+    if(req.params.action === `previous`) {
       sendMessage({
-        target: { client: 'presentation' },
+        target: { client: `presentation` },
         content: {
-          action: 'goToPreviousSlide'
+          action: `goToPreviousSlide`
         }
       });
-    } else if(req.params.action === 'next') {
+    } else if(req.params.action === `next`) {
       sendMessage({
-        target: { client: 'presentation' },
+        target: { client: `presentation` },
         content: {
-          action: 'goToNextSlide'
+          action: `goToNextSlide`
         }
       });
     }
-    res.json({result: 'ok'});
+    res.json({result: `ok`});
   } else {
-    res.json({result: 'error'});
+    res.json({result: `error`});
   }
 });
 
-app.post('/login', function(req, res){
-  console.log('login post received');
-  var token;
+app.post(`/login`, function(req, res){
+  console.log(`login post received`);
+  let token;
   if(req.body.email === username && req.body.password === password) {
-    var profile = {
+    const profile = {
       email: username,
-      role: 'presentation'
+      role: `presentation`
     };
-    token = jwt.sign(profile, jwtSecret, {expiresIn: 60*5*60});
-    console.log('send presentation token');
+    token = jwt.sign(profile, jwtSecret, {expiresIn: 60 * 5 * 60});
+    console.log(`send presentation token`);
   } else {
-    token = jwt.sign({}, jwtSecret, {expiresIn: 60*5*60});
-    console.log('send mobile token');
+    token = jwt.sign({}, jwtSecret, {expiresIn: 60 * 5 * 60});
+    console.log(`send mobile token`);
   }
   res.json({token: token});
 });
@@ -90,33 +90,33 @@ io.use(socketioJwt.authorize({
   handshake: true
 }));
 
-var rooms = {};
+const rooms = {};
 
 function ClientHandler(socket) {
-  console.log('created clientHandler');
+  console.log(`created clientHandler`);
   this.socket = socket;
   this.id = this.socket.id;
-  this.role = (socket.decoded_token && socket.decoded_token.role === 'presentation') ? 'presentation' : 'mobile';
+  this.role = (socket.decoded_token && socket.decoded_token.role === `presentation`) ? `presentation` : `mobile`;
   this.rooms = {};
-  this.join('role:' + this.role);
-  if(this.role === 'presentation') {
-    this.socket.on('message', this.presentationMessageHandler.bind(this));
+  this.join(`role:${  this.role}`);
+  if(this.role === `presentation`) {
+    this.socket.on(`message`, this.presentationMessageHandler.bind(this));
   } else {
-    this.socket.on('message', this.mobileMessageHandler.bind(this));
+    this.socket.on(`message`, this.mobileMessageHandler.bind(this));
     //sent the current slide index
     if(currentSlideIndex > -1) {
       sendMessage({
         target: { client: this.id },
         content: {
-          action: 'setCurrentSlideIndex',
+          action: `setCurrentSlideIndex`,
           currentSlideIndex: currentSlideIndex
         }
       });
     }
   }
-  socket.on('disconnect', this.disconnectHandler.bind(this));
-  socket.on('joinSlideRoom', this.joinSlideRoomHandler.bind(this));
-  socket.on('leaveSlideRoom', this.leaveSlideRoomHandler.bind(this));
+  socket.on(`disconnect`, this.disconnectHandler.bind(this));
+  socket.on(`joinSlideRoom`, this.joinSlideRoomHandler.bind(this));
+  socket.on(`leaveSlideRoom`, this.leaveSlideRoomHandler.bind(this));
 }
 
 ClientHandler.prototype.join = function(roomName) {
@@ -140,7 +140,7 @@ ClientHandler.prototype.leave = function(roomName) {
 };
 
 ClientHandler.prototype.presentationMessageHandler = function(message) {
-  if(message.content && message.content.action === 'setCurrentSlideIndex') {
+  if(message.content && message.content.action === `setCurrentSlideIndex`) {
     currentSlideIndex = message.content.currentSlideIndex;
   }
   sendMessage(message);
@@ -155,7 +155,7 @@ ClientHandler.prototype.mobileMessageHandler = function(message) {
 };
 
 ClientHandler.prototype.joinSlideRoomHandler = function(roomName) {
-  if(roomName === 'role:presentation' || roomName === 'role:mobile') {
+  if(roomName === `role:presentation` || roomName === `role:mobile`) {
     return;
   }
   this.join(roomName);
@@ -169,25 +169,25 @@ ClientHandler.prototype.leaveSlideRoomHandler = function(roomName) {
 };
 
 ClientHandler.prototype.disconnectHandler = function() {
-  var roomNames = Object.keys(this.rooms);
-  roomNames.forEach(function(roomName, i){
+  const roomNames = Object.keys(this.rooms);
+  roomNames.forEach(roomName => {
     this.leave(roomName);
-  }, this);
+  });
 };
 
 const sendMessage = message => {
   console.log(message);
   if(message.target) {
-    var roomNames = [];
-    var allowSend = true;
+    const roomNames = [];
+    let allowSend = true;
     if(message.target.slide) {
       roomNames.push(message.target.slide);
     }
     if(message.target.client) {
-      if(message.target.client === 'all') {
+      if(message.target.client === `all`) {
         //no further filtering
-      }else if(message.target.client === 'mobile' || message.target.client === 'presentation') {
-        roomNames.push('role:' + message.target.client);
+      }else if(message.target.client === `mobile` || message.target.client === `presentation`) {
+        roomNames.push(`role:${  message.target.client}`);
       } else {
         //multiple or one id?
         if(message.target.client.constructor === Array) {
@@ -202,52 +202,52 @@ const sendMessage = message => {
         if(roomNames.length > 0) {
           sendMessageToIds(getClientHandlerIdsInRooms(roomNames), message);
         } else {
-          io.sockets.emit('message', message);
+          io.sockets.emit(`message`, message);
         }
       }
     }
   }
-}
+};
 
 const getClientHandlerIdsInRooms = roomNames => {
   if(!rooms[roomNames[0]]) {
     return [];
   }
-  var ids = Object.keys(rooms[roomNames[0]]);
-  var numRoomNames = roomNames.length;
-  for(var i = 1; i < numRoomNames; i++) {
+  let ids = Object.keys(rooms[roomNames[0]]);
+  const numRoomNames = roomNames.length;
+  for(let i = 1; i < numRoomNames; i++) {
     if(!rooms[roomNames[i]]) {
       return [];
     }
-    var roomIds = Object.keys(rooms[roomNames[i]]);
+    const roomIds = Object.keys(rooms[roomNames[i]]);
     ids = _.intersection(ids, roomIds);
   }
   return ids;
-}
+};
 
 const sendMessageToIds = (ids, message) => {
   ids.forEach(function(id){
-    io.to(id).emit('message', message);
+    io.to(id).emit(`message`, message);
   });
-}
+};
 
 const sendRoomListToPresentation = roomName => {
-  console.log('sendRoomListToPresentation: ' + roomName);
+  console.log(`sendRoomListToPresentation: ${  roomName}`);
   rooms[roomName] = rooms[roomName] || {};
-  var clientIdsInRoom = getClientHandlerIdsInRooms([roomName, 'role:mobile']);
-  var target = { client: 'presentation' };
-  if(roomName !== 'role:mobile' && roomName !== 'role:presentation') {
+  const clientIdsInRoom = getClientHandlerIdsInRooms([roomName, `role:mobile`]);
+  const target = { client: `presentation` };
+  if(roomName !== `role:mobile` && roomName !== `role:presentation`) {
     target.slide = roomName;
   }
   sendMessage({
     target: target,
     content: {
-      action: 'updateRoomList',
+      action: `updateRoomList`,
       ids: clientIdsInRoom
     }
   });
-}
+};
 
-io.on('connection', socket => {
+io.on(`connection`, socket => {
   new ClientHandler(socket);
 });

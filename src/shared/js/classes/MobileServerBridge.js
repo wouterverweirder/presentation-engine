@@ -9,18 +9,18 @@ export default class MobileServerBridge {
   }
 
   connect() {
-    console.log('MobileServerBridge.connect');
+    console.log(`MobileServerBridge.connect`);
     //console.warn('MobileServerBridge disabled');
     //return;
     //post to the api
     fetch(`${this.settings.mobileServerUrl}/login`, {
-      method: 'POST',
+      method: `POST`,
       body: JSON.stringify(this.getLoginCredentials()),
-      headers: new Headers({'Content-Type': 'application/json'})
+      headers: new Headers({'Content-Type': `application/json`})
     })
     .then(response => response.json())
     .then(result => this.loginHandler(result))
-    .catch(e => {
+    .catch(() => {
       //retry after one second
       setTimeout(() => this.connect(), 1000);
     });
@@ -36,17 +36,17 @@ export default class MobileServerBridge {
   loginHandler(result) {
     this.token = result.token;
     this.socket = io(this.settings.mobileServerUrl, {
-      query: 'token=' + this.token,
+      query: `token=${  this.token}`,
       reconnection: false,
       forceNew: true
     });
-    this.socket.on('connect', this.socketConnectHandler.bind(this));
-    this.socket.on('disconnect', this.socketDisconnectHandler.bind(this));
-    this.socket.on('message', this.socketMessageHandler.bind(this));
+    this.socket.on(`connect`, this.socketConnectHandler.bind(this));
+    this.socket.on(`disconnect`, this.socketDisconnectHandler.bind(this));
+    this.socket.on(`message`, this.socketMessageHandler.bind(this));
   }
 
   socketConnectHandler() {
-    console.log('MobileServerBridge.socketConnectHandler');
+    console.log(`MobileServerBridge.socketConnectHandler`);
     this.presentation.mobileServerBridgeConnected();
   }
 

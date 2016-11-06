@@ -1,9 +1,9 @@
 import {Constants} from '../../../../shared/js/Constants';
 import ContentBase from '../../../../shared/js/classes/ContentBase';
 
-let teamColors = [
-  '#c6363d', //red
-  '#0684AF'  //blue
+const teamColors = [
+  `#c6363d`, //red
+  `#0684AF`  //blue
 ];
 
 export default class ShakeYourPhonesSlide extends ContentBase{
@@ -14,9 +14,9 @@ export default class ShakeYourPhonesSlide extends ContentBase{
     this.motion = 0;
     this.team = -1;
 
-    this.$background = this.$slideHolder.find('.background');
-    this.$background.css('top', '100%');
-    this.$background.css('background-color', 'rgba(255, 255, 255, 0.5)');
+    this.$background = this.$slideHolder.find(`.background`);
+    this.$background.css(`top`, `100%`);
+    this.$background.css(`background-color`, `rgba(255, 255, 255, 0.5)`);
 
     this._motionUpdateHandler = this.motionUpdateHandler.bind(this);
   }
@@ -24,12 +24,12 @@ export default class ShakeYourPhonesSlide extends ContentBase{
   onStateChanged() {
     if(this.state === Constants.STATE_ACTIVE) {
       if (window.DeviceMotionEvent) {
-        window.addEventListener('devicemotion', this._motionUpdateHandler, false);
+        window.addEventListener(`devicemotion`, this._motionUpdateHandler, false);
       } else {
-        this.$slideHolder.find('.acceleration').text('Not supported on your device :-(');
+        this.$slideHolder.find(`.acceleration`).text(`Not supported on your device :-(`);
       }
     } else {
-      window.removeEventListener('devicemotion', this._motionUpdateHandler);
+      window.removeEventListener(`devicemotion`, this._motionUpdateHandler);
     }
   }
 
@@ -44,10 +44,10 @@ export default class ShakeYourPhonesSlide extends ContentBase{
       this.setSubstate(message.content.substate);
     }
     if(message.content.action === Constants.YOU_WIN) {
-      this.$slideHolder.find('.substate-finished h1').text('Your Team Won!');
+      this.$slideHolder.find(`.substate-finished h1`).text(`Your Team Won!`);
     }
     if(message.content.action === Constants.YOU_LOSE) {
-      this.$slideHolder.find('.substate-finished h1').text('Your Team Lost...');
+      this.$slideHolder.find(`.substate-finished h1`).text(`Your Team Lost...`);
     }
   }
 
@@ -56,7 +56,7 @@ export default class ShakeYourPhonesSlide extends ContentBase{
     if(team !== this.team) {
       this.team = team;
       //set body background color
-      this.$slideHolder.find('.slide').css('background-color', teamColors[this.team]);
+      this.$slideHolder.find(`.slide`).css(`background-color`, teamColors[this.team]);
     }
   }
 
@@ -74,11 +74,11 @@ export default class ShakeYourPhonesSlide extends ContentBase{
   drawLoop() {
     this.motion += this.currentMotion;
     this.motion *= 0.97;
-    this.$background.css('top', 100 - this.motion + '%');
+    this.$background.css(`top`, `${100 - this.motion  }%`);
     if(this.currentFrame % 10 === 0) {
       this.postSocketMessage({
         target: {
-          client: 'presentation',
+          client: `presentation`,
           slide: this.name
         },
         content: {
@@ -90,13 +90,13 @@ export default class ShakeYourPhonesSlide extends ContentBase{
   }
 
   showCurrentState() {
-    this.$slideHolder.find('.substate').removeClass('active');
+    this.$slideHolder.find(`.substate`).removeClass(`active`);
     if(this.substate === Constants.SHAKE_YOUR_PHONES_GAME) {
-      this.$slideHolder.find('.substate-game').addClass('active');
+      this.$slideHolder.find(`.substate-game`).addClass(`active`);
     } else if(this.substate === Constants.SHAKE_YOUR_PHONES_FINISHED) {
-      this.$slideHolder.find('.substate-finished').addClass('active');
+      this.$slideHolder.find(`.substate-finished`).addClass(`active`);
     } else {
-      this.$slideHolder.find('.substate-intro').addClass('active');
+      this.$slideHolder.find(`.substate-intro`).addClass(`active`);
     }
   }
 
