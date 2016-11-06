@@ -16,8 +16,8 @@ let ttyServer = tty.createServer({
   shell: 'bash',
   port: 3000,
   localOnly: true,
-  static: path.join(__dirname, 'tty'),
-  cwd: path.join(__dirname)
+  static: path.resolve(__dirname, 'vendors', 'tty'),
+  cwd: path.resolve(__dirname)
 });
 
 ttyServer.listen();

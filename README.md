@@ -1,6 +1,6 @@
 #Presentation Engine
 
-Interactive presentation built with electron & nodejs. (Using electron 1.3.4 on node 4.2.2)
+Interactive presentation built with electron & nodejs.
 
 ## building
 
@@ -13,7 +13,7 @@ npm run develop
 Presentation:
 
 ```bash
-npm start
+npm run presentation
 ```
 
 Server (optional):
