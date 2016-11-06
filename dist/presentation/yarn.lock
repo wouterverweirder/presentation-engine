@@ -437,16 +437,16 @@ electron-download@^3.0.1:
     semver "^5.3.0"
     sumchecker "^1.2.0"
 
-"electron-rebuild@git://github.com/wouterverweirder/electron-rebuild.git":
+electron-rebuild@^1.3.0:
   version "1.3.0"
-  resolved "git://github.com/wouterverweirder/electron-rebuild.git#818db9fd7572a8ec2956d2b70fd5460e2b0b816c"
+  resolved "https://registry.yarnpkg.com/electron-rebuild/-/electron-rebuild-1.3.0.tgz#46fe6eda2fd9c05a74a9f207ad03adc97136de43"
   dependencies:
     babel-runtime "^5.8.20"
     glob "^6.0.3"
     lodash "^3.10.1"
     ncp "^2.0.0"
     npm "^3.5.3"
-    nslog "git://github.com/wouterverweirder/node-nslog.git"
+    nslog "^3.0.0"
     promise "^7.1.1"
     rimraf "^2.5.0"
     yargs "^3.31.0"
@@ -1220,7 +1220,7 @@ node-fetch@^1.0.1:
     encoding "^0.1.11"
     is-stream "^1.0.1"
 
-node-gyp@^3.4.0, node-gyp@~3.4.0:
+node-gyp@~3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/node-gyp/-/node-gyp-3.4.0.tgz#dda558393b3ecbbe24c9e6b8703c71194c63fa36"
   dependencies:
@@ -1393,12 +1393,11 @@ npmlog@~4.0.0:
     gauge "~2.6.0"
     set-blocking "~2.0.0"
 
-"nslog@git://github.com/wouterverweirder/node-nslog.git":
+nslog@^3.0.0:
   version "3.0.0"
-  resolved "git://github.com/wouterverweirder/node-nslog.git#4d0473f1bd21a1e0e8146da76a670c6651ca37e0"
+  resolved "https://registry.yarnpkg.com/nslog/-/nslog-3.0.0.tgz#9ef7e3a46bde1e757244541cca13ff2b676f7b19"
   dependencies:
     nan "^2.0.0"
-    node-gyp "^3.4.0"
 
 nugget@^2.0.0:
   version "2.0.1"
@@ -1591,13 +1590,12 @@ ps-tree@^1.1.0:
   dependencies:
     event-stream "~3.3.0"
 
-"pty.js@git://github.com/wouterverweirder/pty.js.git":
+"pty.js@>= 0.2.13":
   version "0.3.1"
-  resolved "git://github.com/wouterverweirder/pty.js.git#77b342c986a45de650a518fc3feb45c6a4847d1f"
+  resolved "https://registry.yarnpkg.com/pty.js/-/pty.js-0.3.1.tgz#81f5bed332d6e5e7ab685688d1ba0373410d51b5"
   dependencies:
     extend "~1.2.1"
     nan "2.3.5"
-    node-gyp "^3.4.0"
 
 punycode@^1.4.1:
   version "1.4.1"
@@ -2071,12 +2069,12 @@ trim-newlines@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/trim-newlines/-/trim-newlines-1.0.0.tgz#5887966bb582a4503a41eb524f7d35011815a613"
 
-"tty.js@git://github.com/wouterverweirder/tty.js.git":
+tty.js@^0.2.15:
   version "0.2.15"
-  resolved "git://github.com/wouterverweirder/tty.js.git#4c9626f1ad45a551cabd38faaaaf68255b9fe103"
+  resolved "https://registry.yarnpkg.com/tty.js/-/tty.js-0.2.15.tgz#88233eaa73d1853a8bc94e8af787b7cdc7548fa7"
   dependencies:
     express "3.4.4"
-    pty.js "git://github.com/wouterverweirder/pty.js.git"
+    pty.js ">= 0.2.13"
     socket.io "0.9.16"
     term.js ">= 0.0.5"
 
