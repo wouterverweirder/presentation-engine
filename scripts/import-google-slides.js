@@ -158,6 +158,7 @@ const downloadSlides = auth => {
     presentation.slides.forEach((slide, index) => {
       const fileName = `slide-${padStart(index, 4, `0`)}.png`;
       downloadQueue = downloadQueue
+        .then(() => console.log(`downloading ${fileName}`))
         .then(() => getThumbnailPromised(auth, argv.id, slide.objectId))
         .then(thumbnail => thumbnail.contentUrl)
         .then(url => downloadFilePromised(url, `${SLIDES_PATH}${fileName}`));
