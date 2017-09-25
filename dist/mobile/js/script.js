@@ -493,9 +493,9 @@ var Presentation = function (_PresentationBase) {
       if (!message.content) {
         return;
       }
-      if (message.content.action == 'setCurrentSlideIndex') {
+      if (message.content.action === 'setCurrentSlideIndex') {
         this.setCurrentSlideIndex(message.content.currentSlideIndex);
-      } else if (message.content.action == _Constants.Constants.BLINK) {
+      } else if (message.content.action === _Constants.Constants.BLINK) {
         this.blink(message.content.text, message.content.backgroundColor);
       }
     }
@@ -570,57 +570,57 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 })();
 
 },{"./classes/Presentation":3,"isomorphic-fetch":1}],5:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var Constants = exports.Constants = {
-  GO_TO_PREVIOUS_SLIDE: 'goToPreviousSlide',
-  GO_TO_NEXT_SLIDE: 'goToNextSlide',
-  SET_SLIDES: 'setSlides',
-  SET_CURRENT_SLIDE_INDEX: 'setCurrentSlideIndex',
+  GO_TO_PREVIOUS_SLIDE: "goToPreviousSlide",
+  GO_TO_NEXT_SLIDE: "goToNextSlide",
+  SET_SLIDES: "setSlides",
+  SET_CURRENT_SLIDE_INDEX: "setCurrentSlideIndex",
 
-  MESSAGE: 'message',
-  SOCKET_SEND: 'socketSend',
-  SOCKET_RECEIVE: 'socketReceive',
-  JOIN_SLIDE_ROOM: 'joinSlideRoom',
-  LEAVE_SLIDE_ROOM: 'leaveSlideRoom',
+  MESSAGE: "message",
+  SOCKET_SEND: "socketSend",
+  SOCKET_RECEIVE: "socketReceive",
+  JOIN_SLIDE_ROOM: "joinSlideRoom",
+  LEAVE_SLIDE_ROOM: "leaveSlideRoom",
 
-  ROLE_PRESENTATION: 'presentation',
-  ROLE_MOBILE: 'mobile',
+  ROLE_PRESENTATION: "presentation",
+  ROLE_MOBILE: "mobile",
 
-  STATE_ACTIVE: 'active',
-  STATE_INACTIVE: 'inactive',
+  STATE_ACTIVE: "active",
+  STATE_INACTIVE: "inactive",
 
-  SET_SUBSTATE: 'setSubstate',
+  SET_SUBSTATE: "setSubstate",
 
-  CHILD_APP_SAVE_CODE: 'childAppSaveCode',
-  CHILD_APP_RUN_CODE: 'childAppRunCode',
-  CHILD_APP_STDOUT_DATA: 'childAppStdoutData',
-  CHILD_APP_STDERR_DATA: 'childAppStderrData',
+  CHILD_APP_SAVE_CODE: "childAppSaveCode",
+  CHILD_APP_RUN_CODE: "childAppRunCode",
+  CHILD_APP_STDOUT_DATA: "childAppStdoutData",
+  CHILD_APP_STDERR_DATA: "childAppStderrData",
 
-  OPEN_COMMAND_LINE: 'openCommandLine',
-  OPEN_CAMERA: 'openCamera',
+  OPEN_COMMAND_LINE: "openCommandLine",
+  OPEN_CAMERA: "openCamera",
 
-  BLINK: 'blink',
+  BLINK: "blink",
 
-  HEART_RATE_POLAR: 'heartRatePolar',
+  HEART_RATE_POLAR: "heartRatePolar",
 
-  SET_TEAM: 'setTeam',
-  UPDATE_MOTION: 'updateMotion',
+  SET_TEAM: "setTeam",
+  UPDATE_MOTION: "updateMotion",
 
-  YOU_WIN: 'youWin',
-  YOU_LOSE: 'youLose',
+  YOU_WIN: "youWin",
+  YOU_LOSE: "youLose",
 
-  SHAKE_YOUR_PHONES_INTRO: 'shakeYourPhonesIntro',
-  SHAKE_YOUR_PHONES_GAME: 'shakeYourPhonesGame',
-  SHAKE_YOUR_PHONES_FINISHED: 'shakeYourPhonesFinished',
+  SHAKE_YOUR_PHONES_INTRO: "shakeYourPhonesIntro",
+  SHAKE_YOUR_PHONES_GAME: "shakeYourPhonesGame",
+  SHAKE_YOUR_PHONES_FINISHED: "shakeYourPhonesFinished",
 
-  SHAKE_YOUR_PHONES_CLIENT_ADDED: 'shakeYourPhonesClientAdded',
-  SHAKE_YOUR_PHONES_CLIENT_REMOVED: 'shakeYourPhonesClientRemoved',
-  SHAKE_YOUR_PHONES_CLIENT_LIST: 'shakeYourPhonesClientList',
-  SHAKE_YOUR_PHONES_CLIENT_UPDATE: 'shakeYourPhonesClientUpdate'
+  SHAKE_YOUR_PHONES_CLIENT_ADDED: "shakeYourPhonesClientAdded",
+  SHAKE_YOUR_PHONES_CLIENT_REMOVED: "shakeYourPhonesClientRemoved",
+  SHAKE_YOUR_PHONES_CLIENT_LIST: "shakeYourPhonesClientList",
+  SHAKE_YOUR_PHONES_CLIENT_UPDATE: "shakeYourPhonesClientUpdate"
 };
 
 },{}],6:[function(require,module,exports){
@@ -666,7 +666,7 @@ var MobileServerBridge = function () {
         return response.json();
       }).then(function (result) {
         return _this.loginHandler(result);
-      }).catch(function (e) {
+      }).catch(function () {
         //retry after one second
         setTimeout(function () {
           return _this.connect();
@@ -731,6 +731,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Constants = require('../Constants');
@@ -773,7 +775,7 @@ var Presentation = function () {
   _createClass(Presentation, [{
     key: 'startListeningForMessages',
     value: function startListeningForMessages() {
-      window.addEventListener("message", this.slideMessageHandler.bind(this), false);
+      window.addEventListener('message', this.slideMessageHandler.bind(this), false);
     }
   }, {
     key: 'createSlideHolders',
@@ -787,7 +789,6 @@ var Presentation = function () {
   }, {
     key: 'createSlideBridges',
     value: function createSlideBridges(data) {
-      var that = this;
       var numSlides = data.slides.length;
       for (var i = 0; i < numSlides; i++) {
         var slideBridge = this.createSlideBridge(data.slides[i]);
@@ -861,23 +862,31 @@ var Presentation = function () {
     key: 'getSlideHolderForSlide',
     value: function getSlideHolderForSlide(slide, slidesNotToClear) {
       if (slide) {
-        var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
-        if ($slideHolder.length > 0) {
-          return $slideHolder[0];
-        }
-        //get a free slideHolder
-        var slideNamesNotToClear = [];
-        $(slidesNotToClear).each(function (index, obj) {
-          slideNamesNotToClear.push(obj.name);
-        });
-        var $slideHolders = $('.slide-frame');
-        for (var i = $slideHolders.length - 1; i >= 0; i--) {
-          $slideHolder = $($slideHolders[i]);
-          var name = $slideHolder.attr('data-name');
-          if (!name || slideNamesNotToClear.indexOf(name) === -1) {
-            return $slideHolder[0];
+        var _ret = function () {
+          var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
+          if ($slideHolder.length > 0) {
+            return {
+              v: $slideHolder[0]
+            };
           }
-        }
+          //get a free slideHolder
+          var slideNamesNotToClear = [];
+          $(slidesNotToClear).each(function (index, obj) {
+            slideNamesNotToClear.push(obj.name);
+          });
+          var $slideHolders = $('.slide-frame');
+          for (var i = $slideHolders.length - 1; i >= 0; i--) {
+            $slideHolder = $($slideHolders[i]);
+            var name = $slideHolder.attr('data-name');
+            if (!name || slideNamesNotToClear.indexOf(name) === -1) {
+              return {
+                v: $slideHolder[0]
+              };
+            }
+          }
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
       return false;
     }
@@ -894,55 +903,59 @@ var Presentation = function () {
   }, {
     key: 'setCurrentSlideIndex',
     value: function setCurrentSlideIndex(value) {
+      var _this = this;
+
       value = Math.max(0, Math.min(value, this.slideBridges.length - 1));
       if (value !== this.currentSlideIndex) {
-        this.currentSlideIndex = value;
+        (function () {
+          _this.currentSlideIndex = value;
 
-        var currentSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex);
-        var previousSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex - 1);
-        var nextSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex + 1);
+          var currentSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex);
+          var previousSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex - 1);
+          var nextSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex + 1);
 
-        //remove "used" class from slide holders
-        $('.slide-frame').removeAttr('data-used', false);
+          //remove "used" class from slide holders
+          $('.slide-frame').removeAttr('data-used', false);
 
-        var currentSlideHolder = this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
+          var currentSlideHolder = _this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
 
-        var previousSlideHolder = this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
+          var previousSlideHolder = _this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
 
-        var nextSlideHolder = this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
-        this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
+          var nextSlideHolder = _this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
+          _this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
 
-        //clear attributes of unused slide frames
-        $('.slide-frame').each(function (index, slideHolder) {
-          if (!$(slideHolder).attr('data-used')) {
-            $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
-          }
-        });
+          //clear attributes of unused slide frames
+          $('.slide-frame').each(function (index, slideHolder) {
+            if (!$(slideHolder).attr('data-used')) {
+              $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
+            }
+          });
 
-        //all other slideHolder bridges should be unlinked from their slideHolder
-        this.slideBridges.forEach(function (slideBridge) {
-          if (slideBridge === currentSlideBridge) {
-            return;
-          }
-          if (slideBridge === previousSlideBridge) {
-            return;
-          }
-          if (slideBridge === nextSlideBridge) {
-            return;
-          }
-          slideBridge.slideHolder = null;
-        });
+          //all other slideHolder bridges should be unlinked from their slideHolder
+          _this.slideBridges.forEach(function (slideBridge) {
+            if (slideBridge === currentSlideBridge) {
+              return;
+            }
+            if (slideBridge === previousSlideBridge) {
+              return;
+            }
+            if (slideBridge === nextSlideBridge) {
+              return;
+            }
+            slideBridge.slideHolder = null;
+          });
 
-        bean.fire(this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [this.currentSlideIndex]);
+          bean.fire(_this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [_this.currentSlideIndex]);
+        })();
       }
     }
   }, {
     key: 'setupSlideHolder',
     value: function setupSlideHolder(slideHolder, slideBridge, state, left) {
       if (slideHolder) {
-        var src = "slides/" + slideBridge.name + '.html';
+        var src = 'slides/' + slideBridge.name + '.html';
         if (slideBridge.data[this.role] && slideBridge.data[this.role].url) {
           src = slideBridge.data[this.role].url;
         }
@@ -960,12 +973,12 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
-      var _this = this;
+      var _this2 = this;
 
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        _this.slideMessageHandler({ data: message });
+        _this2.slideMessageHandler({ data: message });
       });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
@@ -977,6 +990,7 @@ var Presentation = function () {
   }, {
     key: 'slideLoaded',
     value: function slideLoaded(slideHolder, slideBridge) {
+      // eslint-disable-line no-unused-vars
       //join new channel
       if (this.mobileServerBridge) {
         this.mobileServerBridge.tryToSend(_Constants.Constants.JOIN_SLIDE_ROOM, $(slideHolder).attr('data-name'));
@@ -1094,7 +1108,6 @@ var SlideBridge = function () {
 }();
 
 exports.default = SlideBridge;
-;
 
 },{"isomorphic-fetch":1}]},{},[4])
 

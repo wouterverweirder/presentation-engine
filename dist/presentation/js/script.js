@@ -1855,9 +1855,9 @@ var MobileServerBridge = function (_MobileServerBridgeBa) {
 
 exports.default = MobileServerBridge;
 
-},{"../../../shared/js/Constants":16,"../../../shared/js/classes/MobileServerBridge":18}],6:[function(require,module,exports){
+},{"../../../shared/js/Constants":17,"../../../shared/js/classes/MobileServerBridge":19}],6:[function(require,module,exports){
 (function (process){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -1871,20 +1871,20 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var childProcess = requireNode('child_process');
-var EventEmitter = requireNode('events').EventEmitter;
-var path = requireNode('path');
+var childProcess = requireNode("child_process");
+var EventEmitter = requireNode("events").EventEmitter;
+var path = requireNode("path");
 
-var platform = requireNode('electron').remote.process.platform;
+var platform = requireNode("electron").remote.process.platform;
 var isWin = /^win/.test(platform);
 
 //kill entire process tree
 //http://krasimirtsonev.com/blog/article/Nodejs-managing-child-processes-starting-stopping-exec-spawn
 var kill = function kill(pid, signal) {
-  signal = signal || 'SIGKILL';
-  return new Promise(function (resolve, reject) {
+  signal = signal || "SIGKILL";
+  return new Promise(function (resolve) {
     if (!isWin) {
-      var psTree = requireNode('ps-tree');
+      var psTree = requireNode("ps-tree");
       var killTree = true;
       if (killTree) {
         psTree(pid, function (err, children) {
@@ -1893,17 +1893,21 @@ var kill = function kill(pid, signal) {
           })).forEach(function (tpid) {
             try {
               process.kill(tpid, signal);
-            } catch (ex) {}
+            } catch (ex) {
+              console.error(ex);
+            }
           });
         });
       } else {
         try {
           process.kill(pid, signal);
-        } catch (ex) {}
+        } catch (ex) {
+          console.error(ex);
+        }
       }
       resolve();
     } else {
-      childProcess.exec('taskkill /PID ' + pid + ' /T /F', function (error, stdout, stderr) {
+      childProcess.exec("taskkill /PID " + pid + " /T /F", function () {
         resolve();
       });
     }
@@ -1920,7 +1924,7 @@ var NodeAppRunner = function (_EventEmitter) {
   }
 
   _createClass(NodeAppRunner, [{
-    key: 'run',
+    key: "run",
     value: function run(applicationPath) {
       var _this2 = this;
 
@@ -1935,28 +1939,28 @@ var NodeAppRunner = function (_EventEmitter) {
             _this2.runner.stdin.write("node " + applicationPath + "\n");
           }, 500);
         } else {
-          console.log('node ' + applicationPath);
+          console.log("node " + applicationPath);
           _this2.runner = childProcess.spawn("node", [applicationPath], { cwd: _this2.cwd });
         }
-        _this2.runner.stdout.on('data', function (data) {
+        _this2.runner.stdout.on("data", function (data) {
           return _this2.onRunnerData(data);
         });
-        _this2.runner.stderr.on('data', function (error) {
+        _this2.runner.stderr.on("data", function (error) {
           return _this2.onRunnerError(error);
         });
-        _this2.runner.on('disconnect', function () {
+        _this2.runner.on("disconnect", function () {
           return _this2.onDisconnect();
         });
-        _this2.runner.on('close', function () {
+        _this2.runner.on("close", function () {
           return _this2.onClose();
         });
-        _this2.runner.on('exit', function () {
+        _this2.runner.on("exit", function () {
           return _this2.onExit();
         });
       });
     }
   }, {
-    key: 'onRunnerData',
+    key: "onRunnerData",
     value: function onRunnerData(data) {
       this.numDataEventsReceived++;
       if (this.numDataEventsReceived <= this.ignoreFirstEventsAmount) {
@@ -1970,37 +1974,37 @@ var NodeAppRunner = function (_EventEmitter) {
           return;
         }
       }
-      this.emit('stdout-data', data);
+      this.emit("stdout-data", data);
     }
   }, {
-    key: 'onRunnerError',
+    key: "onRunnerError",
     value: function onRunnerError(error) {
-      this.emit('stderr-data', error.toString().trim());
+      this.emit("stderr-data", error.toString().trim());
     }
   }, {
-    key: 'onDisconnect',
+    key: "onDisconnect",
     value: function onDisconnect() {
-      console.log('[ChildApp] runner disconnected');
+      console.log("[ChildApp] runner disconnected");
       this.runner = false;
     }
   }, {
-    key: 'onClose',
+    key: "onClose",
     value: function onClose() {
-      console.log('[ChildApp] runner closed');
+      console.log("[ChildApp] runner closed");
       this.runner = false;
     }
   }, {
-    key: 'onExit',
+    key: "onExit",
     value: function onExit() {
-      console.log('[ChildApp] runner exited');
+      console.log("[ChildApp] runner exited");
       this.runner = false;
     }
   }, {
-    key: 'stop',
+    key: "stop",
     value: function stop() {
       var _this3 = this;
 
-      return new Promise(function (resolve, reject) {
+      return new Promise(function (resolve) {
         if (!_this3.runner) {
           resolve();
         }
@@ -2008,7 +2012,7 @@ var NodeAppRunner = function (_EventEmitter) {
         _this3.runner.stderr.removeAllListeners();
         _this3.runner.stdin.end();
         //listen for runner events and resolve on the one that occurs
-        var cbCalled = false;
+        // const cbCalled = false;
         // this.runner.on('disconnect', () => {
         //   console.log('disconnect');
         //   if(!cbCalled) {
@@ -2034,7 +2038,7 @@ var NodeAppRunner = function (_EventEmitter) {
       });
     }
   }, {
-    key: 'destroy',
+    key: "destroy",
     value: function destroy() {
       return this.stop().then(function () {});
     }
@@ -2109,10 +2113,12 @@ var Presentation = function (_PresentationBase) {
 
   _createClass(Presentation, [{
     key: 'closeHandler',
-    value: function closeHandler(event) {}
+    value: function closeHandler(event) {// eslint-disable-line no-unused-vars
+    }
   }, {
     key: 'currentSlideIndexChangedHandler',
-    value: function currentSlideIndexChangedHandler(slideIndex) {}
+    value: function currentSlideIndexChangedHandler(slideIndex) {// eslint-disable-line no-unused-vars
+    }
   }, {
     key: 'createMobileServerBridge',
     value: function createMobileServerBridge() {
@@ -2135,7 +2141,7 @@ var Presentation = function (_PresentationBase) {
     key: 'processSlideSrc',
     value: function processSlideSrc(src) {
       src = 'file:///' + path.resolve(this.settings.presentationPath, src);
-      src = src.replace(/\\/g, "/");
+      src = src.replace(/\\/g, '/');
       return src;
     }
   }, {
@@ -2179,12 +2185,6 @@ var Presentation = function (_PresentationBase) {
           break;
         case _Constants.Constants.OPEN_CAMERA:
           this.openCamera();
-          break;
-        case _Constants.Constants.CHILD_APP_SAVE_CODE:
-          ChildApp.getInstance().saveCode(event.data.code, event.data.type);
-          break;
-        case _Constants.Constants.CHILD_APP_RUN_CODE:
-          ChildApp.getInstance().runCode(event.data.code, event.data.type);
           break;
       }
     }
@@ -2261,7 +2261,7 @@ var Presentation = function (_PresentationBase) {
 
 exports.default = Presentation;
 
-},{"../../../shared/js/Constants":16,"../../../shared/js/classes/Presentation":19,"./MobileServerBridge":5,"./SlideBridge":8}],8:[function(require,module,exports){
+},{"../../../shared/js/Constants":17,"../../../shared/js/classes/Presentation":20,"./MobileServerBridge":5,"./SlideBridge":8}],8:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2342,10 +2342,9 @@ var SlideBridge = function (_SlideBridgeBase) {
 }(_SlideBridge2.default);
 
 exports.default = SlideBridge;
-;
 
-},{"../../../shared/js/classes/SlideBridge":20}],9:[function(require,module,exports){
-'use strict';
+},{"../../../shared/js/classes/SlideBridge":21}],9:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2355,7 +2354,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var fs = requireNode('fs-promise');
+var fs = requireNode("fs-promise");
 
 var CodeElement = function () {
   function CodeElement(el, options) {
@@ -2368,41 +2367,41 @@ var CodeElement = function () {
       options = {};
     }
 
-    var width = $(el).parent()[0].style.width || '100%';
-    var height = $(el).parent()[0].style.height || '100%';
+    var width = $(el).parent()[0].style.width || "100%";
+    var height = $(el).parent()[0].style.height || "100%";
 
     //wrap element in a container
-    this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-code-element"></div>').parent();
+    this.$wrapperEl = $(el).wrap("<div class=\"live-code-element live-code-code-element\"></div>").parent();
     this.wrapperEl = this.$wrapperEl[0];
 
-    this.id = this.$el.attr('data-id');
-    this.file = this.$el.data('file');
+    this.id = this.$el.attr("data-id");
+    this.file = this.$el.data("file");
 
     if (!this.id && this.file) {
       this.id = this.file;
     }
     if (!this.id) {
-      this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
+      this.id = "code-" + Math.round(Math.random() * 1000 * new Date().getTime());
     }
-    this.$el.attr('data-id', this.id);
+    this.$el.attr("data-id", this.id);
 
-    this.runtime = this.$el.data('runtime');
+    this.runtime = this.$el.data("runtime");
     if (!this.runtime) {
-      this.runtime = 'browser';
+      this.runtime = "browser";
     }
 
-    this.console = this.$el.data('console');
-    this.processor = this.$el.data('processor');
+    this.console = this.$el.data("console");
+    this.processor = this.$el.data("processor");
 
     //language is programming language - used for injecting in html
-    this.language = this.$el.data('language');
+    this.language = this.$el.data("language");
     if (!this.language) {
       //default to javascript
       this.language = "javascript";
     }
 
     //mode is mode for codemirror
-    this.mode = this.$el.data('mode');
+    this.mode = this.$el.data("mode");
     if (!this.mode) {
       //default to the language
       this.mode = this.language;
@@ -2421,47 +2420,47 @@ var CodeElement = function () {
   }
 
   _createClass(CodeElement, [{
-    key: 'pause',
+    key: "pause",
     value: function pause() {
       //no real reason to do pause / resume
     }
   }, {
-    key: 'resume',
+    key: "resume",
     value: function resume() {
       //no real reason to do pause / resume
     }
   }, {
-    key: 'destroy',
+    key: "destroy",
     value: function destroy() {
       this.pause();
     }
   }, {
-    key: 'getValue',
+    key: "getValue",
     value: function getValue() {
       return this.codeMirror.getValue();
     }
   }, {
-    key: 'setValue',
+    key: "setValue",
     value: function setValue(value) {
       this.codeMirror.setValue(value);
     }
   }, {
-    key: 'saveToFile',
+    key: "saveToFile",
     value: function saveToFile(filePath) {
       return fs.writeFile(filePath, this.getValue());
     }
   }, {
-    key: 'readFromFile',
+    key: "readFromFile",
     value: function readFromFile(filePath) {
       var _this = this;
 
-      return fs.readFile(filePath, 'utf8').then(function (data) {
+      return fs.readFile(filePath, "utf8").then(function (data) {
         _this.setValue(data);
         return data;
       });
     }
   }, {
-    key: 'layout',
+    key: "layout",
     value: function layout() {
       // this.$wrapperEl.find('.CodeMirror-scroll').css('max-height', this.$wrapperEl.css('height'));
       this.codeMirror.refresh();
@@ -2627,7 +2626,7 @@ var ConsoleElement = function () {
 exports.default = ConsoleElement;
 
 },{"../NodeAppRunner":6}],11:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -2637,7 +2636,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var TERMINAL_URL = 'http://localhost:3000';
+var TERMINAL_URL = "http://localhost:3000";
 
 var TerminalElement = function () {
   function TerminalElement(el, options) {
@@ -2657,26 +2656,26 @@ var TerminalElement = function () {
       options = {};
     }
     //wrap element in a container
-    this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-terminal-element"></div>').parent();
+    this.$wrapperEl = $(el).wrap("<div class=\"live-code-element live-code-terminal-element\"></div>").parent();
     this.wrapperEl = this.$wrapperEl[0];
 
-    this.id = this.$el.attr('data-id');
+    this.id = this.$el.attr("data-id");
     if (!this.id) {
       //generate id
-      this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
-      this.$el.attr('data-id', this.id);
+      this.id = "code-" + Math.round(Math.random() * 1000 * new Date().getTime());
+      this.$el.attr("data-id", this.id);
     }
 
-    this.dir = this.$el.data('dir');
-    this.autorun = this.$el.data('autorun');
+    this.dir = this.$el.data("dir");
+    this.autorun = this.$el.data("autorun");
 
-    this.$el.css('width', '100%').css('height', '100%');
+    this.$el.css("width", "100%").css("height", "100%");
 
     this.isRunning = false;
   }
 
   _createClass(TerminalElement, [{
-    key: 'pause',
+    key: "pause",
     value: function pause() {
       this.isRunning = false;
       if (this.webview) {
@@ -2685,7 +2684,7 @@ var TerminalElement = function () {
       }
     }
   }, {
-    key: 'resume',
+    key: "resume",
     value: function resume() {
       if (this.isRunning) {
         return;
@@ -2693,25 +2692,25 @@ var TerminalElement = function () {
       this.isRunning = true;
       //create a webview tag
       if (this.webview) {
-        this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
+        this.webview.removeEventListener("ipc-message", this._ipcMessageHandler);
         this.webview.parentNode.removeChild(this.webview);
         this.webview = false;
       }
-      this.webview = document.createElement('webview');
+      this.webview = document.createElement("webview");
       // this.webview.addEventListener('dom-ready', () => {
       //   this.webview.openDevTools();
       // });
-      this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
-      this.webview.style.width = '100%';
-      this.webview.style.height = '100%';
-      this.webview.setAttribute('nodeintegration', '');
-      this.webview.setAttribute('src', TERMINAL_URL);
+      this.webview.addEventListener("ipc-message", this._ipcMessageHandler);
+      this.webview.style.width = "100%";
+      this.webview.style.height = "100%";
+      this.webview.setAttribute("nodeintegration", "");
+      this.webview.setAttribute("src", TERMINAL_URL);
       this.el.appendChild(this.webview);
     }
   }, {
-    key: 'ipcMessageHandler',
+    key: "ipcMessageHandler",
     value: function ipcMessageHandler(e) {
-      if (e.channel !== 'message-from-terminal') {
+      if (e.channel !== "message-from-terminal") {
         return;
       }
       if (e.args.length < 1) {
@@ -2722,31 +2721,31 @@ var TerminalElement = function () {
         return;
       }
       switch (o.command) {
-        case 'init':
+        case "init":
           if (this.dir) {
-            this.executeCommand('cd ' + this.dir);
-            this.executeCommand('clear');
+            this.executeCommand("cd " + this.dir);
+            this.executeCommand("clear");
           }
           if (this.autorun) {
             this.executeCommand(this.autorun);
           }
           break;
         default:
-          console.warn('unknow command object from terminal');
+          console.warn("unknow command object from terminal");
           console.warn(o);
           break;
       }
     }
   }, {
-    key: 'executeCommand',
+    key: "executeCommand",
     value: function executeCommand(commandString) {
-      this.webview.send('message-to-terminal', {
-        command: 'execute',
+      this.webview.send("message-to-terminal", {
+        command: "execute",
         value: commandString
       });
     }
   }, {
-    key: 'destroy',
+    key: "destroy",
     value: function destroy() {
       this.pause();
     }
@@ -2758,10 +2757,10 @@ var TerminalElement = function () {
 exports.default = TerminalElement;
 
 },{}],12:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
-	value: true
+  value: true
 });
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -2769,159 +2768,248 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var WebPreviewElement = function () {
-	function WebPreviewElement(el, options) {
-		_classCallCheck(this, WebPreviewElement);
+  function WebPreviewElement(el, options) {
+    _classCallCheck(this, WebPreviewElement);
 
-		this.el = el;
-		this.$el = $(el);
-		//options
-		if (!options) {
-			options = {};
-		}
-		//wrap element in a container
-		this.$wrapperEl = $(el).wrap('<div class="live-code-element live-code-web-preview-element"></div>').parent();
-		this.wrapperEl = this.$wrapperEl[0];
+    this.el = el;
+    this.$el = $(el);
+    //options
+    if (!options) {
+      options = {};
+    }
+    //wrap element in a container
+    this.$wrapperEl = $(el).wrap("<div class=\"live-code-element live-code-web-preview-element\"></div>").parent();
+    this.wrapperEl = this.$wrapperEl[0];
 
-		this.id = this.$el.attr('data-id');
-		if (!this.id) {
-			//generate id
-			this.id = 'code-' + Math.round(Math.random() * 1000 * new Date().getTime());
-			this.$el.attr('data-id', this.id);
-		}
+    this.id = this.$el.attr("data-id");
+    if (!this.id) {
+      //generate id
+      this.id = "code-" + Math.round(Math.random() * 1000 * new Date().getTime());
+      this.$el.attr("data-id", this.id);
+    }
 
-		this.file = this.$el.data('file') || this.$el.data('url');
-		this.autoload = this.$el.data('autoload');
+    this.file = this.$el.data("file") || this.$el.data("url");
+    this.autoload = this.$el.data("autoload");
 
-		this.console = this.$el.data('console');
+    this.console = this.$el.data("console");
 
-		this.$el.css('width', '100%').css('height', '100%');
+    this.$el.css("width", "100%").css("height", "100%");
 
-		this.url = false;
-		this.blocks = false;
-		this.isRunning = false;
-		//webview gets created by calling updateUrl or updateCode
-	}
+    this.url = false;
+    this.blocks = false;
+    this.isRunning = false;
+    //webview gets created by calling updateUrl or updateCode
+  }
 
-	_createClass(WebPreviewElement, [{
-		key: 'destroy',
-		value: function destroy() {
-			this.pause();
-		}
-	}, {
-		key: 'pause',
-		value: function pause() {
-			this.isRunning = false;
-			if (this.webview) {
-				this.webview.removeEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
-				this.webview.removeEventListener('did-fail-load', this._didFailLoadHandler);
-				this.webview.removeEventListener('ipc-message', this._ipcMessageHandler);
-				this.webview.parentNode.removeChild(this.webview);
-				this.webview = false;
-				clearTimeout(this.retryTimeout);
-			}
-		}
-	}, {
-		key: 'resume',
-		value: function resume() {
-			if (this.isRunning) {
-				return;
-			}
-			if (this.url === false && this.blocks === false) {
-				return;
-			}
-			this.isRunning = true;
-			this._createWebview();
-		}
-	}, {
-		key: '_createWebview',
-		value: function _createWebview() {
-			var _this = this;
+  _createClass(WebPreviewElement, [{
+    key: "destroy",
+    value: function destroy() {
+      this.pause();
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      this.isRunning = false;
+      if (this.webview) {
+        this.webview.removeEventListener("did-get-response-details", this._didGetResponseDetailsHandler);
+        this.webview.removeEventListener("did-fail-load", this._didFailLoadHandler);
+        this.webview.removeEventListener("ipc-message", this._ipcMessageHandler);
+        this.webview.parentNode.removeChild(this.webview);
+        this.webview = false;
+        clearTimeout(this.retryTimeout);
+      }
+    }
+  }, {
+    key: "resume",
+    value: function resume() {
+      if (this.isRunning) {
+        return;
+      }
+      if (this.url === false && this.blocks === false) {
+        return;
+      }
+      this.isRunning = true;
+      this._createWebview();
+    }
+  }, {
+    key: "_createWebview",
+    value: function _createWebview() {
+      var _this = this;
 
-			//create a webview tag
-			if (this.webview) {
-				this.webview.parentNode.removeChild(this.webview);
-				this.webview = false;
-			}
-			this.webview = document.createElement('webview');
-			this.webview.style.width = '100%';
-			this.webview.style.height = '100%';
-			this.webview.preload = 'js/webpreview.js';
-			this.el.appendChild(this.webview);
+      //create a webview tag
+      if (this.webview) {
+        this.webview.parentNode.removeChild(this.webview);
+        this.webview = false;
+      }
+      this.webview = document.createElement("webview");
+      this.webview.style.width = "100%";
+      this.webview.style.height = "100%";
+      this.webview.preload = "js/webpreview.js";
+      this.el.appendChild(this.webview);
 
-			var url = this.url !== false ? this.url : 'webpreview.html';
-			var htmlSrc = '';
-			if (this.blocks !== false) {
-				for (var i = 0; i < blocks.length; i++) {
-					htmlSrc += blocks[i].code;
-				}
-			}
+      var url = this.url !== false ? this.url : "webpreview.html";
+      var htmlSrc = "";
+      if (this.blocks !== false) {
+        for (var i = 0; i < this.blocks.length; i++) {
+          htmlSrc += this.blocks[i].code;
+        }
+      }
 
-			//add listeners
-			this._didGetResponseDetailsHandler = function (e) {
-				if (e.originalURL !== _this.webview.src) {
-					return;
-				}
-				if (_this.$el.attr('data-open-devtools')) {
-					_this.webview.openDevTools();
-				}
-			};
-			this.webview.addEventListener('did-get-response-details', this._didGetResponseDetailsHandler);
+      //add listeners
+      this._didGetResponseDetailsHandler = function (e) {
+        if (e.originalURL !== _this.webview.src) {
+          return;
+        }
+        if (_this.$el.attr("data-open-devtools")) {
+          _this.webview.openDevTools();
+        }
+      };
+      this.webview.addEventListener("did-get-response-details", this._didGetResponseDetailsHandler);
 
-			this._didFailLoadHandler = function (e) {
-				_this.retryTimeout = setTimeout(function () {
-					_this.pause();
-					_this.resume();
-				}, 1000);
-			};
-			this.webview.addEventListener('did-fail-load', this._didFailLoadHandler);
+      this._didFailLoadHandler = function () {
+        _this.retryTimeout = setTimeout(function () {
+          _this.pause();
+          _this.resume();
+        }, 1000);
+      };
+      this.webview.addEventListener("did-fail-load", this._didFailLoadHandler);
 
-			this._ipcMessageHandler = function (event) {
-				if (event.channel === 'request-html') {
-					_this.webview.send('receive-html', htmlSrc);
-				} else if (event.channel === 'console.log') {
-					//notify live code editor
-					_this.$wrapperEl.trigger('console.log', event.args[0]);
-				} else if (event.channel === 'console.error') {
-					//notify live code editor
-					_this.$wrapperEl.trigger('console.error', event.args[0]);
-				}
-			};
-			this.webview.addEventListener('ipc-message', this._ipcMessageHandler);
+      this._ipcMessageHandler = function (event) {
+        if (event.channel === "request-html") {
+          _this.webview.send("receive-html", htmlSrc);
+        } else if (event.channel === "console.log") {
+          //notify live code editor
+          _this.$wrapperEl.trigger("console.log", event.args[0]);
+        } else if (event.channel === "console.error") {
+          //notify live code editor
+          _this.$wrapperEl.trigger("console.error", event.args[0]);
+        }
+      };
+      this.webview.addEventListener("ipc-message", this._ipcMessageHandler);
 
-			if (!this.$el.attr('data-disable-nodeintegration')) {
-				this.webview.setAttribute('nodeintegration', '');
-			}
-			this.webview.setAttribute('src', url);
-		}
-	}, {
-		key: 'updateUrl',
-		value: function updateUrl(url) {
-			this.pause();
-			this.url = url;
-			this.blocks = false;
-			this.resume();
-		}
-	}, {
-		key: 'updateCode',
-		value: function updateCode(blocks) {
-			this.pause();
-			this.url = false;
-			this.blocks = blocks;
-			this.resume();
-		}
-	}, {
-		key: 'needsOutputPathPrefix',
-		get: function get() {
-			return !this.$el.data('url');
-		}
-	}]);
+      if (!this.$el.attr("data-disable-nodeintegration")) {
+        this.webview.setAttribute("nodeintegration", "");
+      }
+      this.webview.setAttribute("src", url);
+    }
+  }, {
+    key: "updateUrl",
+    value: function updateUrl(url) {
+      this.pause();
+      this.url = url;
+      this.blocks = false;
+      this.resume();
+    }
+  }, {
+    key: "updateCode",
+    value: function updateCode(blocks) {
+      this.pause();
+      this.url = false;
+      this.blocks = blocks;
+      this.resume();
+    }
+  }, {
+    key: "needsOutputPathPrefix",
+    get: function get() {
+      return !this.$el.data("url");
+    }
+  }]);
 
-	return WebPreviewElement;
+  return WebPreviewElement;
 }();
 
 exports.default = WebPreviewElement;
 
 },{}],13:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var WebcamElement = function () {
+  function WebcamElement(el, options) {
+    _classCallCheck(this, WebcamElement);
+
+    this.el = el;
+    this.$el = $(el);
+
+    //options
+    if (!options) {
+      options = {};
+    }
+
+    this.id = this.$el.attr("data-id");
+    if (!this.id) {
+      //generate id
+      this.id = "webcam-" + Math.round(Math.random() * 1000 * new Date().getTime());
+      this.$el.attr("data-id", this.id);
+    }
+
+    this.source = this.$el.attr("data-source");
+    if (this.source) {
+      this.sourceEl = document.querySelector(this.source);
+    }
+
+    this.ctx = this.el.getContext("2d");
+
+    this.isRunning = false;
+  }
+
+  _createClass(WebcamElement, [{
+    key: "destroy",
+    value: function destroy() {
+      this.pause();
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      this.isRunning = false;
+      window.cancelAnimationFrame(this.animationFrameId);
+    }
+  }, {
+    key: "resume",
+    value: function resume() {
+      var _this = this;
+
+      if (this.isRunning) {
+        return;
+      }
+      this.isRunning = true;
+      this.animationFrameId = window.requestAnimationFrame(function () {
+        return _this.drawLoop();
+      });
+    }
+  }, {
+    key: "drawLoop",
+    value: function drawLoop() {
+      var _this2 = this;
+
+      if (this.isRunning) {
+        window.requestAnimationFrame(function () {
+          return _this2.drawLoop();
+        });
+      }
+      if (!this.sourceEl) {
+        return;
+      }
+      this.el.width = this.sourceEl.width;
+      this.el.height = this.sourceEl.height;
+      this.ctx.clearRect(0, 0, this.el.width, this.el.height);
+      this.ctx.drawImage(this.sourceEl, 0, 0);
+    }
+  }]);
+
+  return WebcamElement;
+}();
+
+exports.default = WebcamElement;
+
+},{}],14:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2945,6 +3033,10 @@ var _CodeElement2 = _interopRequireDefault(_CodeElement);
 var _WebPreviewElement = require('./WebPreviewElement');
 
 var _WebPreviewElement2 = _interopRequireDefault(_WebPreviewElement);
+
+var _WebcamElement = require('./WebcamElement');
+
+var _WebcamElement2 = _interopRequireDefault(_WebcamElement);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -3001,6 +3093,12 @@ var LiveCode = function () {
       _this.codeElements = {};
       _this.$el.find('[data-type="code"]').each(function (index, codeEl) {
         return _this.createCodeElement(codeEl);
+      });
+
+      //create the webcam elements
+      _this.webcamElements = {};
+      _this.$el.find('[data-type="webcam"]').each(function (index, webcamEl) {
+        return _this.createWebcamElement(webcamEl);
       });
 
       //create run buttons
@@ -3178,6 +3276,9 @@ var LiveCode = function () {
       for (key in this.codeElements) {
         this.destroyCodeElement(this.codeElements[key]);
       }
+      for (key in this.webcamElements) {
+        this.destroyWebcamElement(this.webcamElements[key]);
+      }
       this.runButtonEls.forEach(function (el) {
         return _this2.destroyRunButton(el);
       });
@@ -3209,6 +3310,9 @@ var LiveCode = function () {
       for (key in this.codeElements) {
         this.codeElements[key].pause();
       }
+      for (key in this.webcamElements) {
+        this.webcamElements[key].pause();
+      }
     }
   }, {
     key: 'resume',
@@ -3229,6 +3333,9 @@ var LiveCode = function () {
       }
       for (key in this.codeElements) {
         this.codeElements[key].resume();
+      }
+      for (key in this.webcamElements) {
+        this.webcamElements[key].resume();
       }
       this.autoStartWebpreviewElementsWhenNeeded();
     }
@@ -3290,12 +3397,23 @@ var LiveCode = function () {
       codeElement.destroy();
     }
   }, {
+    key: 'createWebcamElement',
+    value: function createWebcamElement(webcamEl) {
+      var webcamElement = new _WebcamElement2.default(webcamEl);
+      this.webcamElements[webcamElement.id] = webcamElement;
+    }
+  }, {
+    key: 'destroyWebcamElement',
+    value: function destroyWebcamElement(webcamElement) {
+      webcamElement.destroy();
+    }
+  }, {
     key: 'createRunButton',
     value: function createRunButton(runButtonEl) {
       var _this3 = this;
 
       this.runButtonEls.push(runButtonEl);
-      $(runButtonEl).on('click', function (event) {
+      $(runButtonEl).on('click', function () {
         if (_this3.webPreviewElements[$(runButtonEl).data('target')]) {
           //save the files first
           _this3.saveCodeElementsToFiles().catch(function (err) {
@@ -3351,7 +3469,7 @@ var LiveCode = function () {
       var _this5 = this;
 
       this.reloadButtonEls.push(reloadButtonEl);
-      $(reloadButtonEl).on('click', function (e) {
+      $(reloadButtonEl).on('click', function () {
         //get the reload button target
         var reloadTargetElement = _this5.getCodeElement($(reloadButtonEl).data('target'));
         if (reloadTargetElement) {
@@ -3446,7 +3564,7 @@ var LiveCode = function () {
 
 exports.default = LiveCode;
 
-},{"./CodeElement":9,"./ConsoleElement":10,"./TerminalElement":11,"./WebPreviewElement":12}],14:[function(require,module,exports){
+},{"./CodeElement":9,"./ConsoleElement":10,"./TerminalElement":11,"./WebPreviewElement":12,"./WebcamElement":13}],15:[function(require,module,exports){
 'use strict';
 
 var _Presentation = require('./classes/Presentation');
@@ -3484,8 +3602,8 @@ require('es6-promise').polyfill();
   init();
 })();
 
-},{"../../server/classes/SlidesFolderParser":15,"./classes/Presentation":7,"es6-promise":1}],15:[function(require,module,exports){
-'use strict';
+},{"../../server/classes/SlidesFolderParser":16,"./classes/Presentation":7,"es6-promise":1}],16:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -3495,19 +3613,20 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-if (!(typeof window !== 'undefined' && window)) {
-  var requireNode = require;
+var requireNode = void 0;
+if (!(typeof window !== "undefined" && window)) {
+  requireNode = require;
 } else {
-  var requireNode = window.requireNode;
+  requireNode = window.requireNode;
 }
 
-var fs = requireNode('fs-promise');
-var path = requireNode('path');
+var fs = requireNode("fs-promise");
+var path = requireNode("path");
 
 var getFileProperties = function getFileProperties(filePath) {
   var _fd = void 0,
       _o = void 0;
-  return fs.open(filePath, 'r').then(function (fd) {
+  return fs.open(filePath, "r").then(function (fd) {
     _fd = fd;
     return fd;
   }).then(function (fd) {
@@ -3515,7 +3634,7 @@ var getFileProperties = function getFileProperties(filePath) {
   }).then(function (o) {
     _o = o;
     return _o;
-  }).then(function (o) {
+  }).then(function () {
     return fs.close(_fd);
   }).then(function () {
     return {
@@ -3532,14 +3651,14 @@ var SlidesFolderParser = function () {
   }
 
   _createClass(SlidesFolderParser, [{
-    key: 'parse',
+    key: "parse",
     value: function parse(presentationPath, slidesFolderPath) {
       var _this = this;
 
       //read the contents of the slides directory
       return fs.readdir(slidesFolderPath).then(function (result) {
         return result.filter(function (name) {
-          return name.indexOf('.') > 0;
+          return name.indexOf(".") > 0;
         });
       }).then(function (result) {
         return result.map(function (name) {
@@ -3568,13 +3687,13 @@ var SlidesFolderParser = function () {
       });
     }
   }, {
-    key: 'parseSlideBaseName',
+    key: "parseSlideBaseName",
     value: function parseSlideBaseName(slideBaseName) {
       var parsed = {};
       parsed.ext = path.extname(slideBaseName);
       parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
-      var splitted = parsed.name.split('.');
-      var keywords = ['mobile', 'desktop', 'muted', 'loop', 'cover'];
+      var splitted = parsed.name.split(".");
+      var keywords = ["mobile", "desktop", "muted", "loop", "cover"];
       keywords.forEach(function (keyword) {
         var index = splitted.indexOf(keyword);
         if (index > -1) {
@@ -3582,20 +3701,20 @@ var SlidesFolderParser = function () {
           splitted.splice(index, 1);
         }
       });
-      parsed.name = splitted.join('.');
+      parsed.name = splitted.join(".");
       return parsed;
     }
   }, {
-    key: 'createSlideObjectBasedOnFileProperties',
+    key: "createSlideObjectBasedOnFileProperties",
     value: function createSlideObjectBasedOnFileProperties(fileProperties, presentationPath, slidesByName) {
 
       var parsed = this.parseSlideBaseName(path.basename(fileProperties.path));
-      var url = path.relative(presentationPath, fileProperties.path).replace('\\', '/');
-      if (parsed.ext === '.jpg' || parsed.ext === '.jpeg' || parsed.ext === '.gif' || parsed.ext === '.png') {
-        url = 'slides-builtin/image.html?image=' + url;
+      var url = path.relative(presentationPath, fileProperties.path).replace("\\", "/");
+      if (parsed.ext === ".jpg" || parsed.ext === ".jpeg" || parsed.ext === ".gif" || parsed.ext === ".png") {
+        url = "slides-builtin/image.html?image=" + url;
       }
-      if (parsed.ext === '.mp4') {
-        url = 'slides-builtin/video.html?video=' + url;
+      if (parsed.ext === ".mp4") {
+        url = "slides-builtin/video.html?video=" + url;
       }
       if (slidesByName[parsed.name]) {
         if (parsed.mobile) {
@@ -3634,61 +3753,61 @@ var SlidesFolderParser = function () {
 
 exports.default = SlidesFolderParser;
 
-},{}],16:[function(require,module,exports){
-'use strict';
+},{}],17:[function(require,module,exports){
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var Constants = exports.Constants = {
-  GO_TO_PREVIOUS_SLIDE: 'goToPreviousSlide',
-  GO_TO_NEXT_SLIDE: 'goToNextSlide',
-  SET_SLIDES: 'setSlides',
-  SET_CURRENT_SLIDE_INDEX: 'setCurrentSlideIndex',
+  GO_TO_PREVIOUS_SLIDE: "goToPreviousSlide",
+  GO_TO_NEXT_SLIDE: "goToNextSlide",
+  SET_SLIDES: "setSlides",
+  SET_CURRENT_SLIDE_INDEX: "setCurrentSlideIndex",
 
-  MESSAGE: 'message',
-  SOCKET_SEND: 'socketSend',
-  SOCKET_RECEIVE: 'socketReceive',
-  JOIN_SLIDE_ROOM: 'joinSlideRoom',
-  LEAVE_SLIDE_ROOM: 'leaveSlideRoom',
+  MESSAGE: "message",
+  SOCKET_SEND: "socketSend",
+  SOCKET_RECEIVE: "socketReceive",
+  JOIN_SLIDE_ROOM: "joinSlideRoom",
+  LEAVE_SLIDE_ROOM: "leaveSlideRoom",
 
-  ROLE_PRESENTATION: 'presentation',
-  ROLE_MOBILE: 'mobile',
+  ROLE_PRESENTATION: "presentation",
+  ROLE_MOBILE: "mobile",
 
-  STATE_ACTIVE: 'active',
-  STATE_INACTIVE: 'inactive',
+  STATE_ACTIVE: "active",
+  STATE_INACTIVE: "inactive",
 
-  SET_SUBSTATE: 'setSubstate',
+  SET_SUBSTATE: "setSubstate",
 
-  CHILD_APP_SAVE_CODE: 'childAppSaveCode',
-  CHILD_APP_RUN_CODE: 'childAppRunCode',
-  CHILD_APP_STDOUT_DATA: 'childAppStdoutData',
-  CHILD_APP_STDERR_DATA: 'childAppStderrData',
+  CHILD_APP_SAVE_CODE: "childAppSaveCode",
+  CHILD_APP_RUN_CODE: "childAppRunCode",
+  CHILD_APP_STDOUT_DATA: "childAppStdoutData",
+  CHILD_APP_STDERR_DATA: "childAppStderrData",
 
-  OPEN_COMMAND_LINE: 'openCommandLine',
-  OPEN_CAMERA: 'openCamera',
+  OPEN_COMMAND_LINE: "openCommandLine",
+  OPEN_CAMERA: "openCamera",
 
-  BLINK: 'blink',
+  BLINK: "blink",
 
-  HEART_RATE_POLAR: 'heartRatePolar',
+  HEART_RATE_POLAR: "heartRatePolar",
 
-  SET_TEAM: 'setTeam',
-  UPDATE_MOTION: 'updateMotion',
+  SET_TEAM: "setTeam",
+  UPDATE_MOTION: "updateMotion",
 
-  YOU_WIN: 'youWin',
-  YOU_LOSE: 'youLose',
+  YOU_WIN: "youWin",
+  YOU_LOSE: "youLose",
 
-  SHAKE_YOUR_PHONES_INTRO: 'shakeYourPhonesIntro',
-  SHAKE_YOUR_PHONES_GAME: 'shakeYourPhonesGame',
-  SHAKE_YOUR_PHONES_FINISHED: 'shakeYourPhonesFinished',
+  SHAKE_YOUR_PHONES_INTRO: "shakeYourPhonesIntro",
+  SHAKE_YOUR_PHONES_GAME: "shakeYourPhonesGame",
+  SHAKE_YOUR_PHONES_FINISHED: "shakeYourPhonesFinished",
 
-  SHAKE_YOUR_PHONES_CLIENT_ADDED: 'shakeYourPhonesClientAdded',
-  SHAKE_YOUR_PHONES_CLIENT_REMOVED: 'shakeYourPhonesClientRemoved',
-  SHAKE_YOUR_PHONES_CLIENT_LIST: 'shakeYourPhonesClientList',
-  SHAKE_YOUR_PHONES_CLIENT_UPDATE: 'shakeYourPhonesClientUpdate'
+  SHAKE_YOUR_PHONES_CLIENT_ADDED: "shakeYourPhonesClientAdded",
+  SHAKE_YOUR_PHONES_CLIENT_REMOVED: "shakeYourPhonesClientRemoved",
+  SHAKE_YOUR_PHONES_CLIENT_LIST: "shakeYourPhonesClientList",
+  SHAKE_YOUR_PHONES_CLIENT_UPDATE: "shakeYourPhonesClientUpdate"
 };
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3706,12 +3825,22 @@ var ContentBase = function () {
     _classCallCheck(this, ContentBase);
 
     this.$slideHolder = $slideHolder;
+    this.slideHolder = this.$slideHolder[0];
+    this.width = this.slideHolder.offsetWidth;
+    this.height = this.slideHolder.offsetHeight;
+    this.prevWidth = this.width;
+    this.prevHeight = this.height;
+    this.widthChanged = false;
+    this.heightChanged = false;
+    this.sizeChanged = false;
     this.src = $slideHolder.attr('data-src');
     this.name = $slideHolder.attr('data-name');
     this.settings = {};
     try {
       this.settings = JSON.parse($('#presentation').attr('data-presentation-settings'));
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
     this.fps = 60;
     this._animationFrameId = false;
     this._currentTime = 0;
@@ -3780,7 +3909,8 @@ var ContentBase = function () {
     }
   }, {
     key: 'handleMessage',
-    value: function handleMessage(data) {}
+    value: function handleMessage(data) {// eslint-disable-line no-unused-vars
+    }
   }, {
     key: 'postSocketMessage',
     value: function postSocketMessage(message) {
@@ -3791,7 +3921,7 @@ var ContentBase = function () {
     }
   }, {
     key: 'receiveSocketMessage',
-    value: function receiveSocketMessage(message) {
+    value: function receiveSocketMessage(message) {// eslint-disable-line no-unused-vars
       //console.log('receiveSocketMessageame, message);
     }
   }, {
@@ -3819,13 +3949,21 @@ var ContentBase = function () {
       this._delta = this._currentTime - this._lastTime;
       if (this._delta > this._interval) {
         this.currentFrame++;
+        this.prevWidth = this.width;
+        this.prevHeight = this.height;
+        this.width = this.slideHolder.offsetWidth;
+        this.height = this.slideHolder.offsetHeight;
+        this.widthChanged = this.width !== this.prevWidth;
+        this.heightChanged = this.height !== this.prevHeight;
+        this.sizeChanged = this.widthChanged || this.heightChanged;
         this.drawLoop(this._delta);
         this._lastTime = this._currentTime - this._delta % this._interval;
       }
     }
   }, {
     key: 'drawLoop',
-    value: function drawLoop(delta) {}
+    value: function drawLoop(delta) {// eslint-disable-line no-unused-vars
+    }
   }]);
 
   return ContentBase;
@@ -3833,7 +3971,7 @@ var ContentBase = function () {
 
 exports.default = ContentBase;
 
-},{"../Constants":16}],18:[function(require,module,exports){
+},{"../Constants":17}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -3876,7 +4014,7 @@ var MobileServerBridge = function () {
         return response.json();
       }).then(function (result) {
         return _this.loginHandler(result);
-      }).catch(function (e) {
+      }).catch(function () {
         //retry after one second
         setTimeout(function () {
           return _this.connect();
@@ -3934,12 +4072,14 @@ var MobileServerBridge = function () {
 
 exports.default = MobileServerBridge;
 
-},{"isomorphic-fetch":2}],19:[function(require,module,exports){
+},{"isomorphic-fetch":2}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -3983,7 +4123,7 @@ var Presentation = function () {
   _createClass(Presentation, [{
     key: 'startListeningForMessages',
     value: function startListeningForMessages() {
-      window.addEventListener("message", this.slideMessageHandler.bind(this), false);
+      window.addEventListener('message', this.slideMessageHandler.bind(this), false);
     }
   }, {
     key: 'createSlideHolders',
@@ -3997,7 +4137,6 @@ var Presentation = function () {
   }, {
     key: 'createSlideBridges',
     value: function createSlideBridges(data) {
-      var that = this;
       var numSlides = data.slides.length;
       for (var i = 0; i < numSlides; i++) {
         var slideBridge = this.createSlideBridge(data.slides[i]);
@@ -4071,23 +4210,31 @@ var Presentation = function () {
     key: 'getSlideHolderForSlide',
     value: function getSlideHolderForSlide(slide, slidesNotToClear) {
       if (slide) {
-        var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
-        if ($slideHolder.length > 0) {
-          return $slideHolder[0];
-        }
-        //get a free slideHolder
-        var slideNamesNotToClear = [];
-        $(slidesNotToClear).each(function (index, obj) {
-          slideNamesNotToClear.push(obj.name);
-        });
-        var $slideHolders = $('.slide-frame');
-        for (var i = $slideHolders.length - 1; i >= 0; i--) {
-          $slideHolder = $($slideHolders[i]);
-          var name = $slideHolder.attr('data-name');
-          if (!name || slideNamesNotToClear.indexOf(name) === -1) {
-            return $slideHolder[0];
+        var _ret = function () {
+          var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
+          if ($slideHolder.length > 0) {
+            return {
+              v: $slideHolder[0]
+            };
           }
-        }
+          //get a free slideHolder
+          var slideNamesNotToClear = [];
+          $(slidesNotToClear).each(function (index, obj) {
+            slideNamesNotToClear.push(obj.name);
+          });
+          var $slideHolders = $('.slide-frame');
+          for (var i = $slideHolders.length - 1; i >= 0; i--) {
+            $slideHolder = $($slideHolders[i]);
+            var name = $slideHolder.attr('data-name');
+            if (!name || slideNamesNotToClear.indexOf(name) === -1) {
+              return {
+                v: $slideHolder[0]
+              };
+            }
+          }
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
       return false;
     }
@@ -4104,55 +4251,59 @@ var Presentation = function () {
   }, {
     key: 'setCurrentSlideIndex',
     value: function setCurrentSlideIndex(value) {
+      var _this = this;
+
       value = Math.max(0, Math.min(value, this.slideBridges.length - 1));
       if (value !== this.currentSlideIndex) {
-        this.currentSlideIndex = value;
+        (function () {
+          _this.currentSlideIndex = value;
 
-        var currentSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex);
-        var previousSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex - 1);
-        var nextSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex + 1);
+          var currentSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex);
+          var previousSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex - 1);
+          var nextSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex + 1);
 
-        //remove "used" class from slide holders
-        $('.slide-frame').removeAttr('data-used', false);
+          //remove "used" class from slide holders
+          $('.slide-frame').removeAttr('data-used', false);
 
-        var currentSlideHolder = this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
+          var currentSlideHolder = _this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
 
-        var previousSlideHolder = this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
+          var previousSlideHolder = _this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
 
-        var nextSlideHolder = this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
-        this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
+          var nextSlideHolder = _this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
+          _this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
 
-        //clear attributes of unused slide frames
-        $('.slide-frame').each(function (index, slideHolder) {
-          if (!$(slideHolder).attr('data-used')) {
-            $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
-          }
-        });
+          //clear attributes of unused slide frames
+          $('.slide-frame').each(function (index, slideHolder) {
+            if (!$(slideHolder).attr('data-used')) {
+              $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
+            }
+          });
 
-        //all other slideHolder bridges should be unlinked from their slideHolder
-        this.slideBridges.forEach(function (slideBridge) {
-          if (slideBridge === currentSlideBridge) {
-            return;
-          }
-          if (slideBridge === previousSlideBridge) {
-            return;
-          }
-          if (slideBridge === nextSlideBridge) {
-            return;
-          }
-          slideBridge.slideHolder = null;
-        });
+          //all other slideHolder bridges should be unlinked from their slideHolder
+          _this.slideBridges.forEach(function (slideBridge) {
+            if (slideBridge === currentSlideBridge) {
+              return;
+            }
+            if (slideBridge === previousSlideBridge) {
+              return;
+            }
+            if (slideBridge === nextSlideBridge) {
+              return;
+            }
+            slideBridge.slideHolder = null;
+          });
 
-        bean.fire(this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [this.currentSlideIndex]);
+          bean.fire(_this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [_this.currentSlideIndex]);
+        })();
       }
     }
   }, {
     key: 'setupSlideHolder',
     value: function setupSlideHolder(slideHolder, slideBridge, state, left) {
       if (slideHolder) {
-        var src = "slides/" + slideBridge.name + '.html';
+        var src = 'slides/' + slideBridge.name + '.html';
         if (slideBridge.data[this.role] && slideBridge.data[this.role].url) {
           src = slideBridge.data[this.role].url;
         }
@@ -4170,12 +4321,12 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
-      var _this = this;
+      var _this2 = this;
 
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        _this.slideMessageHandler({ data: message });
+        _this2.slideMessageHandler({ data: message });
       });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
@@ -4187,6 +4338,7 @@ var Presentation = function () {
   }, {
     key: 'slideLoaded',
     value: function slideLoaded(slideHolder, slideBridge) {
+      // eslint-disable-line no-unused-vars
       //join new channel
       if (this.mobileServerBridge) {
         this.mobileServerBridge.tryToSend(_Constants.Constants.JOIN_SLIDE_ROOM, $(slideHolder).attr('data-name'));
@@ -4209,7 +4361,7 @@ var Presentation = function () {
 
 exports.default = Presentation;
 
-},{"../Constants":16,"./SlideBridge":20}],20:[function(require,module,exports){
+},{"../Constants":17,"./SlideBridge":21}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4304,7 +4456,6 @@ var SlideBridge = function () {
 }();
 
 exports.default = SlideBridge;
-;
 
 },{"isomorphic-fetch":2}],"LiveCodeSlide":[function(require,module,exports){
 'use strict';
@@ -4381,7 +4532,7 @@ var LiveCodeSlide = function (_ContentBase) {
 
 exports.default = LiveCodeSlide;
 
-},{"../../../../shared/js/Constants":16,"../../../../shared/js/classes/ContentBase":17,"../live-code":13}],"VideoSlide":[function(require,module,exports){
+},{"../../../../shared/js/Constants":17,"../../../../shared/js/classes/ContentBase":18,"../live-code":14}],"VideoSlide":[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -4407,10 +4558,10 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var getParameterByName = function getParameterByName(url, name) {
-  name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-  var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)'),
       results = regex.exec(url);
-  return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  return results == null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
 var VideoSlide = function (_ContentBase) {
@@ -4439,13 +4590,15 @@ var VideoSlide = function (_ContentBase) {
 
     _this.video = _this.$slideHolder.find('video')[0];
     if (loop) {
-      $(_this.video).attr('loop', "loop");
+      $(_this.video).attr('loop', 'loop');
     }
     if (muted) {
-      $(_this.video).attr('muted', "muted");
+      $(_this.video).attr('muted', 'muted');
     }
     $(_this.video).attr('src', videoUrl);
-    _this._clickHandler = _this.clickHandler.bind(_this);
+    _this._clickHandler = function () {
+      return _this.toggleVideoPlaying();
+    };
     $(_this.video).on('click', _this._clickHandler);
     return _this;
   }
@@ -4464,11 +4617,6 @@ var VideoSlide = function (_ContentBase) {
       } else {
         this.setVideoPlaying(false);
       }
-    }
-  }, {
-    key: 'clickHandler',
-    value: function clickHandler(event) {
-      this.toggleVideoPlaying();
     }
   }, {
     key: 'setVideoPlaying',
@@ -4494,7 +4642,7 @@ var VideoSlide = function (_ContentBase) {
 
 exports.default = VideoSlide;
 
-},{"../../../../shared/js/Constants":16,"../../../../shared/js/classes/ContentBase":17}]},{},[14])
+},{"../../../../shared/js/Constants":17,"../../../../shared/js/classes/ContentBase":18}]},{},[15])
 
 
 //# sourceMappingURL=script.js.map
