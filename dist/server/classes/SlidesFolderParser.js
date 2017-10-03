@@ -15,7 +15,7 @@ if (!(typeof window !== "undefined" && window)) {
   requireNode = window.requireNode;
 }
 
-var fs = requireNode("fs-promise");
+var fs = requireNode("fs-extra");
 var path = requireNode("path");
 
 var getFileProperties = function getFileProperties(filePath) {

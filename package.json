@@ -46,7 +46,7 @@
     "es6-promise": "^4.0.5",
     "express": "^4.14.0",
     "forever": "^0.15.3",
-    "fs-promise": "^0.5.0",
+    "fs-extra": "^4.0.2",
     "google-auth-library": "^0.11.0",
     "googleapis": "^22.1.0",
     "isomorphic-fetch": "^2.2.1",

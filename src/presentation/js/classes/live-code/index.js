@@ -5,7 +5,7 @@ import WebPreviewElement from './WebPreviewElement';
 import WebcamElement from './WebcamElement';
 
 const path = requireNode(`path`);
-const fs = requireNode(`fs-promise`);
+const fs = requireNode(`fs-extra`);
 
 export default class LiveCode {
 

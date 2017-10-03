@@ -5,7 +5,7 @@ if(!(typeof window !== `undefined` && window)) {
   requireNode = window.requireNode;
 }
 
-const fs = requireNode(`fs-promise`);
+const fs = requireNode(`fs-extra`);
 const path = requireNode(`path`);
 
 const getFileProperties = filePath => {
