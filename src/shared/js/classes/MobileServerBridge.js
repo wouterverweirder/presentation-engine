@@ -9,6 +9,9 @@ export default class MobileServerBridge {
   }
 
   connect() {
+    if (!this.settings.mobileServerUrl) {
+      return;
+    }
     console.log(`MobileServerBridge.connect`);
     //console.warn('MobileServerBridge disabled');
     //return;

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
   value: true
@@ -8,19 +8,20 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-if (!(typeof window !== 'undefined' && window)) {
-  var requireNode = require;
+var requireNode = void 0;
+if (!(typeof window !== "undefined" && window)) {
+  requireNode = require;
 } else {
-  var requireNode = window.requireNode;
+  requireNode = window.requireNode;
 }
 
-var fs = requireNode('fs-promise');
-var path = requireNode('path');
+var fs = requireNode("fs-promise");
+var path = requireNode("path");
 
 var getFileProperties = function getFileProperties(filePath) {
   var _fd = void 0,
       _o = void 0;
-  return fs.open(filePath, 'r').then(function (fd) {
+  return fs.open(filePath, "r").then(function (fd) {
     _fd = fd;
     return fd;
   }).then(function (fd) {
@@ -28,7 +29,7 @@ var getFileProperties = function getFileProperties(filePath) {
   }).then(function (o) {
     _o = o;
     return _o;
-  }).then(function (o) {
+  }).then(function () {
     return fs.close(_fd);
   }).then(function () {
     return {
@@ -45,14 +46,14 @@ var SlidesFolderParser = function () {
   }
 
   _createClass(SlidesFolderParser, [{
-    key: 'parse',
+    key: "parse",
     value: function parse(presentationPath, slidesFolderPath) {
       var _this = this;
 
       //read the contents of the slides directory
       return fs.readdir(slidesFolderPath).then(function (result) {
         return result.filter(function (name) {
-          return name.indexOf('.') > 0;
+          return name.indexOf(".") > 0;
         });
       }).then(function (result) {
         return result.map(function (name) {
@@ -81,13 +82,13 @@ var SlidesFolderParser = function () {
       });
     }
   }, {
-    key: 'parseSlideBaseName',
+    key: "parseSlideBaseName",
     value: function parseSlideBaseName(slideBaseName) {
       var parsed = {};
       parsed.ext = path.extname(slideBaseName);
       parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
-      var splitted = parsed.name.split('.');
-      var keywords = ['mobile', 'desktop', 'muted', 'loop', 'cover'];
+      var splitted = parsed.name.split(".");
+      var keywords = ["mobile", "desktop", "muted", "loop", "cover"];
       keywords.forEach(function (keyword) {
         var index = splitted.indexOf(keyword);
         if (index > -1) {
@@ -95,20 +96,20 @@ var SlidesFolderParser = function () {
           splitted.splice(index, 1);
         }
       });
-      parsed.name = splitted.join('.');
+      parsed.name = splitted.join(".");
       return parsed;
     }
   }, {
-    key: 'createSlideObjectBasedOnFileProperties',
+    key: "createSlideObjectBasedOnFileProperties",
     value: function createSlideObjectBasedOnFileProperties(fileProperties, presentationPath, slidesByName) {
 
       var parsed = this.parseSlideBaseName(path.basename(fileProperties.path));
-      var url = path.relative(presentationPath, fileProperties.path).replace('\\', '/');
-      if (parsed.ext === '.jpg' || parsed.ext === '.jpeg' || parsed.ext === '.gif' || parsed.ext === '.png') {
-        url = 'slides-builtin/image.html?image=' + url;
+      var url = path.relative(presentationPath, fileProperties.path).replace("\\", "/");
+      if (parsed.ext === ".jpg" || parsed.ext === ".jpeg" || parsed.ext === ".gif" || parsed.ext === ".png") {
+        url = "slides-builtin/image.html?image=" + url;
       }
-      if (parsed.ext === '.mp4') {
-        url = 'slides-builtin/video.html?video=' + url;
+      if (parsed.ext === ".mp4") {
+        url = "slides-builtin/video.html?video=" + url;
       }
       if (slidesByName[parsed.name]) {
         if (parsed.mobile) {

@@ -17,9 +17,9 @@ var path = require('path'),
     _ = require('lodash');
 
 var port = process.env.PORT || 5000;
-var jwtSecret = process.env.PRESENTATION_JWTSECRET || "JdklmazeXHkdlsfdezaiHJK67hdf87";
-var username = process.env.PRESENTATION_USERNAME || "wouter.verweirder@gmail.com";
-var password = process.env.PRESENTATION_PASSWORD || "geheim";
+var jwtSecret = process.env.PRESENTATION_JWTSECRET || 'JdklmazeXHkdlsfdezaiHJK67hdf87';
+var username = process.env.PRESENTATION_USERNAME || 'wouter.verweirder@gmail.com';
+var password = process.env.PRESENTATION_PASSWORD || 'geheim';
 var presentationPath = path.resolve(__dirname, '..', 'presentation');
 
 var data = {};
@@ -48,8 +48,8 @@ app.get('/data.json', function (req, res) {
 });
 
 app.post('/remote/:action', function (req, res) {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With');
   //check credentials
   if (req.body.email === username && req.body.password === password) {
     if (req.params.action === 'previous') {
@@ -75,7 +75,7 @@ app.post('/remote/:action', function (req, res) {
 
 app.post('/login', function (req, res) {
   console.log('login post received');
-  var token;
+  var token = void 0;
   if (req.body.email === username && req.body.password === password) {
     var profile = {
       email: username,
@@ -174,10 +174,12 @@ ClientHandler.prototype.leaveSlideRoomHandler = function (roomName) {
 };
 
 ClientHandler.prototype.disconnectHandler = function () {
+  var _this = this;
+
   var roomNames = Object.keys(this.rooms);
-  roomNames.forEach(function (roomName, i) {
-    this.leave(roomName);
-  }, this);
+  roomNames.forEach(function (roomName) {
+    _this.leave(roomName);
+  });
 };
 
 var sendMessage = function sendMessage(message) {
