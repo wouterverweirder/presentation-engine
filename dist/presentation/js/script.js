@@ -2385,7 +2385,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var fs = requireNode("fs-promise");
+var fs = requireNode("fs-extra");
 
 var CodeElement = function () {
   function CodeElement(el, options) {
@@ -3084,7 +3084,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var path = requireNode('path');
-var fs = requireNode('fs-promise');
+var fs = requireNode('fs-extra');
 
 var LiveCode = function () {
   function LiveCode($el, config, readyCallback) {
@@ -3661,7 +3661,7 @@ if (!(typeof window !== "undefined" && window)) {
   requireNode = window.requireNode;
 }
 
-var fs = requireNode("fs-promise");
+var fs = requireNode("fs-extra");
 var path = requireNode("path");
 
 var getFileProperties = function getFileProperties(filePath) {
