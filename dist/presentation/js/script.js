@@ -2820,9 +2820,10 @@ var WebPreviewElement = function () {
     }
 
     this.file = this.$el.data("file") || this.$el.data("url");
-    this.autoload = this.$el.data("autoload");
+    this.autoload = this.$el.data("autoload") || false;
+    this.zoomfactor = this.$el.data("zoomfactor") || false;
 
-    this.console = this.$el.data("console");
+    this.console = this.$el.data("console") || false;
 
     this.$el.css("width", "100%").css("height", "100%");
 
@@ -2843,6 +2844,7 @@ var WebPreviewElement = function () {
       this.isRunning = false;
       if (this.webview) {
         this.webview.removeEventListener("did-get-response-details", this._didGetResponseDetailsHandler);
+        this.webview.removeEventListener("dom-ready", this._domReadyHandler);
         this.webview.removeEventListener("did-fail-load", this._didFailLoadHandler);
         this.webview.removeEventListener("ipc-message", this._ipcMessageHandler);
         this.webview.parentNode.removeChild(this.webview);
@@ -2896,6 +2898,14 @@ var WebPreviewElement = function () {
         }
       };
       this.webview.addEventListener("did-get-response-details", this._didGetResponseDetailsHandler);
+
+      this._domReadyHandler = function (e) {
+        if (_this.zoomfactor) {
+          var zoomfactor = parseFloat(_this.zoomfactor);
+          _this.webview.setZoomFactor(zoomfactor);
+        }
+      };
+      this.webview.addEventListener("dom-ready", this._domReadyHandler);
 
       this._didFailLoadHandler = function () {
         _this.retryTimeout = setTimeout(function () {
