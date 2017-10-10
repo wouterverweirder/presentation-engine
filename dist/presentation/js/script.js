@@ -4672,6 +4672,81 @@ var VideoSlide = function (_ContentBase) {
 
 exports.default = VideoSlide;
 
+},{"../../../../shared/js/Constants":17,"../../../../shared/js/classes/ContentBase":18}],"WebviewSlide":[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _Constants = require('../../../../shared/js/Constants');
+
+var _ContentBase2 = require('../../../../shared/js/classes/ContentBase');
+
+var _ContentBase3 = _interopRequireDefault(_ContentBase2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var WebviewSlide = function (_ContentBase) {
+  _inherits(WebviewSlide, _ContentBase);
+
+  function WebviewSlide($slideHolder) {
+    _classCallCheck(this, WebviewSlide);
+
+    var _this = _possibleConstructorReturn(this, (WebviewSlide.__proto__ || Object.getPrototypeOf(WebviewSlide)).call(this, $slideHolder));
+
+    _this.webviewMuted = false;
+
+    _this.webview = _this.$slideHolder.find('webview')[0];
+    return _this;
+  }
+
+  _createClass(WebviewSlide, [{
+    key: 'destroy',
+    value: function destroy() {
+      _get(WebviewSlide.prototype.__proto__ || Object.getPrototypeOf(WebviewSlide.prototype), 'destroy', this).call(this);
+    }
+  }, {
+    key: 'onStateChanged',
+    value: function onStateChanged() {
+      if (this.state === _Constants.Constants.STATE_ACTIVE) {
+        this.setWebviewMuted(false);
+      } else {
+        this.setWebviewMuted(true);
+      }
+    }
+  }, {
+    key: 'setWebviewMuted',
+    value: function setWebviewMuted(value) {
+      if (value !== this.webviewMuted) {
+        this.webviewMuted = value;
+        if (!this.webview) {
+          return;
+        }
+        if (this.webviewMuted) {
+          this.webview.setAudioMuted(true);
+        } else {
+          this.webview.setAudioMuted(false);
+        }
+      }
+    }
+  }]);
+
+  return WebviewSlide;
+}(_ContentBase3.default);
+
+exports.default = WebviewSlide;
+
 },{"../../../../shared/js/Constants":17,"../../../../shared/js/classes/ContentBase":18}]},{},[15])
 
 //# sourceMappingURL=script.js.map

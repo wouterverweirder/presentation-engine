@@ -91,6 +91,7 @@ const presentationScriptsTask = function(watch) {
   const b = browserify(`${config.presentation.js.src  }/script.js`, { debug: gutil.env.type !== `production` })
     .require(`${__dirname  }/${  config.presentation.js.src  }/classes/live-code-slide/index.js`, { expose: `LiveCodeSlide`})
     .require(`${__dirname  }/${  config.presentation.js.src  }/classes/video-slide/index.js`, { expose: `VideoSlide`})
+    .require(`${__dirname  }/${  config.presentation.js.src  }/classes/webview-slide/index.js`, { expose: `WebviewSlide`})
     .transform(babelify);
 
   return scriptsTask(b, watch, `script.js`, config.presentation.js.dst);
