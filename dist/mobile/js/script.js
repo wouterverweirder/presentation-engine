@@ -29,28 +29,6 @@ module.exports = self.fetch.bind(self);
     arrayBuffer: 'ArrayBuffer' in self
   }
 
-  if (support.arrayBuffer) {
-    var viewClasses = [
-      '[object Int8Array]',
-      '[object Uint8Array]',
-      '[object Uint8ClampedArray]',
-      '[object Int16Array]',
-      '[object Uint16Array]',
-      '[object Int32Array]',
-      '[object Uint32Array]',
-      '[object Float32Array]',
-      '[object Float64Array]'
-    ]
-
-    var isDataView = function(obj) {
-      return obj && DataView.prototype.isPrototypeOf(obj)
-    }
-
-    var isArrayBufferView = ArrayBuffer.isView || function(obj) {
-      return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
-    }
-  }
-
   function normalizeName(name) {
     if (typeof name !== 'string') {
       name = String(name)
@@ -93,10 +71,7 @@ module.exports = self.fetch.bind(self);
       headers.forEach(function(value, name) {
         this.append(name, value)
       }, this)
-    } else if (Array.isArray(headers)) {
-      headers.forEach(function(header) {
-        this.append(header[0], header[1])
-      }, this)
+
     } else if (headers) {
       Object.getOwnPropertyNames(headers).forEach(function(name) {
         this.append(name, headers[name])
@@ -107,8 +82,12 @@ module.exports = self.fetch.bind(self);
   Headers.prototype.append = function(name, value) {
     name = normalizeName(name)
     value = normalizeValue(value)
-    var oldValue = this.map[name]
-    this.map[name] = oldValue ? oldValue+','+value : value
+    var list = this.map[name]
+    if (!list) {
+      list = []
+      this.map[name] = list
+    }
+    list.push(value)
   }
 
   Headers.prototype['delete'] = function(name) {
@@ -116,8 +95,12 @@ module.exports = self.fetch.bind(self);
   }
 
   Headers.prototype.get = function(name) {
-    name = normalizeName(name)
-    return this.has(name) ? this.map[name] : null
+    var values = this.map[normalizeName(name)]
+    return values ? values[0] : null
+  }
+
+  Headers.prototype.getAll = function(name) {
+    return this.map[normalizeName(name)] || []
   }
 
   Headers.prototype.has = function(name) {
@@ -125,15 +108,15 @@ module.exports = self.fetch.bind(self);
   }
 
   Headers.prototype.set = function(name, value) {
-    this.map[normalizeName(name)] = normalizeValue(value)
+    this.map[normalizeName(name)] = [normalizeValue(value)]
   }
 
   Headers.prototype.forEach = function(callback, thisArg) {
-    for (var name in this.map) {
-      if (this.map.hasOwnProperty(name)) {
-        callback.call(thisArg, this.map[name], name, this)
-      }
-    }
+    Object.getOwnPropertyNames(this.map).forEach(function(name) {
+      this.map[name].forEach(function(value) {
+        callback.call(thisArg, value, name, this)
+      }, this)
+    }, this)
   }
 
   Headers.prototype.keys = function() {
@@ -178,36 +161,14 @@ module.exports = self.fetch.bind(self);
 
   function readBlobAsArrayBuffer(blob) {
     var reader = new FileReader()
-    var promise = fileReaderReady(reader)
     reader.readAsArrayBuffer(blob)
-    return promise
+    return fileReaderReady(reader)
   }
 
   function readBlobAsText(blob) {
     var reader = new FileReader()
-    var promise = fileReaderReady(reader)
     reader.readAsText(blob)
-    return promise
-  }
-
-  function readArrayBufferAsText(buf) {
-    var view = new Uint8Array(buf)
-    var chars = new Array(view.length)
-
-    for (var i = 0; i < view.length; i++) {
-      chars[i] = String.fromCharCode(view[i])
-    }
-    return chars.join('')
-  }
-
-  function bufferClone(buf) {
-    if (buf.slice) {
-      return buf.slice(0)
-    } else {
-      var view = new Uint8Array(buf.byteLength)
-      view.set(new Uint8Array(buf))
-      return view.buffer
-    }
+    return fileReaderReady(reader)
   }
 
   function Body() {
@@ -215,9 +176,7 @@ module.exports = self.fetch.bind(self);
 
     this._initBody = function(body) {
       this._bodyInit = body
-      if (!body) {
-        this._bodyText = ''
-      } else if (typeof body === 'string') {
+      if (typeof body === 'string') {
         this._bodyText = body
       } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
         this._bodyBlob = body
@@ -225,12 +184,11 @@ module.exports = self.fetch.bind(self);
         this._bodyFormData = body
       } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
         this._bodyText = body.toString()
-      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
-        this._bodyArrayBuffer = bufferClone(body.buffer)
-        // IE 10-11 can't handle a DataView body.
-        this._bodyInit = new Blob([this._bodyArrayBuffer])
-      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
-        this._bodyArrayBuffer = bufferClone(body)
+      } else if (!body) {
+        this._bodyText = ''
+      } else if (support.arrayBuffer && ArrayBuffer.prototype.isPrototypeOf(body)) {
+        // Only support ArrayBuffers for POST method.
+        // Receiving ArrayBuffers happens via Blobs, instead.
       } else {
         throw new Error('unsupported BodyInit type')
       }
@@ -255,8 +213,6 @@ module.exports = self.fetch.bind(self);
 
         if (this._bodyBlob) {
           return Promise.resolve(this._bodyBlob)
-        } else if (this._bodyArrayBuffer) {
-          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as blob')
         } else {
@@ -265,28 +221,27 @@ module.exports = self.fetch.bind(self);
       }
 
       this.arrayBuffer = function() {
-        if (this._bodyArrayBuffer) {
-          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+        return this.blob().then(readBlobAsArrayBuffer)
+      }
+
+      this.text = function() {
+        var rejected = consumed(this)
+        if (rejected) {
+          return rejected
+        }
+
+        if (this._bodyBlob) {
+          return readBlobAsText(this._bodyBlob)
+        } else if (this._bodyFormData) {
+          throw new Error('could not read FormData body as text')
         } else {
-          return this.blob().then(readBlobAsArrayBuffer)
+          return Promise.resolve(this._bodyText)
         }
       }
-    }
-
-    this.text = function() {
-      var rejected = consumed(this)
-      if (rejected) {
-        return rejected
-      }
-
-      if (this._bodyBlob) {
-        return readBlobAsText(this._bodyBlob)
-      } else if (this._bodyArrayBuffer) {
-        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
-      } else if (this._bodyFormData) {
-        throw new Error('could not read FormData body as text')
-      } else {
-        return Promise.resolve(this._bodyText)
+    } else {
+      this.text = function() {
+        var rejected = consumed(this)
+        return rejected ? rejected : Promise.resolve(this._bodyText)
       }
     }
 
@@ -314,8 +269,7 @@ module.exports = self.fetch.bind(self);
   function Request(input, options) {
     options = options || {}
     var body = options.body
-
-    if (input instanceof Request) {
+    if (Request.prototype.isPrototypeOf(input)) {
       if (input.bodyUsed) {
         throw new TypeError('Already read')
       }
@@ -326,12 +280,12 @@ module.exports = self.fetch.bind(self);
       }
       this.method = input.method
       this.mode = input.mode
-      if (!body && input._bodyInit != null) {
+      if (!body) {
         body = input._bodyInit
         input.bodyUsed = true
       }
     } else {
-      this.url = String(input)
+      this.url = input
     }
 
     this.credentials = options.credentials || this.credentials || 'omit'
@@ -349,7 +303,7 @@ module.exports = self.fetch.bind(self);
   }
 
   Request.prototype.clone = function() {
-    return new Request(this, { body: this._bodyInit })
+    return new Request(this)
   }
 
   function decode(body) {
@@ -365,17 +319,16 @@ module.exports = self.fetch.bind(self);
     return form
   }
 
-  function parseHeaders(rawHeaders) {
-    var headers = new Headers()
-    rawHeaders.split(/\r?\n/).forEach(function(line) {
-      var parts = line.split(':')
-      var key = parts.shift().trim()
-      if (key) {
-        var value = parts.join(':').trim()
-        headers.append(key, value)
-      }
+  function headers(xhr) {
+    var head = new Headers()
+    var pairs = (xhr.getAllResponseHeaders() || '').trim().split('\n')
+    pairs.forEach(function(header) {
+      var split = header.trim().split(':')
+      var key = split.shift().trim()
+      var value = split.join(':').trim()
+      head.append(key, value)
     })
-    return headers
+    return head
   }
 
   Body.call(Request.prototype)
@@ -386,10 +339,10 @@ module.exports = self.fetch.bind(self);
     }
 
     this.type = 'default'
-    this.status = 'status' in options ? options.status : 200
+    this.status = options.status
     this.ok = this.status >= 200 && this.status < 300
-    this.statusText = 'statusText' in options ? options.statusText : 'OK'
-    this.headers = new Headers(options.headers)
+    this.statusText = options.statusText
+    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers)
     this.url = options.url || ''
     this._initBody(bodyInit)
   }
@@ -427,16 +380,35 @@ module.exports = self.fetch.bind(self);
 
   self.fetch = function(input, init) {
     return new Promise(function(resolve, reject) {
-      var request = new Request(input, init)
+      var request
+      if (Request.prototype.isPrototypeOf(input) && !init) {
+        request = input
+      } else {
+        request = new Request(input, init)
+      }
+
       var xhr = new XMLHttpRequest()
+
+      function responseURL() {
+        if ('responseURL' in xhr) {
+          return xhr.responseURL
+        }
+
+        // Avoid security warnings on getResponseHeader when not allowed by CORS
+        if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
+          return xhr.getResponseHeader('X-Request-URL')
+        }
+
+        return
+      }
 
       xhr.onload = function() {
         var options = {
           status: xhr.status,
           statusText: xhr.statusText,
-          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
+          headers: headers(xhr),
+          url: responseURL()
         }
-        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
         var body = 'response' in xhr ? xhr.response : xhr.responseText
         resolve(new Response(body, options))
       }
@@ -762,6 +734,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Constants = require('../Constants');
@@ -891,23 +865,31 @@ var Presentation = function () {
     key: 'getSlideHolderForSlide',
     value: function getSlideHolderForSlide(slide, slidesNotToClear) {
       if (slide) {
-        var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
-        if ($slideHolder.length > 0) {
-          return $slideHolder[0];
-        }
-        //get a free slideHolder
-        var slideNamesNotToClear = [];
-        $(slidesNotToClear).each(function (index, obj) {
-          slideNamesNotToClear.push(obj.name);
-        });
-        var $slideHolders = $('.slide-frame');
-        for (var i = $slideHolders.length - 1; i >= 0; i--) {
-          $slideHolder = $($slideHolders[i]);
-          var name = $slideHolder.attr('data-name');
-          if (!name || slideNamesNotToClear.indexOf(name) === -1) {
-            return $slideHolder[0];
+        var _ret = function () {
+          var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
+          if ($slideHolder.length > 0) {
+            return {
+              v: $slideHolder[0]
+            };
           }
-        }
+          //get a free slideHolder
+          var slideNamesNotToClear = [];
+          $(slidesNotToClear).each(function (index, obj) {
+            slideNamesNotToClear.push(obj.name);
+          });
+          var $slideHolders = $('.slide-frame');
+          for (var i = $slideHolders.length - 1; i >= 0; i--) {
+            $slideHolder = $($slideHolders[i]);
+            var name = $slideHolder.attr('data-name');
+            if (!name || slideNamesNotToClear.indexOf(name) === -1) {
+              return {
+                v: $slideHolder[0]
+              };
+            }
+          }
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
       return false;
     }
@@ -924,48 +906,52 @@ var Presentation = function () {
   }, {
     key: 'setCurrentSlideIndex',
     value: function setCurrentSlideIndex(value) {
+      var _this = this;
+
       value = Math.max(0, Math.min(value, this.slideBridges.length - 1));
       if (value !== this.currentSlideIndex) {
-        this.currentSlideIndex = value;
+        (function () {
+          _this.currentSlideIndex = value;
 
-        var currentSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex);
-        var previousSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex - 1);
-        var nextSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex + 1);
+          var currentSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex);
+          var previousSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex - 1);
+          var nextSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex + 1);
 
-        //remove "used" class from slide holders
-        $('.slide-frame').removeAttr('data-used', false);
+          //remove "used" class from slide holders
+          $('.slide-frame').removeAttr('data-used', false);
 
-        var currentSlideHolder = this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
+          var currentSlideHolder = _this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
 
-        var previousSlideHolder = this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
+          var previousSlideHolder = _this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
 
-        var nextSlideHolder = this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
-        this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
+          var nextSlideHolder = _this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
+          _this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
 
-        //clear attributes of unused slide frames
-        $('.slide-frame').each(function (index, slideHolder) {
-          if (!$(slideHolder).attr('data-used')) {
-            $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
-          }
-        });
+          //clear attributes of unused slide frames
+          $('.slide-frame').each(function (index, slideHolder) {
+            if (!$(slideHolder).attr('data-used')) {
+              $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
+            }
+          });
 
-        //all other slideHolder bridges should be unlinked from their slideHolder
-        this.slideBridges.forEach(function (slideBridge) {
-          if (slideBridge === currentSlideBridge) {
-            return;
-          }
-          if (slideBridge === previousSlideBridge) {
-            return;
-          }
-          if (slideBridge === nextSlideBridge) {
-            return;
-          }
-          slideBridge.slideHolder = null;
-        });
+          //all other slideHolder bridges should be unlinked from their slideHolder
+          _this.slideBridges.forEach(function (slideBridge) {
+            if (slideBridge === currentSlideBridge) {
+              return;
+            }
+            if (slideBridge === previousSlideBridge) {
+              return;
+            }
+            if (slideBridge === nextSlideBridge) {
+              return;
+            }
+            slideBridge.slideHolder = null;
+          });
 
-        bean.fire(this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [this.currentSlideIndex]);
+          bean.fire(_this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [_this.currentSlideIndex]);
+        })();
       }
     }
   }, {
@@ -990,12 +976,12 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
-      var _this = this;
+      var _this2 = this;
 
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        _this.slideMessageHandler({ data: message });
+        _this2.slideMessageHandler({ data: message });
       });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
@@ -1127,5 +1113,6 @@ var SlideBridge = function () {
 exports.default = SlideBridge;
 
 },{"isomorphic-fetch":1}]},{},[4])
+
 
 //# sourceMappingURL=script.js.map

@@ -9,7 +9,8 @@ window.io = io;
 window._ = _;
 
 window.Tether = require(`tether`);
-require(`../../vendors/bootstrap-4.0.0-alpha.2/dist/js/bootstrap`);
+window.Popper = require(`popper.js`);
+require(`../../../node_modules/bootstrap/dist/js/bootstrap.js`);
 
 window.CodeMirror = require(`../../../node_modules/codemirror/lib/codemirror.js`);
 require(`../../../node_modules/codemirror/mode/javascript/javascript.js`);

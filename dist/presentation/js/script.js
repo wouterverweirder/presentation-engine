@@ -5,18 +5,17 @@ require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof requ
  * @copyright Copyright (c) 2014 Yehuda Katz, Tom Dale, Stefan Penner and contributors (Conversion to ES6 API by Jake Archibald)
  * @license   Licensed under MIT license
  *            See https://raw.githubusercontent.com/stefanpenner/es6-promise/master/LICENSE
- * @version   4.1.1
+ * @version   4.0.5
  */
 
 (function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-	typeof define === 'function' && define.amd ? define(factory) :
-	(global.ES6Promise = factory());
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+    typeof define === 'function' && define.amd ? define(factory) :
+    (global.ES6Promise = factory());
 }(this, (function () { 'use strict';
 
 function objectOrFunction(x) {
-  var type = typeof x;
-  return x !== null && (type === 'object' || type === 'function');
+  return typeof x === 'function' || typeof x === 'object' && x !== null;
 }
 
 function isFunction(x) {
@@ -24,12 +23,12 @@ function isFunction(x) {
 }
 
 var _isArray = undefined;
-if (Array.isArray) {
-  _isArray = Array.isArray;
-} else {
+if (!Array.isArray) {
   _isArray = function (x) {
     return Object.prototype.toString.call(x) === '[object Array]';
   };
+} else {
+  _isArray = Array.isArray;
 }
 
 var isArray = _isArray;
@@ -217,7 +216,7 @@ function then(onFulfillment, onRejection) {
   @return {Promise} a promise that will become fulfilled with the given
   `value`
 */
-function resolve$1(object) {
+function resolve(object) {
   /*jshint validthis:true */
   var Constructor = this;
 
@@ -226,7 +225,7 @@ function resolve$1(object) {
   }
 
   var promise = new Constructor(noop);
-  resolve(promise, object);
+  _resolve(promise, object);
   return promise;
 }
 
@@ -257,24 +256,24 @@ function getThen(promise) {
   }
 }
 
-function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
+function tryThen(then, value, fulfillmentHandler, rejectionHandler) {
   try {
-    then$$1.call(value, fulfillmentHandler, rejectionHandler);
+    then.call(value, fulfillmentHandler, rejectionHandler);
   } catch (e) {
     return e;
   }
 }
 
-function handleForeignThenable(promise, thenable, then$$1) {
+function handleForeignThenable(promise, thenable, then) {
   asap(function (promise) {
     var sealed = false;
-    var error = tryThen(then$$1, thenable, function (value) {
+    var error = tryThen(then, thenable, function (value) {
       if (sealed) {
         return;
       }
       sealed = true;
       if (thenable !== value) {
-        resolve(promise, value);
+        _resolve(promise, value);
       } else {
         fulfill(promise, value);
       }
@@ -284,12 +283,12 @@ function handleForeignThenable(promise, thenable, then$$1) {
       }
       sealed = true;
 
-      reject(promise, reason);
+      _reject(promise, reason);
     }, 'Settle: ' + (promise._label || ' unknown promise'));
 
     if (!sealed && error) {
       sealed = true;
-      reject(promise, error);
+      _reject(promise, error);
     }
   }, promise);
 }
@@ -298,36 +297,35 @@ function handleOwnThenable(promise, thenable) {
   if (thenable._state === FULFILLED) {
     fulfill(promise, thenable._result);
   } else if (thenable._state === REJECTED) {
-    reject(promise, thenable._result);
+    _reject(promise, thenable._result);
   } else {
     subscribe(thenable, undefined, function (value) {
-      return resolve(promise, value);
+      return _resolve(promise, value);
     }, function (reason) {
-      return reject(promise, reason);
+      return _reject(promise, reason);
     });
   }
 }
 
-function handleMaybeThenable(promise, maybeThenable, then$$1) {
-  if (maybeThenable.constructor === promise.constructor && then$$1 === then && maybeThenable.constructor.resolve === resolve$1) {
+function handleMaybeThenable(promise, maybeThenable, then$$) {
+  if (maybeThenable.constructor === promise.constructor && then$$ === then && maybeThenable.constructor.resolve === resolve) {
     handleOwnThenable(promise, maybeThenable);
   } else {
-    if (then$$1 === GET_THEN_ERROR) {
-      reject(promise, GET_THEN_ERROR.error);
-      GET_THEN_ERROR.error = null;
-    } else if (then$$1 === undefined) {
+    if (then$$ === GET_THEN_ERROR) {
+      _reject(promise, GET_THEN_ERROR.error);
+    } else if (then$$ === undefined) {
       fulfill(promise, maybeThenable);
-    } else if (isFunction(then$$1)) {
-      handleForeignThenable(promise, maybeThenable, then$$1);
+    } else if (isFunction(then$$)) {
+      handleForeignThenable(promise, maybeThenable, then$$);
     } else {
       fulfill(promise, maybeThenable);
     }
   }
 }
 
-function resolve(promise, value) {
+function _resolve(promise, value) {
   if (promise === value) {
-    reject(promise, selfFulfillment());
+    _reject(promise, selfFulfillment());
   } else if (objectOrFunction(value)) {
     handleMaybeThenable(promise, value, getThen(value));
   } else {
@@ -356,7 +354,7 @@ function fulfill(promise, value) {
   }
 }
 
-function reject(promise, reason) {
+function _reject(promise, reason) {
   if (promise._state !== PENDING) {
     return;
   }
@@ -435,13 +433,13 @@ function invokeCallback(settled, promise, callback, detail) {
     if (value === TRY_CATCH_ERROR) {
       failed = true;
       error = value.error;
-      value.error = null;
+      value = null;
     } else {
       succeeded = true;
     }
 
     if (promise === value) {
-      reject(promise, cannotReturnOwn());
+      _reject(promise, cannotReturnOwn());
       return;
     }
   } else {
@@ -452,25 +450,25 @@ function invokeCallback(settled, promise, callback, detail) {
   if (promise._state !== PENDING) {
     // noop
   } else if (hasCallback && succeeded) {
-      resolve(promise, value);
+      _resolve(promise, value);
     } else if (failed) {
-      reject(promise, error);
+      _reject(promise, error);
     } else if (settled === FULFILLED) {
       fulfill(promise, value);
     } else if (settled === REJECTED) {
-      reject(promise, value);
+      _reject(promise, value);
     }
 }
 
 function initializePromise(promise, resolver) {
   try {
     resolver(function resolvePromise(value) {
-      resolve(promise, value);
+      _resolve(promise, value);
     }, function rejectPromise(reason) {
-      reject(promise, reason);
+      _reject(promise, reason);
     });
   } catch (e) {
-    reject(promise, e);
+    _reject(promise, e);
   }
 }
 
@@ -486,7 +484,7 @@ function makePromise(promise) {
   promise._subscribers = [];
 }
 
-function Enumerator$1(Constructor, input) {
+function Enumerator(Constructor, input) {
   this._instanceConstructor = Constructor;
   this.promise = new Constructor(noop);
 
@@ -495,6 +493,7 @@ function Enumerator$1(Constructor, input) {
   }
 
   if (isArray(input)) {
+    this._input = input;
     this.length = input.length;
     this._remaining = input.length;
 
@@ -504,31 +503,34 @@ function Enumerator$1(Constructor, input) {
       fulfill(this.promise, this._result);
     } else {
       this.length = this.length || 0;
-      this._enumerate(input);
+      this._enumerate();
       if (this._remaining === 0) {
         fulfill(this.promise, this._result);
       }
     }
   } else {
-    reject(this.promise, validationError());
+    _reject(this.promise, validationError());
   }
 }
 
 function validationError() {
   return new Error('Array Methods must be provided an Array');
-}
+};
 
-Enumerator$1.prototype._enumerate = function (input) {
-  for (var i = 0; this._state === PENDING && i < input.length; i++) {
-    this._eachEntry(input[i], i);
+Enumerator.prototype._enumerate = function () {
+  var length = this.length;
+  var _input = this._input;
+
+  for (var i = 0; this._state === PENDING && i < length; i++) {
+    this._eachEntry(_input[i], i);
   }
 };
 
-Enumerator$1.prototype._eachEntry = function (entry, i) {
+Enumerator.prototype._eachEntry = function (entry, i) {
   var c = this._instanceConstructor;
-  var resolve$$1 = c.resolve;
+  var resolve$$ = c.resolve;
 
-  if (resolve$$1 === resolve$1) {
+  if (resolve$$ === resolve) {
     var _then = getThen(entry);
 
     if (_then === then && entry._state !== PENDING) {
@@ -536,28 +538,28 @@ Enumerator$1.prototype._eachEntry = function (entry, i) {
     } else if (typeof _then !== 'function') {
       this._remaining--;
       this._result[i] = entry;
-    } else if (c === Promise$2) {
+    } else if (c === Promise) {
       var promise = new c(noop);
       handleMaybeThenable(promise, entry, _then);
       this._willSettleAt(promise, i);
     } else {
-      this._willSettleAt(new c(function (resolve$$1) {
-        return resolve$$1(entry);
+      this._willSettleAt(new c(function (resolve$$) {
+        return resolve$$(entry);
       }), i);
     }
   } else {
-    this._willSettleAt(resolve$$1(entry), i);
+    this._willSettleAt(resolve$$(entry), i);
   }
 };
 
-Enumerator$1.prototype._settledAt = function (state, i, value) {
+Enumerator.prototype._settledAt = function (state, i, value) {
   var promise = this.promise;
 
   if (promise._state === PENDING) {
     this._remaining--;
 
     if (state === REJECTED) {
-      reject(promise, value);
+      _reject(promise, value);
     } else {
       this._result[i] = value;
     }
@@ -568,7 +570,7 @@ Enumerator$1.prototype._settledAt = function (state, i, value) {
   }
 };
 
-Enumerator$1.prototype._willSettleAt = function (promise, i) {
+Enumerator.prototype._willSettleAt = function (promise, i) {
   var enumerator = this;
 
   subscribe(promise, undefined, function (value) {
@@ -625,8 +627,8 @@ Enumerator$1.prototype._willSettleAt = function (promise, i) {
   fulfilled, or rejected if any of them become rejected.
   @static
 */
-function all$1(entries) {
-  return new Enumerator$1(this, entries).promise;
+function all(entries) {
+  return new Enumerator(this, entries).promise;
 }
 
 /**
@@ -694,7 +696,7 @@ function all$1(entries) {
   @return {Promise} a promise which settles in the same way as the first passed
   promise to settle.
 */
-function race$1(entries) {
+function race(entries) {
   /*jshint validthis:true */
   var Constructor = this;
 
@@ -746,11 +748,11 @@ function race$1(entries) {
   Useful for tooling.
   @return {Promise} a promise rejected with the given `reason`.
 */
-function reject$1(reason) {
+function reject(reason) {
   /*jshint validthis:true */
   var Constructor = this;
   var promise = new Constructor(noop);
-  reject(promise, reason);
+  _reject(promise, reason);
   return promise;
 }
 
@@ -865,27 +867,27 @@ function needsNew() {
   Useful for tooling.
   @constructor
 */
-function Promise$2(resolver) {
+function Promise(resolver) {
   this[PROMISE_ID] = nextId();
   this._result = this._state = undefined;
   this._subscribers = [];
 
   if (noop !== resolver) {
     typeof resolver !== 'function' && needsResolver();
-    this instanceof Promise$2 ? initializePromise(this, resolver) : needsNew();
+    this instanceof Promise ? initializePromise(this, resolver) : needsNew();
   }
 }
 
-Promise$2.all = all$1;
-Promise$2.race = race$1;
-Promise$2.resolve = resolve$1;
-Promise$2.reject = reject$1;
-Promise$2._setScheduler = setScheduler;
-Promise$2._setAsap = setAsap;
-Promise$2._asap = asap;
+Promise.all = all;
+Promise.race = race;
+Promise.resolve = resolve;
+Promise.reject = reject;
+Promise._setScheduler = setScheduler;
+Promise._setAsap = setAsap;
+Promise._asap = asap;
 
-Promise$2.prototype = {
-  constructor: Promise$2,
+Promise.prototype = {
+  constructor: Promise,
 
   /**
     The primary way of interacting with a promise is through its `then` method,
@@ -1114,8 +1116,7 @@ Promise$2.prototype = {
   }
 };
 
-/*global self*/
-function polyfill$1() {
+function polyfill() {
     var local = undefined;
 
     if (typeof global !== 'undefined') {
@@ -1145,18 +1146,16 @@ function polyfill$1() {
         }
     }
 
-    local.Promise = Promise$2;
+    local.Promise = Promise;
 }
 
 // Strange compat..
-Promise$2.polyfill = polyfill$1;
-Promise$2.Promise = Promise$2;
+Promise.polyfill = polyfill;
+Promise.Promise = Promise;
 
-return Promise$2;
+return Promise;
 
 })));
-
-
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 
@@ -1339,10 +1338,6 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -1375,28 +1370,6 @@ process.umask = function() { return 0; };
     })(),
     formData: 'FormData' in self,
     arrayBuffer: 'ArrayBuffer' in self
-  }
-
-  if (support.arrayBuffer) {
-    var viewClasses = [
-      '[object Int8Array]',
-      '[object Uint8Array]',
-      '[object Uint8ClampedArray]',
-      '[object Int16Array]',
-      '[object Uint16Array]',
-      '[object Int32Array]',
-      '[object Uint32Array]',
-      '[object Float32Array]',
-      '[object Float64Array]'
-    ]
-
-    var isDataView = function(obj) {
-      return obj && DataView.prototype.isPrototypeOf(obj)
-    }
-
-    var isArrayBufferView = ArrayBuffer.isView || function(obj) {
-      return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
-    }
   }
 
   function normalizeName(name) {
@@ -1441,10 +1414,7 @@ process.umask = function() { return 0; };
       headers.forEach(function(value, name) {
         this.append(name, value)
       }, this)
-    } else if (Array.isArray(headers)) {
-      headers.forEach(function(header) {
-        this.append(header[0], header[1])
-      }, this)
+
     } else if (headers) {
       Object.getOwnPropertyNames(headers).forEach(function(name) {
         this.append(name, headers[name])
@@ -1455,8 +1425,12 @@ process.umask = function() { return 0; };
   Headers.prototype.append = function(name, value) {
     name = normalizeName(name)
     value = normalizeValue(value)
-    var oldValue = this.map[name]
-    this.map[name] = oldValue ? oldValue+','+value : value
+    var list = this.map[name]
+    if (!list) {
+      list = []
+      this.map[name] = list
+    }
+    list.push(value)
   }
 
   Headers.prototype['delete'] = function(name) {
@@ -1464,8 +1438,12 @@ process.umask = function() { return 0; };
   }
 
   Headers.prototype.get = function(name) {
-    name = normalizeName(name)
-    return this.has(name) ? this.map[name] : null
+    var values = this.map[normalizeName(name)]
+    return values ? values[0] : null
+  }
+
+  Headers.prototype.getAll = function(name) {
+    return this.map[normalizeName(name)] || []
   }
 
   Headers.prototype.has = function(name) {
@@ -1473,15 +1451,15 @@ process.umask = function() { return 0; };
   }
 
   Headers.prototype.set = function(name, value) {
-    this.map[normalizeName(name)] = normalizeValue(value)
+    this.map[normalizeName(name)] = [normalizeValue(value)]
   }
 
   Headers.prototype.forEach = function(callback, thisArg) {
-    for (var name in this.map) {
-      if (this.map.hasOwnProperty(name)) {
-        callback.call(thisArg, this.map[name], name, this)
-      }
-    }
+    Object.getOwnPropertyNames(this.map).forEach(function(name) {
+      this.map[name].forEach(function(value) {
+        callback.call(thisArg, value, name, this)
+      }, this)
+    }, this)
   }
 
   Headers.prototype.keys = function() {
@@ -1526,36 +1504,14 @@ process.umask = function() { return 0; };
 
   function readBlobAsArrayBuffer(blob) {
     var reader = new FileReader()
-    var promise = fileReaderReady(reader)
     reader.readAsArrayBuffer(blob)
-    return promise
+    return fileReaderReady(reader)
   }
 
   function readBlobAsText(blob) {
     var reader = new FileReader()
-    var promise = fileReaderReady(reader)
     reader.readAsText(blob)
-    return promise
-  }
-
-  function readArrayBufferAsText(buf) {
-    var view = new Uint8Array(buf)
-    var chars = new Array(view.length)
-
-    for (var i = 0; i < view.length; i++) {
-      chars[i] = String.fromCharCode(view[i])
-    }
-    return chars.join('')
-  }
-
-  function bufferClone(buf) {
-    if (buf.slice) {
-      return buf.slice(0)
-    } else {
-      var view = new Uint8Array(buf.byteLength)
-      view.set(new Uint8Array(buf))
-      return view.buffer
-    }
+    return fileReaderReady(reader)
   }
 
   function Body() {
@@ -1563,9 +1519,7 @@ process.umask = function() { return 0; };
 
     this._initBody = function(body) {
       this._bodyInit = body
-      if (!body) {
-        this._bodyText = ''
-      } else if (typeof body === 'string') {
+      if (typeof body === 'string') {
         this._bodyText = body
       } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
         this._bodyBlob = body
@@ -1573,12 +1527,11 @@ process.umask = function() { return 0; };
         this._bodyFormData = body
       } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
         this._bodyText = body.toString()
-      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
-        this._bodyArrayBuffer = bufferClone(body.buffer)
-        // IE 10-11 can't handle a DataView body.
-        this._bodyInit = new Blob([this._bodyArrayBuffer])
-      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
-        this._bodyArrayBuffer = bufferClone(body)
+      } else if (!body) {
+        this._bodyText = ''
+      } else if (support.arrayBuffer && ArrayBuffer.prototype.isPrototypeOf(body)) {
+        // Only support ArrayBuffers for POST method.
+        // Receiving ArrayBuffers happens via Blobs, instead.
       } else {
         throw new Error('unsupported BodyInit type')
       }
@@ -1603,8 +1556,6 @@ process.umask = function() { return 0; };
 
         if (this._bodyBlob) {
           return Promise.resolve(this._bodyBlob)
-        } else if (this._bodyArrayBuffer) {
-          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
         } else if (this._bodyFormData) {
           throw new Error('could not read FormData body as blob')
         } else {
@@ -1613,28 +1564,27 @@ process.umask = function() { return 0; };
       }
 
       this.arrayBuffer = function() {
-        if (this._bodyArrayBuffer) {
-          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
+        return this.blob().then(readBlobAsArrayBuffer)
+      }
+
+      this.text = function() {
+        var rejected = consumed(this)
+        if (rejected) {
+          return rejected
+        }
+
+        if (this._bodyBlob) {
+          return readBlobAsText(this._bodyBlob)
+        } else if (this._bodyFormData) {
+          throw new Error('could not read FormData body as text')
         } else {
-          return this.blob().then(readBlobAsArrayBuffer)
+          return Promise.resolve(this._bodyText)
         }
       }
-    }
-
-    this.text = function() {
-      var rejected = consumed(this)
-      if (rejected) {
-        return rejected
-      }
-
-      if (this._bodyBlob) {
-        return readBlobAsText(this._bodyBlob)
-      } else if (this._bodyArrayBuffer) {
-        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
-      } else if (this._bodyFormData) {
-        throw new Error('could not read FormData body as text')
-      } else {
-        return Promise.resolve(this._bodyText)
+    } else {
+      this.text = function() {
+        var rejected = consumed(this)
+        return rejected ? rejected : Promise.resolve(this._bodyText)
       }
     }
 
@@ -1662,8 +1612,7 @@ process.umask = function() { return 0; };
   function Request(input, options) {
     options = options || {}
     var body = options.body
-
-    if (input instanceof Request) {
+    if (Request.prototype.isPrototypeOf(input)) {
       if (input.bodyUsed) {
         throw new TypeError('Already read')
       }
@@ -1674,12 +1623,12 @@ process.umask = function() { return 0; };
       }
       this.method = input.method
       this.mode = input.mode
-      if (!body && input._bodyInit != null) {
+      if (!body) {
         body = input._bodyInit
         input.bodyUsed = true
       }
     } else {
-      this.url = String(input)
+      this.url = input
     }
 
     this.credentials = options.credentials || this.credentials || 'omit'
@@ -1697,7 +1646,7 @@ process.umask = function() { return 0; };
   }
 
   Request.prototype.clone = function() {
-    return new Request(this, { body: this._bodyInit })
+    return new Request(this)
   }
 
   function decode(body) {
@@ -1713,17 +1662,16 @@ process.umask = function() { return 0; };
     return form
   }
 
-  function parseHeaders(rawHeaders) {
-    var headers = new Headers()
-    rawHeaders.split(/\r?\n/).forEach(function(line) {
-      var parts = line.split(':')
-      var key = parts.shift().trim()
-      if (key) {
-        var value = parts.join(':').trim()
-        headers.append(key, value)
-      }
+  function headers(xhr) {
+    var head = new Headers()
+    var pairs = (xhr.getAllResponseHeaders() || '').trim().split('\n')
+    pairs.forEach(function(header) {
+      var split = header.trim().split(':')
+      var key = split.shift().trim()
+      var value = split.join(':').trim()
+      head.append(key, value)
     })
-    return headers
+    return head
   }
 
   Body.call(Request.prototype)
@@ -1734,10 +1682,10 @@ process.umask = function() { return 0; };
     }
 
     this.type = 'default'
-    this.status = 'status' in options ? options.status : 200
+    this.status = options.status
     this.ok = this.status >= 200 && this.status < 300
-    this.statusText = 'statusText' in options ? options.statusText : 'OK'
-    this.headers = new Headers(options.headers)
+    this.statusText = options.statusText
+    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers)
     this.url = options.url || ''
     this._initBody(bodyInit)
   }
@@ -1775,16 +1723,35 @@ process.umask = function() { return 0; };
 
   self.fetch = function(input, init) {
     return new Promise(function(resolve, reject) {
-      var request = new Request(input, init)
+      var request
+      if (Request.prototype.isPrototypeOf(input) && !init) {
+        request = input
+      } else {
+        request = new Request(input, init)
+      }
+
       var xhr = new XMLHttpRequest()
+
+      function responseURL() {
+        if ('responseURL' in xhr) {
+          return xhr.responseURL
+        }
+
+        // Avoid security warnings on getResponseHeader when not allowed by CORS
+        if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
+          return xhr.getResponseHeader('X-Request-URL')
+        }
+
+        return
+      }
 
       xhr.onload = function() {
         var options = {
           status: xhr.status,
           statusText: xhr.statusText,
-          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
+          headers: headers(xhr),
+          url: responseURL()
         }
-        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
         var body = 'response' in xhr ? xhr.response : xhr.responseText
         resolve(new Response(body, options))
       }
@@ -2349,22 +2316,24 @@ var SlideBridge = function (_SlideBridgeBase) {
       });
 
       if (src !== $(slideHolder).attr('data-src')) {
-        //create html import
-        var $importEl = $('<link rel="import">');
-        var importEl = $importEl[0];
-        $importEl.on('load', function () {
-          var template = importEl.import.querySelector('template');
-          if (template) {
-            var clone = document.importNode(template.content, true);
-            _this2.slideHolder.appendChild(clone);
-          }
-          $importEl.remove();
-          $(slideHolder).removeClass('loading');
-          cb();
-        });
-        $importEl.attr('href', src);
-        $(slideHolder).attr('data-src', src);
-        $(slideHolder).html($importEl);
+        (function () {
+          //create html import
+          var $importEl = $('<link rel="import">');
+          var importEl = $importEl[0];
+          $importEl.on('load', function () {
+            var template = importEl.import.querySelector('template');
+            if (template) {
+              var clone = document.importNode(template.content, true);
+              _this2.slideHolder.appendChild(clone);
+            }
+            $importEl.remove();
+            $(slideHolder).removeClass('loading');
+            cb();
+          });
+          $importEl.attr('href', src);
+          $(slideHolder).attr('data-src', src);
+          $(slideHolder).html($importEl);
+        })();
       }
     }
   }]);
@@ -3629,10 +3598,6 @@ require('es6-promise').polyfill();
   var init = function init() {
     var settings = {
       presentationPath: presentationPath
-      // mobileServerUrl: 'https://bbridges.herokuapp.com',
-      // mobileServerUrl: `http://localhost:5000`,
-      // mobileServerUsername: `wouter.verweirder@gmail.com`,
-      // mobileServerPassword: `geheim`
     };
     var slidesFolderParser = new _SlidesFolderParser2.default();
     slidesFolderParser.parse(presentationPath, path.resolve(presentationPath, 'slides')).then(function (data) {
@@ -4123,6 +4088,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Constants = require('../Constants');
@@ -4252,23 +4219,31 @@ var Presentation = function () {
     key: 'getSlideHolderForSlide',
     value: function getSlideHolderForSlide(slide, slidesNotToClear) {
       if (slide) {
-        var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
-        if ($slideHolder.length > 0) {
-          return $slideHolder[0];
-        }
-        //get a free slideHolder
-        var slideNamesNotToClear = [];
-        $(slidesNotToClear).each(function (index, obj) {
-          slideNamesNotToClear.push(obj.name);
-        });
-        var $slideHolders = $('.slide-frame');
-        for (var i = $slideHolders.length - 1; i >= 0; i--) {
-          $slideHolder = $($slideHolders[i]);
-          var name = $slideHolder.attr('data-name');
-          if (!name || slideNamesNotToClear.indexOf(name) === -1) {
-            return $slideHolder[0];
+        var _ret = function () {
+          var $slideHolder = $('.slide-frame[data-name="' + slide.name + '"]');
+          if ($slideHolder.length > 0) {
+            return {
+              v: $slideHolder[0]
+            };
           }
-        }
+          //get a free slideHolder
+          var slideNamesNotToClear = [];
+          $(slidesNotToClear).each(function (index, obj) {
+            slideNamesNotToClear.push(obj.name);
+          });
+          var $slideHolders = $('.slide-frame');
+          for (var i = $slideHolders.length - 1; i >= 0; i--) {
+            $slideHolder = $($slideHolders[i]);
+            var name = $slideHolder.attr('data-name');
+            if (!name || slideNamesNotToClear.indexOf(name) === -1) {
+              return {
+                v: $slideHolder[0]
+              };
+            }
+          }
+        }();
+
+        if ((typeof _ret === 'undefined' ? 'undefined' : _typeof(_ret)) === "object") return _ret.v;
       }
       return false;
     }
@@ -4285,48 +4260,52 @@ var Presentation = function () {
   }, {
     key: 'setCurrentSlideIndex',
     value: function setCurrentSlideIndex(value) {
+      var _this = this;
+
       value = Math.max(0, Math.min(value, this.slideBridges.length - 1));
       if (value !== this.currentSlideIndex) {
-        this.currentSlideIndex = value;
+        (function () {
+          _this.currentSlideIndex = value;
 
-        var currentSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex);
-        var previousSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex - 1);
-        var nextSlideBridge = this.getSlideBridgeByIndex(this.currentSlideIndex + 1);
+          var currentSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex);
+          var previousSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex - 1);
+          var nextSlideBridge = _this.getSlideBridgeByIndex(_this.currentSlideIndex + 1);
 
-        //remove "used" class from slide holders
-        $('.slide-frame').removeAttr('data-used', false);
+          //remove "used" class from slide holders
+          $('.slide-frame').removeAttr('data-used', false);
 
-        var currentSlideHolder = this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
+          var currentSlideHolder = _this.getSlideHolderForSlide(currentSlideBridge, [previousSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(currentSlideHolder, currentSlideBridge, _Constants.Constants.STATE_ACTIVE, 0);
 
-        var previousSlideHolder = this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
-        this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
+          var previousSlideHolder = _this.getSlideHolderForSlide(previousSlideBridge, [currentSlideBridge, nextSlideBridge]);
+          _this.setupSlideHolder(previousSlideHolder, previousSlideBridge, _Constants.Constants.STATE_INACTIVE, '-100%');
 
-        var nextSlideHolder = this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
-        this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
+          var nextSlideHolder = _this.getSlideHolderForSlide(nextSlideBridge, [previousSlideBridge, currentSlideBridge]);
+          _this.setupSlideHolder(nextSlideHolder, nextSlideBridge, _Constants.Constants.STATE_INACTIVE, '100%');
 
-        //clear attributes of unused slide frames
-        $('.slide-frame').each(function (index, slideHolder) {
-          if (!$(slideHolder).attr('data-used')) {
-            $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
-          }
-        });
+          //clear attributes of unused slide frames
+          $('.slide-frame').each(function (index, slideHolder) {
+            if (!$(slideHolder).attr('data-used')) {
+              $(slideHolder).removeAttr('data-used').removeAttr('data-name').removeAttr('data-src');
+            }
+          });
 
-        //all other slideHolder bridges should be unlinked from their slideHolder
-        this.slideBridges.forEach(function (slideBridge) {
-          if (slideBridge === currentSlideBridge) {
-            return;
-          }
-          if (slideBridge === previousSlideBridge) {
-            return;
-          }
-          if (slideBridge === nextSlideBridge) {
-            return;
-          }
-          slideBridge.slideHolder = null;
-        });
+          //all other slideHolder bridges should be unlinked from their slideHolder
+          _this.slideBridges.forEach(function (slideBridge) {
+            if (slideBridge === currentSlideBridge) {
+              return;
+            }
+            if (slideBridge === previousSlideBridge) {
+              return;
+            }
+            if (slideBridge === nextSlideBridge) {
+              return;
+            }
+            slideBridge.slideHolder = null;
+          });
 
-        bean.fire(this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [this.currentSlideIndex]);
+          bean.fire(_this, _Constants.Constants.SET_CURRENT_SLIDE_INDEX, [_this.currentSlideIndex]);
+        })();
       }
     }
   }, {
@@ -4351,12 +4330,12 @@ var Presentation = function () {
   }, {
     key: 'attachToSlideHolder',
     value: function attachToSlideHolder(slideHolder, slideBridge, src) {
-      var _this = this;
+      var _this2 = this;
 
       //listen for events on this slideHolder
       $(slideHolder).off('message-from-slide');
       $(slideHolder).on('message-from-slide', function (event, message) {
-        _this.slideMessageHandler({ data: message });
+        _this2.slideMessageHandler({ data: message });
       });
       //leave previous channel of this slideHolder
       if (this.mobileServerBridge) {
@@ -4748,5 +4727,6 @@ var WebviewSlide = function (_ContentBase) {
 exports.default = WebviewSlide;
 
 },{"../../../../shared/js/Constants":17,"../../../../shared/js/classes/ContentBase":18}]},{},[15])
+
 
 //# sourceMappingURL=script.js.map
