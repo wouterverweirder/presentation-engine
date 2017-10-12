@@ -2457,6 +2457,9 @@ var CodeElement = function () {
       return fs.readFile(filePath, "utf8").then(function (data) {
         _this.setValue(data);
         return data;
+      }).catch(function (e) {
+        _this.setValue('');
+        throw e;
       });
     }
   }, {
@@ -2575,42 +2578,12 @@ var ConsoleElement = function () {
       this.resume();
     }
   }, {
-    key: 'info',
-    value: function info(args) {
-      var str = '';
-      args.forEach(function (arg) {
-        if (str.length > 0) {
-          str += ' ';
-        }
-        //is it an object or a simple type?
-        if (needsJSONConversion(arg)) {
-          arg = JSON.stringify(arg);
-        }
-        str += htmlEscape(arg);
-      });
-      this.logs.push('<pre>' + str + '</pre>');
-      while (this.logs.length > 20) {
-        this.logs.shift();
-      }
-      var html = this.logs.join('');
-      this.el.innerHTML = html;
-      this.wrapperEl.scrollTop = this.wrapperEl.scrollHeight;
-    }
-  }, {
-    key: 'error',
-    value: function error(args) {
-      var str = '';
-      args.forEach(function (arg) {
-        if (str.length > 0) {
-          str += ' ';
-        }
-        //is it an object or a simple type?
-        if (needsJSONConversion(arg)) {
-          arg = JSON.stringify(arg);
-        }
-        str += htmlEscape(arg);
-      });
-      this.logs.push('<pre class="console-error">' + str + '</pre>');
+    key: 'message',
+    value: function message(event) {
+      var str = htmlEscape(event.message);
+      var fileName = event.sourceId.split('/');
+      fileName = fileName[fileName.length - 1];
+      this.logs.push('<div class="console-message">\n      <pre class="console-message__content console-message__content--level' + event.level + '">' + str + '</pre>\n      <div class="console-message__origin">' + fileName + ':' + event.line + '</div>\n    </div>');
       while (this.logs.length > 20) {
         this.logs.shift();
       }
@@ -2816,6 +2789,7 @@ var WebPreviewElement = function () {
         this.webview.removeEventListener("dom-ready", this._domReadyHandler);
         this.webview.removeEventListener("did-fail-load", this._didFailLoadHandler);
         this.webview.removeEventListener("ipc-message", this._ipcMessageHandler);
+        this.webview.removeEventListener("console-message", this._consoleMessageHandler);
         this.webview.parentNode.removeChild(this.webview);
         this.webview = false;
         clearTimeout(this.retryTimeout);
@@ -2884,15 +2858,14 @@ var WebPreviewElement = function () {
       };
       this.webview.addEventListener("did-fail-load", this._didFailLoadHandler);
 
+      this._consoleMessageHandler = function (e) {
+        _this.$wrapperEl.trigger("console-message", e);
+      };
+      this.webview.addEventListener("console-message", this._consoleMessageHandler);
+
       this._ipcMessageHandler = function (event) {
         if (event.channel === "request-html") {
           _this.webview.send("receive-html", htmlSrc);
-        } else if (event.channel === "console.log") {
-          //notify live code editor
-          _this.$wrapperEl.trigger("console.log", event.args[0]);
-        } else if (event.channel === "console.error") {
-          //notify live code editor
-          _this.$wrapperEl.trigger("console.error", event.args[0]);
         }
       };
       this.webview.addEventListener("ipc-message", this._ipcMessageHandler);
@@ -2917,6 +2890,11 @@ var WebPreviewElement = function () {
       this.url = false;
       this.blocks = blocks;
       this.resume();
+    }
+  }, {
+    key: "openDevTools",
+    value: function openDevTools() {
+      this.webview.openDevTools();
     }
   }, {
     key: "needsOutputPathPrefix",
@@ -3128,6 +3106,12 @@ var LiveCode = function () {
       _this.$el.find('[data-type="reload-button"]').each(function (index, reloadButtonEl) {
         return _this.createReloadButton(reloadButtonEl);
       });
+
+      //create reload buttons
+      _this.devToolsButtonEls = [];
+      _this.$el.find('[data-type="devtools-button"]').each(function (index, devToolsButtonEl) {
+        return _this.createDevToolsButton(devToolsButtonEl);
+      });
     }).then(function () {
       return _this.setCodeElementValuesFromFiles();
     }).then(function () {
@@ -3298,6 +3282,9 @@ var LiveCode = function () {
       this.reloadButtonEls.forEach(function (el) {
         return _this2.destroyReloadButton(el);
       });
+      this.devToolsButtonEls.forEach(function (el) {
+        return _this2.destroyDevToolsButton(el);
+      });
       //TODO: destroy the tmp directory for this instance
     }
   }, {
@@ -3384,15 +3371,13 @@ var LiveCode = function () {
     key: 'createWebPreviewElement',
     value: function createWebPreviewElement(webPreviewEl) {
       var webPreviewElement = new _WebPreviewElement2.default(webPreviewEl);
-      webPreviewElement.$wrapperEl.on('console.log', this.webPreviewConsoleLogHandler.bind(this, webPreviewElement));
-      webPreviewElement.$wrapperEl.on('console.error', this.webPreviewConsoleErrorHandler.bind(this, webPreviewElement));
+      webPreviewElement.$wrapperEl.on('console-message', this.webPreviewConsoleMessageHandler.bind(this, webPreviewElement));
       this.webPreviewElements[webPreviewElement.id] = webPreviewElement;
     }
   }, {
     key: 'destroyWebPreviewElement',
     value: function destroyWebPreviewElement(webPreviewElement) {
-      webPreviewElement.$wrapperEl.off('console.log');
-      webPreviewElement.$wrapperEl.off('console.error');
+      webPreviewElement.$wrapperEl.off('console-message');
       webPreviewElement.destroy();
     }
   }, {
@@ -3423,7 +3408,7 @@ var LiveCode = function () {
       var _this3 = this;
 
       this.runButtonEls.push(runButtonEl);
-      $(runButtonEl).on('click', function () {
+      $(runButtonEl).on('click', function (e) {
         if (_this3.webPreviewElements[$(runButtonEl).data('target')]) {
           //save the files first
           _this3.saveCodeElementsToFiles().catch(function (err) {
@@ -3436,6 +3421,8 @@ var LiveCode = function () {
           var applicationPath = _this3.getFilePath(_this3.consoleElements[$(runButtonEl).data('target')].file);
           _this3.consoleElements[$(runButtonEl).data('target')].runNodeApp(applicationPath);
         }
+        e.preventDefault();
+        e.stopImmediatePropagation();
       });
     }
   }, {
@@ -3449,7 +3436,9 @@ var LiveCode = function () {
       var _this4 = this;
 
       this.saveButtonEls.push(saveButtonEl);
-      $(saveButtonEl).on('click', function () {
+      $(saveButtonEl).on('click', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
         //get the target element for this button
         var targetString = $(saveButtonEl).data('target');
         if (targetString === 'all') {
@@ -3479,16 +3468,20 @@ var LiveCode = function () {
       var _this5 = this;
 
       this.reloadButtonEls.push(reloadButtonEl);
-      $(reloadButtonEl).on('click', function () {
+      $(reloadButtonEl).on('click', function (e) {
         //get the reload button target
         var reloadTargetElement = _this5.getCodeElement($(reloadButtonEl).data('target'));
         if (reloadTargetElement) {
           _this5.reloadCodeElement(reloadTargetElement);
+          e.preventDefault();
+          e.stopImmediatePropagation();
           return;
         }
         reloadTargetElement = _this5.getWebPreviewElement($(reloadButtonEl).data('target'));
         if (reloadTargetElement) {
           _this5.reloadWebPreviewElement(reloadTargetElement);
+          e.preventDefault();
+          e.stopImmediatePropagation();
           return;
         }
       });
@@ -3496,7 +3489,7 @@ var LiveCode = function () {
   }, {
     key: 'reloadCodeElement',
     value: function reloadCodeElement(codeElement) {
-      var filePath = self.getFilePathForCodeElement(codeElement);
+      var filePath = this.getFilePathForCodeElement(codeElement);
       if (!filePath) {
         return;
       }
@@ -3515,21 +3508,34 @@ var LiveCode = function () {
       $(reloadButtonEl).off('click');
     }
   }, {
-    key: 'webPreviewConsoleLogHandler',
-    value: function webPreviewConsoleLogHandler(webPreviewElement, event, message) {
-      //get the console element for this web preview
-      var consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
-      if (consoleElement) {
-        consoleElement.info(JSON.parse(message).args);
-      }
+    key: 'createDevToolsButton',
+    value: function createDevToolsButton(devToolsButtonEl) {
+      var _this6 = this;
+
+      this.devToolsButtonEls.push(devToolsButtonEl);
+      $(devToolsButtonEl).on('click', function (e) {
+        //get the target element for this button
+        var webPreviewElement = _this6.getWebPreviewElement($(devToolsButtonEl).data('target'));
+        if (!webPreviewElement) {
+          return;
+        }
+        webPreviewElement.openDevTools();
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      });
     }
   }, {
-    key: 'webPreviewConsoleErrorHandler',
-    value: function webPreviewConsoleErrorHandler(webPreviewElement, event, message) {
+    key: 'destroyDevToolsButton',
+    value: function destroyDevToolsButton(devToolsButtonEl) {
+      $(devToolsButtonEl).off('click');
+    }
+  }, {
+    key: 'webPreviewConsoleMessageHandler',
+    value: function webPreviewConsoleMessageHandler(webPreviewElement, jqEvent, event) {
       //get the console element for this web preview
       var consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
       if (consoleElement) {
-        consoleElement.error(JSON.parse(message).args);
+        consoleElement.message(event);
       }
     }
   }, {

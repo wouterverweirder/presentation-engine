@@ -4594,19 +4594,32 @@ overflow-x: auto;
 overflow-y: auto;
 }
 
-.live-code-console-element .console-error {
-color: red;
-}
-
 .live-code-console-element pre,.live-code-console-element code {
-background: 0;
 border: 0;
 margin: 0;
 padding: 0;
+white-space: normal;
+}
+
+.live-code-console-element .console-message {
+display: -ms-flexbox;
+display: flex;
+-ms-flex-pack: justify;
+justify-content: space-between;
+-ms-flex-align: baseline;
+align-items: baseline;
+background: 0;
 padding-left: 0.5em;
 padding-right: 0.5em;
 border-bottom: solid 1px lightgrey;
-white-space: normal;
+}
+
+.live-code-console-element .console-message__content--level1 {
+color: orange;
+}
+
+.live-code-console-element .console-message__content--level2 {
+color: red;
 }
 
 .nav-tabs {

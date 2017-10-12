@@ -96,6 +96,10 @@ export default class CodeElement {
       .then(data => {
         this.setValue(data);
         return data;
+      })
+      .catch(e => {
+        this.setValue('');
+        throw e;
       });
   }
 

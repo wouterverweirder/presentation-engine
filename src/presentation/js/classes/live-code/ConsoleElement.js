@@ -83,40 +83,14 @@ export default class ConsoleElement {
     this.resume();
   }
 
-  info(args) {
-    let str = ``;
-    args.forEach(function(arg){
-      if(str.length > 0) {
-        str += ` `;
-      }
-      //is it an object or a simple type?
-      if(needsJSONConversion(arg)) {
-        arg = JSON.stringify(arg);
-      }
-      str += htmlEscape(arg);
-    });
-    this.logs.push(`<pre>${  str  }</pre>`);
-    while(this.logs.length > 20) {
-      this.logs.shift();
-    }
-    const html = this.logs.join(``);
-    this.el.innerHTML = html;
-    this.wrapperEl.scrollTop = this.wrapperEl.scrollHeight;
-  }
-
-  error(args) {
-    let str = ``;
-    args.forEach(function(arg){
-      if(str.length > 0) {
-        str += ` `;
-      }
-      //is it an object or a simple type?
-      if(needsJSONConversion(arg)) {
-        arg = JSON.stringify(arg);
-      }
-      str += htmlEscape(arg);
-    });
-    this.logs.push(`<pre class="console-error">${  str  }</pre>`);
+  message(event) {
+    const str = htmlEscape(event.message);
+    let fileName = event.sourceId.split('/');
+    fileName = fileName[fileName.length - 1];
+    this.logs.push(`<div class="console-message">
+      <pre class="console-message__content console-message__content--level${event.level}">${  str  }</pre>
+      <div class="console-message__origin">${fileName}:${event.line}</div>
+    </div>`);
     while(this.logs.length > 20) {
       this.logs.shift();
     }

@@ -63,6 +63,10 @@ export default class LiveCode {
       this.reloadButtonEls = [];
       this.$el.find(`[data-type="reload-button"]`).each(((index, reloadButtonEl) => this.createReloadButton(reloadButtonEl)));
 
+      //create reload buttons
+      this.devToolsButtonEls = [];
+      this.$el.find(`[data-type="devtools-button"]`).each(((index, devToolsButtonEl) => this.createDevToolsButton(devToolsButtonEl)));
+
     })
     .then(() => this.setCodeElementValuesFromFiles())
     .then(() => {
@@ -216,6 +220,7 @@ export default class LiveCode {
     this.runButtonEls.forEach(el => this.destroyRunButton(el));
     this.saveButtonEls.forEach(el => this.destroySaveButton(el));
     this.reloadButtonEls.forEach(el => this.destroyReloadButton(el));
+    this.devToolsButtonEls.forEach(el => this.destroyDevToolsButton(el));
     //TODO: destroy the tmp directory for this instance
   }
 
@@ -305,14 +310,12 @@ export default class LiveCode {
 
   createWebPreviewElement(webPreviewEl) {
     const webPreviewElement = new WebPreviewElement(webPreviewEl);
-    webPreviewElement.$wrapperEl.on(`console.log`, this.webPreviewConsoleLogHandler.bind(this, webPreviewElement));
-    webPreviewElement.$wrapperEl.on(`console.error`, this.webPreviewConsoleErrorHandler.bind(this, webPreviewElement));
+    webPreviewElement.$wrapperEl.on(`console-message`, this.webPreviewConsoleMessageHandler.bind(this, webPreviewElement));
     this.webPreviewElements[webPreviewElement.id] = webPreviewElement;
   }
 
   destroyWebPreviewElement(webPreviewElement) {
-    webPreviewElement.$wrapperEl.off(`console.log`);
-    webPreviewElement.$wrapperEl.off(`console.error`);
+    webPreviewElement.$wrapperEl.off(`console-message`);
     webPreviewElement.destroy();
   }
 
@@ -336,7 +339,7 @@ export default class LiveCode {
 
   createRunButton(runButtonEl) {
     this.runButtonEls.push(runButtonEl);
-    $(runButtonEl).on(`click`, (() => {
+    $(runButtonEl).on(`click`, e => {
       if(this.webPreviewElements[$(runButtonEl).data(`target`)]) {
         //save the files first
         this.saveCodeElementsToFiles()
@@ -349,7 +352,9 @@ export default class LiveCode {
         const applicationPath = this.getFilePath(this.consoleElements[$(runButtonEl).data(`target`)].file);
         this.consoleElements[$(runButtonEl).data(`target`)].runNodeApp(applicationPath);
       }
-    }));
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
   }
 
   destroyRunButton(runButtonEl) {
@@ -358,7 +363,9 @@ export default class LiveCode {
 
   createSaveButton(saveButtonEl) {
     this.saveButtonEls.push(saveButtonEl);
-    $(saveButtonEl).on(`click`, () => {
+    $(saveButtonEl).on(`click`, e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
       //get the target element for this button
       const targetString = $(saveButtonEl).data(`target`);
       if(targetString === `all`) {
@@ -382,23 +389,27 @@ export default class LiveCode {
 
   createReloadButton(reloadButtonEl) {
     this.reloadButtonEls.push(reloadButtonEl);
-    $(reloadButtonEl).on(`click`, () => {
+    $(reloadButtonEl).on(`click`, e => {
       //get the reload button target
       let reloadTargetElement = this.getCodeElement($(reloadButtonEl).data(`target`));
       if(reloadTargetElement) {
         this.reloadCodeElement(reloadTargetElement);
+        e.preventDefault();
+        e.stopImmediatePropagation();
         return;
       }
       reloadTargetElement = this.getWebPreviewElement($(reloadButtonEl).data(`target`));
       if(reloadTargetElement) {
         this.reloadWebPreviewElement(reloadTargetElement);
+        e.preventDefault();
+        e.stopImmediatePropagation();
         return;
       }
     });
   }
 
   reloadCodeElement(codeElement) {
-    const filePath = self.getFilePathForCodeElement(codeElement);
+    const filePath = this.getFilePathForCodeElement(codeElement);
     if(!filePath) {
       return;
     }
@@ -413,21 +424,30 @@ export default class LiveCode {
     $(reloadButtonEl).off(`click`);
   }
 
-  webPreviewConsoleLogHandler(webPreviewElement, event, message) {
-    //get the console element for this web preview
-    const consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
-    if(consoleElement)
-    {
-      consoleElement.info(JSON.parse(message).args);
-    }
+  createDevToolsButton(devToolsButtonEl) {
+    this.devToolsButtonEls.push(devToolsButtonEl);
+    $(devToolsButtonEl).on(`click`, e => {
+      //get the target element for this button
+      const webPreviewElement = this.getWebPreviewElement($(devToolsButtonEl).data(`target`));
+      if (!webPreviewElement) {
+        return;
+      }
+      webPreviewElement.openDevTools();
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
   }
 
-  webPreviewConsoleErrorHandler(webPreviewElement, event, message) {
+  destroyDevToolsButton(devToolsButtonEl) {
+    $(devToolsButtonEl).off(`click`);
+  }
+
+  webPreviewConsoleMessageHandler(webPreviewElement, jqEvent, event) {
     //get the console element for this web preview
     const consoleElement = this.getConsoleElementForWebPreview(webPreviewElement);
     if(consoleElement)
     {
-      consoleElement.error(JSON.parse(message).args);
+      consoleElement.message(event);
     }
   }
 

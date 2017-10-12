@@ -48,6 +48,7 @@ export default class WebPreviewElement {
       this.webview.removeEventListener(`dom-ready`, this._domReadyHandler);
       this.webview.removeEventListener(`did-fail-load`, this._didFailLoadHandler);
       this.webview.removeEventListener(`ipc-message`, this._ipcMessageHandler);
+      this.webview.removeEventListener(`console-message`, this._consoleMessageHandler);
       this.webview.parentNode.removeChild(this.webview);
       this.webview = false;
       clearTimeout(this.retryTimeout);
@@ -113,20 +114,15 @@ export default class WebPreviewElement {
     };
     this.webview.addEventListener(`did-fail-load`, this._didFailLoadHandler);
 
+    this._consoleMessageHandler = e => {
+      this.$wrapperEl.trigger(`console-message`, e);
+    };
+    this.webview.addEventListener(`console-message`, this._consoleMessageHandler);
+
     this._ipcMessageHandler = event => {
       if(event.channel === `request-html`)
       {
         this.webview.send(`receive-html`, htmlSrc);
-      }
-      else if(event.channel === `console.log`)
-      {
-        //notify live code editor
-        this.$wrapperEl.trigger(`console.log`, event.args[0]);
-      }
-      else if(event.channel === `console.error`)
-      {
-        //notify live code editor
-        this.$wrapperEl.trigger(`console.error`, event.args[0]);
       }
     };
     this.webview.addEventListener(`ipc-message`, this._ipcMessageHandler);
@@ -149,5 +145,9 @@ export default class WebPreviewElement {
     this.url = false;
     this.blocks = blocks;
     this.resume();
+  }
+
+  openDevTools() {
+    this.webview.openDevTools();
   }
 }
