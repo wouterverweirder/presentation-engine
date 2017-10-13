@@ -10,17 +10,7 @@ const argv = require(`minimist`)(process.argv.slice(2));
 
 const debug = (argv.env === `dev`);
 
-const tty = require(`tty.js`);
-
-const ttyServer = tty.createServer({
-  shell: `bash`,
-  port: 3000,
-  localOnly: true,
-  static: path.resolve(__dirname, `vendors`, `tty`),
-  cwd: path.resolve(__dirname)
-});
-
-ttyServer.listen();
+require('./xterm-app.js');
 
 let mainWindow;
 

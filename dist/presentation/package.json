@@ -17,7 +17,10 @@
     "minimist": "^1.2.0",
     "ps-tree": "^1.1.0",
     "socket.io-client": "^1.5.1",
-    "tty.js": "^0.2.15"
+    "express": "^4.16.2",
+    "express-ws": "^3.0.0",
+    "node-pty": "^0.7.1",
+    "xterm": "^2.9.2"
   },
   "devDependencies": {
     "electron-rebuild": "1.4.0"
