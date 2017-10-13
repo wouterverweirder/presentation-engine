@@ -104,6 +104,13 @@ const presentationVendorsTask = function(watch) {
   return scriptsTask(b, watch, `vendors.js`, config.presentation.js.dst);
 };
 
+const liveCodeWebPreviewTask = function(watch) {
+  const b = browserify(`${config.presentation.js.src  }/livecode-webpreview.js`, { debug: gutil.env.type !== `production` })
+    .transform(babelify);
+
+  return scriptsTask(b, watch, `livecode-webpreview.js`, config.presentation.js.dst);
+};
+
 const mobileStylesTask = function() {
   return stylesTask(config.mobile.scss.src, config.mobile.scss.dst);
 };
@@ -144,6 +151,10 @@ gulp.task(`mobile-vendors`, function() {
   return mobileVendorsTask(false);
 });
 
+gulp.task(`livecode-webpreview`, function() {
+  return liveCodeWebPreviewTask(false);
+});
+
 gulp.task(`server-scripts`, serverScriptsTask);
 
 gulp.task(`watch`, [`presentation-styles`, `mobile-styles`, `server-scripts`], function() {
@@ -151,7 +162,10 @@ gulp.task(`watch`, [`presentation-styles`, `mobile-styles`, `server-scripts`], f
   gulp.watch(`${config.mobile.scss.src  }/**/*.scss`, [`mobile-styles`]);
   gulp.watch(`${config.server.js.src  }/**/*.js`, [`server-scripts`]);
   presentationScriptsTask(true);
+  presentationVendorsTask(true);
   mobileScriptsTask(true);
+  mobileVendorsTask(true);
+  liveCodeWebPreviewTask(true);
 });
 
 gulp.task(`default`, [`watch`]);

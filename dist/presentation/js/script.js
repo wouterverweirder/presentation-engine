@@ -2820,7 +2820,7 @@ var WebPreviewElement = function () {
       this.webview = document.createElement("webview");
       this.webview.style.width = "100%";
       this.webview.style.height = "100%";
-      this.webview.preload = "js/webpreview.js";
+      this.webview.preload = "js/livecode-webpreview.js";
       this.el.appendChild(this.webview);
 
       var url = this.url !== false ? this.url : "webpreview.html";
@@ -2842,7 +2842,7 @@ var WebPreviewElement = function () {
       };
       this.webview.addEventListener("did-get-response-details", this._didGetResponseDetailsHandler);
 
-      this._domReadyHandler = function (e) {
+      this._domReadyHandler = function () {
         if (_this.zoomfactor) {
           var zoomfactor = parseFloat(_this.zoomfactor);
           _this.webview.setZoomFactor(zoomfactor);

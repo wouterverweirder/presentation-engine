@@ -20,8 +20,8 @@ export default class WebPreviewElement {
     }
 
     this.file = this.$el.data(`file`) || this.$el.data(`url`);
-    this.autoload = this.$el.data(`autoload`) || false;
-    this.zoomfactor = this.$el.data(`zoomfactor`) || false;
+    this.autoload = this.$el.data(`autoload`) || false;
+    this.zoomfactor = this.$el.data(`zoomfactor`) || false;
 
     this.console = this.$el.data(`console`) || false;
 
@@ -75,7 +75,7 @@ export default class WebPreviewElement {
     this.webview = document.createElement(`webview`);
     this.webview.style.width = `100%`;
     this.webview.style.height = `100%`;
-    this.webview.preload = `js/webpreview.js`;
+    this.webview.preload = `js/livecode-webpreview.js`;
     this.el.appendChild(this.webview);
 
     const url = (this.url !== false) ? this.url : `webpreview.html`;
@@ -98,7 +98,7 @@ export default class WebPreviewElement {
     };
     this.webview.addEventListener(`did-get-response-details`, this._didGetResponseDetailsHandler);
 
-    this._domReadyHandler = e => {
+    this._domReadyHandler = () => {
       if (this.zoomfactor) {
         const zoomfactor = parseFloat(this.zoomfactor);
         this.webview.setZoomFactor(zoomfactor);
