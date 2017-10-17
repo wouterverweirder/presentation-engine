@@ -15,6 +15,14 @@ export default class WebviewSlide extends ContentBase {
     super.destroy();
   }
 
+  reload() {
+    this.webview.reload();
+  }
+
+  openDevTools() {
+    this.webview.openDevTools();
+  }
+
   onStateChanged() {
     if(this.state === Constants.STATE_ACTIVE) {
       this.setWebviewMuted(false);

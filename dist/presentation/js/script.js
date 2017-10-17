@@ -4702,6 +4702,16 @@ var WebviewSlide = function (_ContentBase) {
       _get(WebviewSlide.prototype.__proto__ || Object.getPrototypeOf(WebviewSlide.prototype), 'destroy', this).call(this);
     }
   }, {
+    key: 'reload',
+    value: function reload() {
+      this.webview.reload();
+    }
+  }, {
+    key: 'openDevTools',
+    value: function openDevTools() {
+      this.webview.openDevTools();
+    }
+  }, {
     key: 'onStateChanged',
     value: function onStateChanged() {
       if (this.state === _Constants.Constants.STATE_ACTIVE) {
