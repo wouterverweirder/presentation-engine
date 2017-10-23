@@ -3484,7 +3484,20 @@ var LiveCode = function () {
           e.stopImmediatePropagation();
           return;
         }
+        // reload all elements
+        _this5.reloadAllCodeElements().then(function () {
+          return _this5.reloadAllWebPreviewElements();
+        });
       });
+    }
+  }, {
+    key: 'reloadAllCodeElements',
+    value: function reloadAllCodeElements() {
+      var tasks = [];
+      for (var key in this.codeElements) {
+        tasks.push(this.reloadCodeElement(this.codeElements[key]));
+      }
+      return Promise.all(tasks);
     }
   }, {
     key: 'reloadCodeElement',
@@ -3493,14 +3506,23 @@ var LiveCode = function () {
       if (!filePath) {
         return;
       }
-      codeElement.readFromFile(filePath).catch(function (err) {
+      return codeElement.readFromFile(filePath).catch(function (err) {
         return console.log(err);
       });
     }
   }, {
+    key: 'reloadAllWebPreviewElements',
+    value: function reloadAllWebPreviewElements() {
+      var tasks = [];
+      for (var key in this.webPreviewElements) {
+        tasks.push(this.reloadWebPreviewElement(this.webPreviewElements[key]));
+      }
+      return Promise.all(tasks);
+    }
+  }, {
     key: 'reloadWebPreviewElement',
     value: function reloadWebPreviewElement(webPreviewElement) {
-      this.updateWebPreviewElement(webPreviewElement);
+      return this.updateWebPreviewElement(webPreviewElement);
     }
   }, {
     key: 'destroyReloadButton',

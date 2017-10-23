@@ -405,7 +405,18 @@ export default class LiveCode {
         e.stopImmediatePropagation();
         return;
       }
+      // reload all elements
+      this.reloadAllCodeElements().then(() => this.reloadAllWebPreviewElements());
     });
+  }
+
+  reloadAllCodeElements() {
+    const tasks = [];
+    for(const key in this.codeElements)
+    {
+      tasks.push(this.reloadCodeElement(this.codeElements[key]));
+    }
+    return Promise.all(tasks);
   }
 
   reloadCodeElement(codeElement) {
@@ -413,11 +424,20 @@ export default class LiveCode {
     if(!filePath) {
       return;
     }
-    codeElement.readFromFile(filePath).catch(err => console.log(err));
+    return codeElement.readFromFile(filePath).catch(err => console.log(err));
+  }
+
+  reloadAllWebPreviewElements() {
+    const tasks = [];
+    for(const key in this.webPreviewElements)
+    {
+      tasks.push(this.reloadWebPreviewElement(this.webPreviewElements[key]));
+    }
+    return Promise.all(tasks);
   }
 
   reloadWebPreviewElement(webPreviewElement) {
-    this.updateWebPreviewElement(webPreviewElement);
+    return this.updateWebPreviewElement(webPreviewElement);
   }
 
   destroyReloadButton(reloadButtonEl) {
