@@ -2581,6 +2581,8 @@ var ConsoleElement = function () {
     key: 'message',
     value: function message(event) {
       var str = htmlEscape(event.message);
+      // remove %c directives, as we don't receive the extra styling info in this event
+      str = str.replace(/\%c/gi, '');
       var fileName = event.sourceId.split('/');
       fileName = fileName[fileName.length - 1];
       this.logs.push('<div class="console-message">\n      <pre class="console-message__content console-message__content--level' + event.level + '">' + str + '</pre>\n      <div class="console-message__origin">' + fileName + ':' + event.line + '</div>\n    </div>');

@@ -84,8 +84,10 @@ export default class ConsoleElement {
   }
 
   message(event) {
-    const str = htmlEscape(event.message);
-    let fileName = event.sourceId.split('/');
+    let str = htmlEscape(event.message);
+    // remove %c directives, as we don't receive the extra styling info in this event
+    str = str.replace(/\%c/gi, ``);
+    let fileName = event.sourceId.split(`/`);
     fileName = fileName[fileName.length - 1];
     this.logs.push(`<div class="console-message">
       <pre class="console-message__content console-message__content--level${event.level}">${  str  }</pre>
