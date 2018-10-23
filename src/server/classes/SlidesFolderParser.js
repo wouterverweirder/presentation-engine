@@ -63,7 +63,7 @@ export default class SlidesFolderParser {
     parsed.ext = path.extname(slideBaseName);
     parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
     const splitted = parsed.name.split(`.`);
-    const keywords = [`mobile`, `desktop`, `muted`, `loop`, `cover`];
+    const keywords = [`mobile`, `desktop`, `muted`, `loop`, `cover`, `controls`];
     keywords.forEach(keyword => {
       const index = splitted.indexOf(keyword);
       if(index > -1) {

@@ -88,7 +88,7 @@ var SlidesFolderParser = function () {
       parsed.ext = path.extname(slideBaseName);
       parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
       var splitted = parsed.name.split(".");
-      var keywords = ["mobile", "desktop", "muted", "loop", "cover"];
+      var keywords = ["mobile", "desktop", "muted", "loop", "cover", "controls"];
       keywords.forEach(function (keyword) {
         var index = splitted.indexOf(keyword);
         if (index > -1) {

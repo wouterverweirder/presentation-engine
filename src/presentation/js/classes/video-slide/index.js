@@ -19,6 +19,7 @@ export default class VideoSlide extends ContentBase {
     //check for extra config in the filename
     let loop = false;
     let muted = false;
+    let controls = false;
     const videoUrlSplitted = videoUrl.split(`.`);
     videoUrlSplitted.forEach(part => {
       if(part === `loop`) {
@@ -26,6 +27,9 @@ export default class VideoSlide extends ContentBase {
       }
       if(part === `muted`) {
         muted = true;
+      }
+      if(part === `controls`) {
+        controls = true;
       }
     });
 
@@ -35,6 +39,9 @@ export default class VideoSlide extends ContentBase {
     }
     if(muted) {
       $(this.video).attr(`muted`, `muted`);
+    }
+    if(controls) {
+      $(this.video).attr(`controls`, `controls`);
     }
     $(this.video).attr(`src`, videoUrl);
     this._clickHandler = () => this.toggleVideoPlaying();

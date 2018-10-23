@@ -3857,7 +3857,7 @@ var SlidesFolderParser = function () {
       parsed.ext = path.extname(slideBaseName);
       parsed.name = slideBaseName.substr(0, slideBaseName.length - parsed.ext.length);
       var splitted = parsed.name.split(".");
-      var keywords = ["mobile", "desktop", "muted", "loop", "cover"];
+      var keywords = ["mobile", "desktop", "muted", "loop", "cover", "controls"];
       keywords.forEach(function (keyword) {
         var index = splitted.indexOf(keyword);
         if (index > -1) {
@@ -4731,6 +4731,7 @@ var VideoSlide = function (_ContentBase) {
     //check for extra config in the filename
     var loop = false;
     var muted = false;
+    var controls = false;
     var videoUrlSplitted = videoUrl.split('.');
     videoUrlSplitted.forEach(function (part) {
       if (part === 'loop') {
@@ -4738,6 +4739,9 @@ var VideoSlide = function (_ContentBase) {
       }
       if (part === 'muted') {
         muted = true;
+      }
+      if (part === 'controls') {
+        controls = true;
       }
     });
 
@@ -4747,6 +4751,9 @@ var VideoSlide = function (_ContentBase) {
     }
     if (muted) {
       $(_this.video).attr('muted', 'muted');
+    }
+    if (controls) {
+      $(_this.video).attr('controls', 'controls');
     }
     $(_this.video).attr('src', videoUrl);
     _this._clickHandler = function () {
