@@ -288,6 +288,10 @@ export default class LiveCode {
     {
       this.codeElements[key].layout();
     }
+    for(const key in this.terminalElements)
+    {
+      this.terminalElements[key].layout();
+    }
   }
 
   createConsoleElement(consoleEl) {

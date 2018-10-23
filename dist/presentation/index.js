@@ -10,8 +10,6 @@ const argv = require(`minimist`)(process.argv.slice(2));
 
 const debug = (argv.env === `dev`);
 
-require('./xterm-app.js');
-
 let mainWindow;
 
 global.__dirname = __dirname;

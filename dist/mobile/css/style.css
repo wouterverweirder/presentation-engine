@@ -3953,6 +3953,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
   font-family: monospace;
   height: 300px;
   color: black;
+  direction: ltr;
 }/* PADDING */.CodeMirror-lines {
   padding: 4px 0;
  /* Vertical padding around content */;
@@ -4002,6 +4003,11 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 
 .cm-fat-cursor div.CodeMirror-cursors {
   z-index: 1;
+}
+
+.cm-fat-cursor-mark {
+  background-color: rgba(20, 255, 20, 0.5);
+  animation: blink 1.06s steps(1) infinite;
 }
 
 .cm-animate-fat-cursor {
@@ -4080,7 +4086,7 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
   color: #05a;
 }
 
-.cm-s-default .cm-variable-3 {
+.cm-s-default .cm-variable-3,.cm-s-default .cm-type {
   color: #085;
 }
 
@@ -4139,11 +4145,11 @@ input[type="submit"].btn-block,input[type="reset"].btn-block,input[type="button"
 .CodeMirror-composing {
   border-bottom: 2px solid;
 }/* Default styles for common addons */div.CodeMirror span.CodeMirror-matchingbracket {
-  color: #0f0;
+  color: #0b0;
 }
 
 div.CodeMirror span.CodeMirror-nonmatchingbracket {
-  color: #f22;
+  color: #a22;
 }
 
 .CodeMirror-matchingtag {
@@ -4227,11 +4233,16 @@ cursor: default;
 z-index: 4;
 }
 
-.CodeMirror-gutter-wrapper {
--webkit-user-select: none;
--moz-user-select: none;
--ms-user-select: none;
-user-select: none;
+.CodeMirror-gutter-wrapper ::-moz-selection {
+background-color: transparent;
+}
+
+.CodeMirror-gutter-wrapper ::selection {
+background-color: transparent;
+}
+
+.CodeMirror-gutter-wrapper ::-moz-selection {
+background-color: transparent;
 }
 
 .CodeMirror-lines {
@@ -4256,7 +4267,7 @@ z-index: 2;
 position: relative;
 overflow: visible;
 -webkit-tap-highlight-color: transparent;
-font-variant-ligatures: none;
+font-variant-ligatures: contextual;
 }
 
 .CodeMirror-wrap pre {
@@ -4277,7 +4288,12 @@ z-index: 0;
 .CodeMirror-linewidget {
 position: relative;
 z-index: 2;
-overflow: auto;
+padding: 0.1px;
+ /* Force widget margins to stay inside of the container */;
+}
+
+.CodeMirror-rtl pre {
+direction: rtl;
 }
 
 .CodeMirror-code {
@@ -4342,8 +4358,8 @@ background: #d7d4f0;
 }
 
 .cm-searching {
-background: #ffa;
-background: rgba(255, 255, 0, 0.4);
+background-color: #ffa;
+background-color: rgba(255, 255, 0, 0.4);
 }/* Used to force a border model for a node */.cm-force-border {
 padding-right: .1px;
 }/* See issue #2901 */.cm-tab-wrap-hack:after {
@@ -4383,7 +4399,7 @@ background: #08f;
 color: white;
 }/*!
 
-Split Pane v0.9.3
+Split Pane v0.9.4
 
 Copyright (c) 2014 - 2016 Simon Hagström
 
@@ -4503,392 +4519,65 @@ width: 100%;
 height: 100%;
 padding: 0 1em;
 overflow: auto;
-}
-
-html,body {
-height: 100%;
-}
-
-html {
-font-size: 0.782vw;
-}
-
-body {
-background: black;
-display: -ms-flexbox;
-display: flex;
--ms-flex-align: center;
-align-items: center;
--ms-flex-pack: center;
-justify-content: center;
-}
-
-#presentation-controls {
-position: absolute;
-top: 0;
-left: 0;
-display: -ms-flexbox;
-display: flex;
-color: white;
-background: black;
--ms-flex-align: center;
-align-items: center;
-}
-
-#presentation-wrapper-outer {
-width: 100%;
--ms-flex-negative: 0;
-flex-shrink: 0;
-}
-
-#presentation-wrapper {
-width: 100%;
-height: 0;
-padding-top: 56.25%;
-overflow: hidden;
+}/**
+ * Copyright (c) 2014 The xterm.js authors. All rights reserved.
+ * Copyright (c) 2012-2013, Christopher Jeffrey (MIT License)
+ * https://github.com/chjj/term.js
+ * @license MIT
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * Originally forked from (with the author's permission):
+ *   Fabrice Bellard's javascript vt100 for jslinux:
+ *   http://bellard.org/jslinux/
+ *   Copyright (c) 2011 Fabrice Bellard
+ *   The original design remains. The terminal itself
+ *   has been extended to include xterm CSI codes, among
+ *   other features.
+ *//**
+ *  Default styles for xterm.js
+ */.xterm {
+font-family: courier-new, courier, monospace;
+font-feature-settings: "liga" 0;
 position: relative;
+-moz-user-select: none;
+user-select: none;
+-ms-user-select: none;
+-webkit-user-select: none;
 }
 
-#presentation {
+.xterm.focus,.xterm:focus {
+outline: none;
+}
+
+.xterm .xterm-helpers {
 position: absolute;
 top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: white;
+ /**
+     * The z-index of the helpers must be higher than the canvases in order for
+     * IMEs to appear on top.
+     */
+z-index: 10;
 }
 
-.slide-frame {
-position: absolute;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-overflow: hidden;
-font-size: 3rem;
-display: -ms-flexbox;
-display: flex;
--ms-flex-direction: column;
-flex-direction: column;
--ms-flex-pack: center;
-justify-content: center;
--ms-flex-align: center;
-align-items: center;
-}
-
-.slide {
-position: absolute;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-overflow: hidden;
-}
-
-.live-code-element {
-text-align: left;
-box-sizing: border-box;
-width: 100%;
-height: 100%;
-overflow-x: auto;
-overflow-y: auto;
-}
-
-.live-code-console-element pre,.live-code-console-element code {
-border: 0;
-margin: 0;
-padding: 0;
-white-space: normal;
-}
-
-.live-code-console-element .console-message {
-display: -ms-flexbox;
-display: flex;
--ms-flex-pack: justify;
-justify-content: space-between;
--ms-flex-align: baseline;
-align-items: baseline;
-background: 0;
-padding-left: 0.5em;
-padding-right: 0.5em;
-border-bottom: solid 1px lightgrey;
-}
-
-.live-code-console-element .console-message__content--level1 {
-color: orange;
-}
-
-.live-code-console-element .console-message__content--level2 {
-color: red;
-}
-
-.nav-tabs {
-font-size: 0.6em;
-}
-
-.tab-content > .tab-pane {
-display: block;
-overflow: hidden;
-width: 0;
-height: 0;
-}
-
-.tab-content > .active {
-display: block;
-width: auto;
-height: auto;
-}
-
-.tab-content > .tab-pane-full-height.active {
-height: 100%;
-}
-
-.substate {
-display: none;
-}
-
-.substate.active {
-display: block;
-}
-
-.vertical-center {
-display: -ms-flexbox;
-display: flex;
--ms-flex-direction: column;
-flex-direction: column;
--ms-flex-pack: center;
-justify-content: center;
-vertical-align: middle;
-}
-
-.scrollable-menu {
-height: auto;
-max-height: 200px;
-overflow-x: hidden;
-}
-
-.slide {
-font-family: 'Conv_DINPro';
-}
-
-.slide-title-header .slide-title {
-margin: 0.94em 0 0 5.3rem;
-font-family: 'Conv_DINCond-Bold';
-font-size: 7rem;
-position: relative;
-z-index: 0;
-}
-
-.slide-title-header .slide-title:before {
-content: "";
-display: block;
-position: absolute;
-left: -.11em;
-top: -.25em;
-width: 0.54em;
-height: 1.43em;
-background: cyan;
-z-index: -1;
-}
-
-.slide-title-header.slide-title-header-vertical-center {
-height: 100%;
-width: 100%;
-display: -ms-flexbox;
-display: flex;
-position: relative;
--ms-flex-pack: center;
-justify-content: center;
--ms-flex-align: center;
-align-items: center;
-}
-
-.slide-title-header.slide-title-header-vertical-center .slide-title {
-margin: 0;
-text-align: center;
-font-size: 7.6rem;
-line-height: 1.2em;
-}
-
-.slide-title-header.slide-title-header-vertical-center .slide-title:before {
-left: 50%;
-top: 50%;
-width: 11rem;
-height: 34rem;
-margin-left: -5.5rem;
-margin-top: -17rem;
-transform: rotate(45deg);
-}
-
-.slide-content {
-padding: 4.5rem;
-color: black;
-}
-
-.slide-content-link {
-color: black;
-text-decoration: underline;
-}
-
-.slide-footer-title {
-position: absolute;
-left: 0;
-bottom: 0;
-z-index: 0;
-padding-right: 18rem;
-padding-left: 3.5rem;
-padding-top: 0.4rem;
-padding-bottom: 1px;
-font-family: 'Conv_DINCond-Medium';
-text-transform: uppercase;
-font-size: 1.8rem;
-}
-
-.slide-footer-title:before {
-background: #D0FA01;
-content: "";
-position: absolute;
-bottom: 0;
-left: 1.5rem;
-height: 100%;
-width: 100%;
-z-index: -1;
-transform: skewX(-45deg);
-}
-
-.slide-footer-logo {
-position: absolute;
-right: 0;
-bottom: 0;
-z-index: 0;
-}
-
-.slide-footer-logo:before {
-content: "";
-display: block;
-width: 12rem;
-height: 6rem;
-bottom: 0;
-right: -9rem;
-position: absolute;
-z-index: -1;
-background: cyan;
-transform: skewX(-45deg);
-}
-
-.slide-footer-logo:after {
-content: "";
-background: url(../assets/embleem-devine.svg);
-background-repeat: no-repeat;
-display: block;
-position: absolute;
-width: 2.5rem;
-height: 5.3rem;
-bottom: .8rem;
-right: 1rem;
-}
-
-.slide-content-list ul {
-padding-left: 3.5rem;
-}
-
-.slide-content-list ul ul {
-margin-top: .9rem;
-padding-left: 2.1rem;
-}
-
-.slide-content-list li {
-font-family: 'Conv_DINCond-Bold';
-letter-spacing: -0.033rem;
-margin-bottom: .8rem;
-}
-
-.slide-content-list li:before {
-content: '';
-display: inline-block;
-background-repeat: no-repeat;
-background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='20'><path d='M0 1 L 7 8.5 L 0 16'/></svg>");
-background-size: 100%;
-width: .7rem;
-height: 2rem;
-margin-right: 0.2em;
-}
-
-.slide-content-list li li {
-font-family: 'Conv_DINPro';
-font-size: 2.4rem;
-letter-spacing: 0;
-}
-
-.slide-content-list li li:before {
-background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='14'><path d='M0 1 L 5 5 L 0 10'/></svg>");
-height: 1.4rem;
-transform: translateY(0.1em);
-}
-
-.overlay {
-position: absolute;
-width: 100%;
-height: 100%;
-top: 0;
-left: 0;
-display: none;
-z-index: 9999;
-background-color: black;
-color: white;
-}
-
-.overlay.active {
-display: table;
-}
-
-.overlay .content {
-display: table-cell;
-width: 100%;
-height: 100%;
-text-align: center;
-vertical-align: middle;
-}
-
-@font-face {
-font-family:'FontAwesome';src:url("../fonts/fontawesome-webfont.eot?v=4.7.0");src:url("../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0") format("embedded-opentype"), url("../fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"), url("../fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"), url("../fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"), url("../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular") format("svg");font-weight:normal;font-style:normal;
-}
-
-@font-face {
-font-family:'Conv_DINCond-Bold';src:url("../fonts/DINCond-Bold/fonts/DINCond-Bold.eot");src:local("☺"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.woff") format("woff"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.ttf") format("truetype"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.svg") format("svg");font-weight:normal;font-style:normal;
-}
-
-@font-face {
-font-family:'Conv_DINCond-Medium';src:url("../fonts/DINCond-Medium/fonts/DINCond-Medium.eot");src:local("☺"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.woff") format("woff"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.ttf") format("truetype"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.svg") format("svg");font-weight:normal;font-style:normal;
-}
-
-@font-face {
-font-family:'Conv_DINPro';src:url("../fonts/DINPro/fonts/DINPro.eot");src:local("☺"), url("../fonts/DINPro/fonts/DINPro.woff") format("woff"), url("../fonts/DINPro/fonts/DINPro.ttf") format("truetype"), url("../fonts/DINPro/fonts/DINPro.svg") format("svg");font-weight:normal;font-style:normal;
-}
-
-@media print {
-/* Hide the cursor when printing */.CodeMirror div.CodeMirror-cursors {
-  visibility: hidden;
-}}
-
-@keyframes fa-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(359deg);
-  }
-}
-
-@keyframes blink {
-  0% {
-  }
-
-  50% {
-    background-color: transparent;
-  }
-
-  100% {
-  }
-}
+.xterm .xterm-helper-textarea {
+ /*
+     * HACK: to fix IE's blinking cursor
+     * Move textarea out of the screen to the far left, so that the cursor is not visible.
+     */position: absolute;opacity: 0;left: -9999em;top: 0;width: 0;height: 0;z-index: -10; /** Prevent wrapping so the IME appears against the textarea at the correct position */white-space: nowrap;overflow: hidden;resize: none;}.xterm .composition-view { /* TODO: Composition position got messed up somewhere */background: #000;color: #FFF;display: none;position: absolute;white-space: nowrap;z-index: 1;}.xterm .composition-view.active {display: block;}.xterm .xterm-viewport { /* On OS X this is required in order for the scroll bar to appear fully opaque */background-color: #000;overflow-y: scroll;cursor: default;position: absolute;right: 0;left: 0;top: 0;bottom: 0;}.xterm .xterm-screen {position: relative;}.xterm .xterm-screen canvas {position: absolute;left: 0;top: 0;}.xterm .xterm-scroll-area {visibility: hidden;}.xterm-char-measure-element {display: inline-block;visibility: hidden;position: absolute;top: 0;left: -9999em;line-height: normal;}.xterm {cursor: text;}.xterm.enable-mouse-events { /* When mouse events are enabled (eg. tmux), revert to the standard pointer cursor */cursor: default;}.xterm.xterm-cursor-pointer {cursor: pointer;}.xterm.xterm-cursor-crosshair { /* Column selection mode */cursor: crosshair;}.xterm .xterm-accessibility,.xterm .xterm-message {position: absolute;left: 0;top: 0;bottom: 0;right: 0;z-index: 100;color: transparent;}.xterm .live-region {position: absolute;left: -9999px;width: 1px;height: 1px;overflow: hidden;}html,body {height: 100%;}html {font-size: 0.782vw;}body {background: black;display: -ms-flexbox;display: flex;-ms-flex-align: center;align-items: center;-ms-flex-pack: center;justify-content: center;}#presentation-controls {position: absolute;top: 0;left: 0;display: -ms-flexbox;display: flex;color: white;background: black;-ms-flex-align: center;align-items: center;}#presentation-wrapper-outer {width: 100%;-ms-flex-negative: 0;flex-shrink: 0;}#presentation-wrapper {width: 100%;height: 0;padding-top: 56.25%;overflow: hidden;position: relative;}#presentation {position: absolute;top: 0;left: 0;width: 100%;height: 100%;background: white;}.slide-frame {position: absolute;top: 0;left: 0;width: 100%;height: 100%;overflow: hidden;font-size: 3rem;display: -ms-flexbox;display: flex;-ms-flex-direction: column;flex-direction: column;-ms-flex-pack: center;justify-content: center;-ms-flex-align: center;align-items: center;}.slide {position: absolute;left: 0;top: 0;width: 100%;height: 100%;overflow: hidden;}.live-code-element {text-align: left;box-sizing: border-box;width: 100%;height: 100%;overflow-x: auto;overflow-y: auto;}.live-code-console-element pre,.live-code-console-element code {border: 0;margin: 0;padding: 0;white-space: normal;}.live-code-console-element .console-message {display: -ms-flexbox;display: flex;-ms-flex-pack: justify;justify-content: space-between;-ms-flex-align: baseline;align-items: baseline;background: 0;padding-left: 0.5em;padding-right: 0.5em;border-bottom: solid 1px lightgrey;}.live-code-console-element .console-message__content--level1 {color: orange;}.live-code-console-element .console-message__content--level2 {color: red;}.nav-tabs {font-size: 0.6em;}.tab-content > .tab-pane {display: block;overflow: hidden;width: 0;height: 0;}.tab-content > .active {display: block;width: auto;height: auto;}.tab-content > .tab-pane-full-height.active {height: 100%;}.substate {display: none;}.substate.active {display: block;}.vertical-center {display: -ms-flexbox;display: flex;-ms-flex-direction: column;flex-direction: column;-ms-flex-pack: center;justify-content: center;vertical-align: middle;}.scrollable-menu {height: auto;max-height: 200px;overflow-x: hidden;}.slide {font-family: 'Conv_DINPro';}.slide-title-header .slide-title {margin: 0.94em 0 0 5.3rem;font-family: 'Conv_DINCond-Bold';font-size: 7rem;position: relative;z-index: 0;}.slide-title-header .slide-title:before {content: "";display: block;position: absolute;left: -.11em;top: -.25em;width: 0.54em;height: 1.43em;background: cyan;z-index: -1;}.slide-title-header.slide-title-header-vertical-center {height: 100%;width: 100%;display: -ms-flexbox;display: flex;position: relative;-ms-flex-pack: center;justify-content: center;-ms-flex-align: center;align-items: center;}.slide-title-header.slide-title-header-vertical-center .slide-title {margin: 0;text-align: center;font-size: 7.6rem;line-height: 1.2em;}.slide-title-header.slide-title-header-vertical-center .slide-title:before {left: 50%;top: 50%;width: 11rem;height: 34rem;margin-left: -5.5rem;margin-top: -17rem;transform: rotate(45deg);}.slide-content {padding: 4.5rem;color: black;}.slide-content-link {color: black;text-decoration: underline;}.slide-footer-title {position: absolute;left: 0;bottom: 0;z-index: 0;padding-right: 18rem;padding-left: 3.5rem;padding-top: 0.4rem;padding-bottom: 1px;font-family: 'Conv_DINCond-Medium';text-transform: uppercase;font-size: 1.8rem;}.slide-footer-title:before {background: #D0FA01;content: "";position: absolute;bottom: 0;left: 1.5rem;height: 100%;width: 100%;z-index: -1;transform: skewX(-45deg);}.slide-footer-logo {position: absolute;right: 0;bottom: 0;z-index: 0;}.slide-footer-logo:before {content: "";display: block;width: 12rem;height: 6rem;bottom: 0;right: -9rem;position: absolute;z-index: -1;background: cyan;transform: skewX(-45deg);}.slide-footer-logo:after {content: "";background: url(../assets/embleem-devine.svg);background-repeat: no-repeat;display: block;position: absolute;width: 2.5rem;height: 5.3rem;bottom: .8rem;right: 1rem;}.slide-content-list ul {padding-left: 3.5rem;}.slide-content-list ul ul {margin-top: .9rem;padding-left: 2.1rem;}.slide-content-list li {font-family: 'Conv_DINCond-Bold';letter-spacing: -0.033rem;margin-bottom: .8rem;}.slide-content-list li:before {content: '';display: inline-block;background-repeat: no-repeat;background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='20'><path d='M0 1 L 7 8.5 L 0 16'/></svg>");background-size: 100%;width: .7rem;height: 2rem;margin-right: 0.2em;}.slide-content-list li li {font-family: 'Conv_DINPro';font-size: 2.4rem;letter-spacing: 0;}.slide-content-list li li:before {background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='7' height='14'><path d='M0 1 L 5 5 L 0 10'/></svg>");height: 1.4rem;transform: translateY(0.1em);}.overlay {position: absolute;width: 100%;height: 100%;top: 0;left: 0;display: none;z-index: 9999;background-color: black;color: white;}.overlay.active {display: table;}.overlay .content {display: table-cell;width: 100%;height: 100%;text-align: center;vertical-align: middle;}@font-face {font-family:'FontAwesome';src:url("../fonts/fontawesome-webfont.eot?v=4.7.0");src:url("../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0") format("embedded-opentype"), url("../fonts/fontawesome-webfont.woff2?v=4.7.0") format("woff2"), url("../fonts/fontawesome-webfont.woff?v=4.7.0") format("woff"), url("../fonts/fontawesome-webfont.ttf?v=4.7.0") format("truetype"), url("../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular") format("svg");font-weight:normal;font-style:normal;}@font-face {font-family:'Conv_DINCond-Bold';src:url("../fonts/DINCond-Bold/fonts/DINCond-Bold.eot");src:local("☺"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.woff") format("woff"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.ttf") format("truetype"), url("../fonts/DINCond-Bold/fonts/DINCond-Bold.svg") format("svg");font-weight:normal;font-style:normal;}@font-face {font-family:'Conv_DINCond-Medium';src:url("../fonts/DINCond-Medium/fonts/DINCond-Medium.eot");src:local("☺"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.woff") format("woff"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.ttf") format("truetype"), url("../fonts/DINCond-Medium/fonts/DINCond-Medium.svg") format("svg");font-weight:normal;font-style:normal;}@font-face {font-family:'Conv_DINPro';src:url("../fonts/DINPro/fonts/DINPro.eot");src:local("☺"), url("../fonts/DINPro/fonts/DINPro.woff") format("woff"), url("../fonts/DINPro/fonts/DINPro.ttf") format("truetype"), url("../fonts/DINPro/fonts/DINPro.svg") format("svg");font-weight:normal;font-style:normal;}@media print {/* Hide the cursor when printing */.CodeMirror div.CodeMirror-cursors {visibility: hidden;}}@keyframes fa-spin {0% {transform: rotate(0deg);}100% {transform: rotate(359deg);}}@keyframes blink {0% {}50% {background-color: transparent;}100% {}}

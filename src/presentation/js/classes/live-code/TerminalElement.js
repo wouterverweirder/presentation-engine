@@ -1,12 +1,17 @@
-const TERMINAL_URL = `http://localhost:3000`;
+const remote = requireNode('electron').remote;
+const path = requireNode('path');
+const os = requireNode('os');
+const pty = requireNode('node-pty');
+const Terminal = requireNode('xterm').Terminal;
+const fit = requireNode('xterm/lib/addons/fit/fit');
+
+Terminal.applyAddon(fit);
 
 export default class TerminalElement {
 
   constructor(el, options) {
     this.el = el;
     this.$el = $(el);
-
-    this._ipcMessageHandler = e => this.ipcMessageHandler(e);
 
     //options
     if(!options) {
@@ -25,80 +30,68 @@ export default class TerminalElement {
     }
 
     this.dir = this.$el.data(`dir`);
+    if (this.dir) {
+      this.dir = path.resolve(remote.getGlobal(`__dirname`), this.dir);
+    } else {
+      this.dir = remote.getGlobal(`__dirname`);
+    }
     this.autorun = this.$el.data(`autorun`);
 
     this.$el.css(`width`, `100%`).css(`height`, `100%`);
 
     this.isRunning = false;
+
+    // Initialize node-pty with an appropriate shell
+    this.shell = process.env[os.platform() === 'win32' ? 'COMSPEC' : 'SHELL'];
+    this.ptyProcess = pty.spawn(this.shell, [], {
+      name: 'xterm-color',
+      cols: 80,
+      rows: 30,
+      cwd: this.dir,
+      env: process.env
+    });
+
+    // Initialize xterm.js and attach it to the DOM
+    this.xterm = new Terminal();
+    this.xterm.setOption('fontSize', '24');
+    this.xterm.open(this.el);
+
+    this.xterm.on('data', (data) => {
+      this.ptyProcess.write(data);
+    });
+    this.ptyProcess.on('data', (data) => {
+      this.xterm.write(data);
+    });
+
+    if(this.autorun) {
+      this.executeCommand(this.autorun + "\n");
+    }
+  }
+
+  layout() {
+    this.xterm.fit();
   }
 
   pause() {
     this.isRunning = false;
-    if(this.webview) {
-      this.webview.parentNode.removeChild(this.webview);
-      this.webview = false;
-    }
   }
 
   resume() {
-    if(this.isRunning) {
+    if (this.isRunning) {
       return;
     }
     this.isRunning = true;
-    //create a webview tag
-    if(this.webview) {
-      this.webview.removeEventListener(`ipc-message`, this._ipcMessageHandler);
-      this.webview.parentNode.removeChild(this.webview);
-      this.webview = false;
-    }
-    this.webview = document.createElement(`webview`);
-    // this.webview.addEventListener('dom-ready', () => {
-    //   this.webview.openDevTools();
-    // });
-    this.webview.addEventListener(`ipc-message`, this._ipcMessageHandler);
-    this.webview.style.width = `100%`;
-    this.webview.style.height = `100%`;
-    this.webview.setAttribute(`nodeintegration`, ``);
-    this.webview.setAttribute(`src`, TERMINAL_URL);
-    this.el.appendChild(this.webview);
-  }
-
-  ipcMessageHandler(e) {
-    if(e.channel !== `message-from-terminal`) {
-      return;
-    }
-    if(e.args.length < 1) {
-      return;
-    }
-    const o = e.args[0];
-    if(!o.command) {
-      return;
-    }
-    switch(o.command) {
-    case `init`:
-      if(this.dir) {
-        this.executeCommand(`cd ${this.dir}`);
-        this.executeCommand(`clear`);
-      }
-      if(this.autorun) {
-        this.executeCommand(this.autorun);
-      }
-      break;
-    default:
-      console.warn(`unknow command object from terminal`);
-      console.warn(o);
-      break;
-    }
   }
 
   executeCommand(commandString) {
-    this.webview.send(`message-to-terminal`, {
-      command: `execute`,
-      value: commandString
-    });
+    this.ptyProcess.write(commandString);
   }
 
   destroy() {
     this.pause();
+    this.xterm.off('data');
+    this.ptyProcess.off('data');
+    this.ptyProcess.kill();
+    this.xterm.destroy();
   }
 }
