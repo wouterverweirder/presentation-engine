@@ -1,4 +1,5 @@
 const remote = requireNode('electron').remote;
+const env = remote.getGlobal('process').env;
 const path = requireNode('path');
 const os = requireNode('os');
 const pty = requireNode('node-pty');
@@ -42,13 +43,13 @@ export default class TerminalElement {
     this.isRunning = false;
 
     // Initialize node-pty with an appropriate shell
-    this.shell = process.env[os.platform() === 'win32' ? 'COMSPEC' : 'SHELL'];
+    this.shell = env[os.platform() === 'win32' ? 'COMSPEC' : 'SHELL'];
     this.ptyProcess = pty.spawn(this.shell, [], {
       name: 'xterm-color',
       cols: 80,
       rows: 30,
       cwd: this.dir,
-      env: process.env
+      env: env
     });
 
     // Initialize xterm.js and attach it to the DOM

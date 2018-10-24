@@ -2728,7 +2728,6 @@ var ConsoleElement = function () {
 exports.default = ConsoleElement;
 
 },{"../NodeAppRunner":6}],11:[function(require,module,exports){
-(function (process){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -2740,6 +2739,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var remote = requireNode('electron').remote;
+var env = remote.getGlobal('process').env;
 var path = requireNode('path');
 var os = requireNode('os');
 var pty = requireNode('node-pty');
@@ -2785,13 +2785,13 @@ var TerminalElement = function () {
     this.isRunning = false;
 
     // Initialize node-pty with an appropriate shell
-    this.shell = process.env[os.platform() === 'win32' ? 'COMSPEC' : 'SHELL'];
+    this.shell = env[os.platform() === 'win32' ? 'COMSPEC' : 'SHELL'];
     this.ptyProcess = pty.spawn(this.shell, [], {
       name: 'xterm-color',
       cols: 80,
       rows: 30,
       cwd: this.dir,
-      env: process.env
+      env: env
     });
 
     // Initialize xterm.js and attach it to the DOM
@@ -2850,9 +2850,7 @@ var TerminalElement = function () {
 
 exports.default = TerminalElement;
 
-}).call(this,require('_process'))
-
-},{"_process":3}],12:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
